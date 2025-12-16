@@ -83,7 +83,7 @@ export default async function handler(req, res) {
             </body>
             </html>
         `;
-
+        
         // --- 2. Invio Email tramite Resend ---
 
         const { data, error } = await resend.emails.send({
@@ -112,4 +112,3 @@ export default async function handler(req, res) {
         });
     }
 }
-
