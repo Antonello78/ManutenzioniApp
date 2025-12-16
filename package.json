@@ -1,17 +1,21 @@
 {
   "name": "calcolo-manodopera-api",
   "version": "1.0.0",
-  "description": "Netlify Functions for Manodopera App",
-  "main": "index.js",
+  "description": "API per la gestione e sincronizzazione del calcolo manodopera con Vercel KV.",
+  
+  "type": "module",
+  
+  "main": "api/index.js",
+  
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node api/index.js"
   },
-  "keywords": [
-    "netlify",
-    "serverless"
-  ],
-  "author": "",
-  "license": "ISC",
+  
   "dependencies": {
-    "pg": "^8.11.3" }
+    "@vercel/kv": "^1.0.1"
+  },
+  
+  "devDependencies": {
+    
+  }
 }
