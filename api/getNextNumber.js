@@ -1,6 +1,6 @@
 // /api/getNextNumber.js (oppure getContatore.js se lo hai già)
 
-import { getContatoreKV } from './db';
+import { getContatoreKV } from './db.js';
 
 export default async function handler(req, res) {
     const { anno } = req.query; // Legge l'anno dall'URL (?anno=25)
@@ -18,3 +18,4 @@ export default async function handler(req, res) {
         return res.status(500).json({ message: 'Errore nel recupero del contatore.' });
     }
 }
+
