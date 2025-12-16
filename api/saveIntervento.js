@@ -1,6 +1,6 @@
 // /api/saveIntervento.js
 
-import { saveInterventoKV, incrementContatoreKV } from './db';
+import { saveInterventoKV, incrementContatoreKV } from './db.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -38,3 +38,4 @@ export default async function handler(req, res) {
         });
     }
 }
+
