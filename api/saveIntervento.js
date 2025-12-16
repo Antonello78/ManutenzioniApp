@@ -1,53 +1,40 @@
-// netlify/functions/saveIntervento.js
-const { query } = require('./db');
+// /api/saveIntervento.js
+
+import { saveInterventoKV, incrementContatoreKV } from './db';
 
 export default async function handler(req, res) {
-    const data = JSON.parse(event.body);
-    const { id, nIntervento, dataIntervento, nomeScuola, plessoEdificio, oraInizio, oraFine, numOperai, flagUrgenza, tariffaOraria, totaleManodopera } = data;
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Metodo non consentito.' });
+    }
 
     try {
-        if (event.httpMethod === 'POST') {
-            // CREAZIONE (POST)
-            const sql = `
-                INSERT INTO interventi ("nIntervento", "dataIntervento", "nomeScuola", "plessoEdificio", 
-                "oraInizio", "oraFine", "numOperai", "flagUrgenza", "tariffaOraria", "totaleManodopera")
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-                RETURNING *`;
+        const { datiIntervento, anno, isUpdate } = req.body;
+        
+        if (!isUpdate) {
+            // Se è un NUOVO INSERIMENTO: 
+            // 1. Incrementa il contatore in modo atomico (nessun rischio di duplicati)
+            const nuovoContatore = await incrementContatoreKV(anno);
             
-            const values = [nIntervento, dataIntervento, nomeScuola, plessoEdificio, oraInizio, oraFine, numOperai, flagUrgenza, tariffaOraria, totaleManodopera];
-
-            const result = await query(sql, values);
-            return {
-                statusCode: 200,
-                body: JSON.stringify(result.rows[0])
-            };
-
-        } else if (event.httpMethod === 'PUT' && id) {
-            // AGGIORNAMENTO (PUT)
-            const sql = `
-                UPDATE interventi SET 
-                "nIntervento" = $1, "dataIntervento" = $2, "nomeScuola" = $3, "plessoEdificio" = $4, 
-                "oraInizio" = $5, "oraFine" = $6, "numOperai" = $7, "flagUrgenza" = $8, 
-                "tariffaOraria" = $9, "totaleManodopera" = $10 
-                WHERE id = $11
-                RETURNING *`;
+            // 2. Salva il dato completo
+            await saveInterventoKV(datiIntervento);
             
-            const values = [nIntervento, dataIntervento, nomeScuola, plessoEdificio, oraInizio, oraFine, numOperai, flagUrgenza, tariffaOraria, totaleManodopera, id];
-
-            const result = await query(sql, values);
-            if (result.rows.length === 0) {
-                 return { statusCode: 404, body: JSON.stringify({ error: 'Intervento non trovato per aggiornamento' }) };
-            }
-
-            res.status(200).json({...});
-	    return;
-
+            return res.status(201).json({ 
+                message: 'Nuovo intervento salvato con successo e contatore aggiornato.',
+                nuovoNumero: nuovoContatore
+            });
+            
         } else {
-            return { statusCode: 405, body: JSON.stringify({ error: 'Metodo non consentito o ID mancante' }) };
+            // Se è un AGGIORNAMENTO:
+            await saveInterventoKV(datiIntervento); 
+            // Nessun incremento del contatore
+            return res.status(200).json({ message: 'Intervento aggiornato con successo.' });
         }
+
     } catch (error) {
-        console.error("Errore saveIntervento:", error);
-        res.status(500).json({...});
-	return;
+        console.error('Errore nel salvataggio:', error);
+        return res.status(500).json({ 
+            message: 'Errore interno del server durante il salvataggio.', 
+            error: error.message 
+        });
     }
-};
+}
