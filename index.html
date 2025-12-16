@@ -243,14 +243,14 @@
 
     <script>
         // Costanti
-        const COSTO_USCITA = 75.00; // 🔄 MODIFICATO: Da 78.00 a 75.00 €
+        const COSTO_USCITA = 75.00; // ✅ MODIFICATO: 75.00 €
         const TARIFFA_ORDINARIA = 38.00; // €/ora
         const TARIFFA_STRAORDINARIO = 48.00; // €/ora
         const ORARIO_INIZIO_ORD = 8 * 60; // 08:00 in minuti
         const ORARIO_FINE_ORD = 17 * 60; // 17:00 in minuti
         const STORAGE_KEY = 'manodoperaInterventi';
-        const EMAIL_KEY = 'reportEmailDestinatario'; // Chiave per l'email
-        const INIZIO_2025 = 74; // Per far partire il primo numero da 075/25
+        const EMAIL_KEY = 'reportEmailDestinatario'; 
+        const INIZIO_2025 = 74; 
 
         // --- Utility Functions ---
 
@@ -428,6 +428,41 @@
             document.getElementById('resOperai').textContent = numOperai + (flagUrgenza ? ' (URGENZA)' : '');
         }
 
+        // --- Server Synchronization Functions ---
+        
+        async function caricaDatiServer() {
+            showMessage('success', 'Sincronizzazione dati in corso...');
+            try {
+                const dataCorrente = new Date();
+                const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
+
+                // 1. Carica l'archivio completo degli interventi
+                const interventiResponse = await fetch('/api/caricaInterventi'); // Endpoint da creare su Vercel
+                const interventiData = await interventiResponse.json();
+                
+                if (interventiResponse.ok && interventiData.interventi) {
+                    // Cache locale per l'archivio
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiData.interventi));
+                }
+
+                // 2. Carica l'ultimo contatore sequenziale
+                const contatoreResponse = await fetch(`/api/getContatore?anno=${CURRENT_YEAR}`); // Endpoint da creare su Vercel
+                const contatoreData = await contatoreResponse.json();
+
+                if (contatoreResponse.ok && contatoreData.numero) {
+                    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+                    // Aggiorna il contatore locale con il valore più recente dal server
+                    localStorage.setItem(COUNTER_KEY_YEARLY, contatoreData.numero.toString());
+                }
+
+                showMessage('success', 'Dati sincronizzati con successo. Pronto.');
+                
+            } catch (error) {
+                showMessage('error', 'Sincronizzazione dati fallita. Lavorerai con dati locali non aggiornati. Verifica la connessione o l\'API Vercel.');
+                console.error('Errore sincronizzazione:', error);
+            }
+        }
+        
         // --- Save / Delete / Load / Render ---
         
         function salvaEmail() {
@@ -447,22 +482,24 @@
             const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
             const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
             
+            // Validazione N° Intervento
             const nInterventoParts = nInterventoCompleto.split('/');
             if (nInterventoParts.length !== 2 || nInterventoParts[1] !== CURRENT_YEAR) {
                  showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/${CURRENT_YEAR}.`); 
                  return;
             }
-            
             const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
-            
             if (isNaN(numeroCorrenteSequenziale) || nInterventoParts[0].length !== 3) { 
                  showMessage('error', "Il 'N° Intervento' non è valido. Deve contenere un numero sequenziale di 3 cifre."); 
                  return;
             }
             
-            // 1. **AZIONI LOCALI DI SALVATAGGIO DEI DATI**
+            // 1. **PREPARAZIONE DEI DATI**
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
+
             const intervento = {
-                id: generateId(),
+                id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(), // Usa ID esistente se è un aggiornamento
                 nIntervento: nInterventoCompleto,
                 dataIntervento: document.getElementById('dataIntervento').value, 
                 nomeScuola: document.getElementById('nomeScuola').value,
@@ -475,22 +512,8 @@
                 tariffaOraria: document.getElementById('tariffaOraria').textContent,
                 totaleManodopera: document.getElementById('totaleManodopera').textContent
             };
-                        
-            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
-
-            if (existingIndex > -1) {
-                intervento.id = interventi[existingIndex].id; // Mantieni l'ID originale
-                interventi[existingIndex] = intervento;
-                showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
-            } else {
-                interventi.push(intervento);
-                showMessage('success', `Intervento N° ${nInterventoCompleto} salvato correttamente! Totale interventi salvati: ${interventi.length}.`);
-            }
             
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
-            
-            // 2. **AGGIORNAMENTO DEL CONTATORE REMOTO SU VERCEL**
+            // 2. **AZIONI SINCRONIZZATE: Salvataggio Remoto**
             try {
                 const response = await fetch('/api/salvaIntervento', { 
                     method: 'POST',
@@ -498,7 +521,8 @@
                     body: JSON.stringify({ 
                         numeroIntervento: numeroCorrenteSequenziale,
                         anno: CURRENT_YEAR,
-                        datiIntervento: intervento
+                        datiIntervento: intervento,
+                        isUpdate: existingIndex > -1
                     })
                 });
 
@@ -508,14 +532,27 @@
                     throw new Error(data.message || 'Errore nel salvataggio remoto.');
                 }
                 
-                const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-                localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
+                // --- 3. AGGIORNAMENTO LOCALE (SOLO DOPO SUCCESSO REMOTO) ---
+                if (existingIndex > -1) {
+                    interventi[existingIndex] = intervento;
+                    showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente! (Sincronizzato)`);
+                } else {
+                    interventi.push(intervento); 
+                    showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
+                    
+                    // Aggiorna il contatore locale SOLO SE è un nuovo inserimento
+                    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+                    localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
+                }
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
 
             } catch (error) {
-                showMessage('error', `Errore Server (Vercel): Il salvataggio remoto (API) è fallito. ${error.message}`);
+                showMessage('error', `Errore Server (Vercel): Il salvataggio/sincronizzazione è fallito. ${error.message}`);
+                return; 
             }
 
-            // 3. Prepara la UI per il prossimo intervento
+            // 4. Prepara la UI per il prossimo intervento
             document.getElementById('nomeScuola').value = '';
             document.getElementById('plessoEdificio').value = '';
             initializeInputs(); 
@@ -683,7 +720,7 @@
             }
         }
         
-        // 🔄 NUOVA FUNZIONE: Aggiorna il testo dell'ultimo aggiornamento (data/ora corrente)
+        // ✅ Funzione per la data/ora corrente (Ultimo aggiornamento)
         function updateLastModifiedText() {
             const now = new Date();
             const formattedDate = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'numeric', day: 'numeric' });
@@ -693,10 +730,13 @@
 
 
         // Funzioni da chiamare all'avvio
-        document.addEventListener('DOMContentLoaded', () => {
-            updateLastModifiedText(); // 🔄 CHIAMATA AGGIUNTA
-            initializeInputs();
+        document.addEventListener('DOMContentLoaded', async () => { 
+            updateLastModifiedText();
+            await caricaDatiServer(); // 🔄 Carica prima i dati remoti (sincronizzazione)
+            initializeInputs(); // Poi inizializza gli input con i dati remoti
             calcolaManodopera(); // Esegue il calcolo iniziale con i valori di default
+            renderArchivio(); // Visualizza gli archivi caricati
+            
             // Rende l'interfaccia utente interattiva
             document.querySelectorAll('input, select').forEach(element => {
                 if (element.id !== 'nIntervento') {
