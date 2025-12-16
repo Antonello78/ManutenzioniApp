@@ -1,7 +1,7 @@
 {
   "name": "calcolo-manodopera-api",
   "version": "1.0.0",
-  "description": "API per la gestione e sincronizzazione del calcolo manodopera con Vercel KV.",
+  "description": "API per la gestione e sincronizzazione del calcolo manodopera con Vercel KV e Resend.",
   
   "type": "module",
   
@@ -12,7 +12,8 @@
   },
   
   "dependencies": {
-    "@vercel/kv": "^1.0.1"
+    "@vercel/kv": "^1.0.1",
+    "resend": "^3.0.0" 
   },
   
   "devDependencies": {
