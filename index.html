@@ -12,65 +12,84 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Calcolo Manodopera">
     <link rel="manifest" href="data:application/manifest+json,{'name':'Calcolo Manodopera','short_name':'CalcoloMan','description':'Calcolo manodopera forfettario','start_url':'index.html','display':'standalone','background_color':'#f7f9fc','theme_color':'#1e40af','icons':[{'src':'https://placehold.co/192x192/4F46E5/ffffff?text=C','sizes':'192x192','type':'image/png'}]}">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f9fc;
-            padding-top: 1rem;
-         }
-        /* Style specific to hide the number input arrows */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f7f9fc;
+        padding-top: 1rem;
+     }
+    /* Style specific to hide the number input arrows */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    
+    /* 🛠️ INIZIO BLOCCO CRITICO PER LA STAMPA 🛠️ */
+    @media print {
+        /* 1. NASCONDI TUTTO CIÒ CHE NON È NECESSARIO */
+        .no-print,
+        #input-section > div:not(.border-t) { /* Nasconde i campi di input non usati nel riepilogo */
+            display: none !important;
         }
         
-        /* 🛠️ CSS per stampa in pagina unica AGGRESSIVA 🛠️ */
-        @media print {
-            .no-print {
-                display: none !important;
-            }
-            body {
-                padding: 0;
-                background-color: white;
-                margin: 0; 
-            }
-            #app {
-                box-shadow: none !important;
-                border: none !important;
-                max-width: none !important;
-                margin: 0 !important; /* Rimuove tutti i margini esterni */
-                padding: 0.2rem !important; /* Riduce il padding interno */
-                
-                /* Definisce le dimensioni target A4 (Verticale) */
-                min-height: 297mm; 
-                width: 210mm; 
-                
-                /* RIDIMENSIONAMENTO ESTREMO: Scala l'intero contenuto per farlo stare nella pagina */
-                transform: scale(0.75); 
-                transform-origin: top left; /* Assicura che la scala parta dall'angolo in alto a sinistra */
-
-                /* Regola cruciale per prevenire le interruzioni all'interno */
-                page-break-inside: avoid !important; 
-            }
-            
-            /* Impedisce che i blocchi principali del riepilogo vengano spezzati */
-            .print-avoid-break,
-            .print-avoid-break *,
-            .flex {
-                page-break-inside: avoid !important;
-            }
-
-            /* Riduci i margini di stampa del browser al minimo per massimizzare lo spazio utile */
-            @page {
-                size: A4 portrait; 
-                margin: 0.2cm !important; /* Margini molto ridotti */
-            }
+        /* Forza la visualizzazione della sezione calcolo e riepilogo anche se nascosta */
+        #input-section {
+            display: block !important;
         }
-    </style>
+        
+        /* 2. LAYOUT E SCALA DELLA PAGINA A4 */
+        body {
+            padding: 0;
+            background-color: white;
+            margin: 0; /* Rimuove tutti i margini del body */
+        }
+        #app {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: none !important;
+            margin: 0 !important; 
+            padding: 0.5rem !important; /* Riduce il padding interno */
+            
+            /* Definisce le dimensioni target A4 (Verticale) */
+            width: 210mm; 
+            min-height: 297mm; 
+            
+            /* SCALA AGGRESSIVA: Scala l'intero contenuto per farlo stare nella pagina. 
+               Regola questo valore se il riepilogo sembra troppo piccolo o troppo grande. */
+            transform: scale(0.85); 
+            transform-origin: top left; 
+
+            /* Regola cruciale per prevenire le interruzioni all'interno */
+            page-break-inside: avoid !important; 
+        }
+        
+        /* 3. STILE DELL'HEADER PER LA STAMPA */
+        #unified-header {
+             display: block !important; /* Rendi visibile l'header (con logo e data) */
+             padding-bottom: 0.5rem;
+             margin-bottom: 1rem;
+             border-bottom: 2px solid #ccc; /* Aggiunge una linea netta */
+        }
+
+        /* 4. MANTIENI I BLOCCHI UNIFICATI */
+        .print-avoid-break,
+        .print-avoid-break *,
+        .flex {
+            page-break-inside: avoid !important;
+        }
+
+        /* 5. MARGINI DI STAMPA DEL BROWSER (CRITICO) */
+        @page {
+            size: A4 portrait; 
+            margin: 0.5cm !important; /* Margini molto ridotti per massimizzare lo spazio */
+        }
+    }
+    /* 🛠️ FINE BLOCCO CRITICO PER LA STAMPA 🛠️ */
+</style>
 </head>
 <body class="p-4 sm:p-8">
     <div id="app" class="max-w-xl mx-auto bg-white shadow-2xl rounded-xl p-6 sm:p-8">
@@ -769,3 +788,4 @@
     </script>
 </body>
 </html>
+
