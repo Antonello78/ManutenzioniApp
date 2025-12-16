@@ -1,34 +1,37 @@
-// netlify/functions/deleteIntervento.js
-const { query } = require('./db');
+// /api/deleteIntervento.js
+
+import { kv } from '@vercel/kv'; // Importiamo direttamente kv per la funzione di delete
 
 export default async function handler(req, res) {
-    if (event.httpMethod !== 'DELETE') {
-        return { statusCode: 405, body: JSON.stringify({ error: 'Metodo non consentito' }) };
+    if (req.method !== 'DELETE') {
+        return res.status(405).json({ message: 'Metodo non consentito. Usa DELETE.' });
     }
 
-    const id = event.queryStringParameters.id;
-    if (!id) {
-        return { statusCode: 400, body: JSON.stringify({ error: 'ID Intervento mancante.' }) };
+    // Ci aspettiamo che il N° Intervento sia passato come parametro di query
+    const { nIntervento } = req.query; 
+
+    if (!nIntervento) {
+        return res.status(400).json({ message: 'N° Intervento (nIntervento) mancante nei parametri di query.' });
     }
+    
+    // Formattiamo la chiave esattamente come viene salvata in saveIntervento.js
+    const keyToDelete = `intervento:${nIntervento}`; 
 
     try {
-        // SQL: Ottieni prima l'intervento (per il messaggio di successo) e poi lo cancella
-        const getResult = await query(`SELECT "nIntervento" FROM interventi WHERE id = $1`, [id]);
+        // 1. Eliminazione dal database KV
+        // kv.del è una funzione atomica che elimina la chiave specificata
+        await kv.del(keyToDelete); 
         
-        if (getResult.rows.length === 0) {
-             return { statusCode: 404, body: JSON.stringify({ error: 'Intervento già cancellato o non trovato.' }) };
-        }
-        
-        const nInterventoCancellato = getResult.rows[0].nIntervento;
-        
-        await query(`DELETE FROM interventi WHERE id = $1`, [id]);
-        
-        res.status(200).json({...});
-	return;
+        return res.status(200).json({ 
+            message: `Intervento N° ${nIntervento} eliminato con successo.`,
+            deletedKey: keyToDelete
+        });
 
     } catch (error) {
-        console.error("Errore deleteIntervento:", error);
-        res.status(500).json({...});
-	return;
+        console.error('Errore durante l\'eliminazione:', error);
+        return res.status(500).json({ 
+            message: 'Errore interno del server durante l\'eliminazione DB.', 
+            error: error.message 
+        });
     }
-};
+}
