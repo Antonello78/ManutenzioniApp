@@ -1,21 +1,14 @@
-// netlify/functions/getArchivio.js
-const { query } = require('./db');
+// /api/getArchivio.js (oppure caricaInterventi.js)
+
+import { getArchivioCompleto } from './db';
 
 export default async function handler(req, res) {
-    if (event.httpMethod !== 'GET') {
-        return { statusCode: 405, body: JSON.stringify({ error: 'Metodo non consentito' }) };
-    }
-
     try {
-        // SQL: Seleziona tutti i campi, ordinati per l'ID (che è sequenziale)
-        const result = await query(`SELECT * FROM interventi ORDER BY id DESC`);
+        const interventi = await getArchivioCompleto();
         
-        res.status(200).json({...});
-	return;
-
+        return res.status(200).json({ interventi: interventi });
     } catch (error) {
-        console.error("Errore getArchivio:", error);
-        res.status(500).json({...});
-	return;
+        console.error('Errore getArchivio:', error);
+        return res.status(500).json({ message: 'Errore nel recupero dell\'archivio.' });
     }
-};
+}
