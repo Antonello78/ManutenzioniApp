@@ -44,7 +44,7 @@ export default async function handler(req, res) {
                 <div class="container">
                     
                     <div class="logo-container">
-                        <img src="URL_PUBBLICO_DEL_TUO_LOGO.png" 
+                        <img src="https://raw.githubusercontent.com/Antonello78/ManutenzioniApp/6d4ebdefb301ca8a1fe41627af387efd5b142665/LOGO%20ANTONELLO.png" 
                              alt="Logo Aziendale" 
                              style="max-width: 150px; height: auto;">
                     </div>
@@ -112,3 +112,4 @@ export default async function handler(req, res) {
         });
     }
 }
+
