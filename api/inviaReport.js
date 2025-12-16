@@ -2,9 +2,6 @@
 
 import { Resend } from 'resend';
 
-// Inizializza Resend leggendo la chiave dalle variabili d'ambiente di Vercel
-// Se la chiave non esiste, questo causerà un errore di connessione,
-// ma l'errore sarà gestito nel blocco try-catch
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(req, res) {
@@ -12,7 +9,6 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: 'Metodo non consentito. Usa POST.' });
     }
 
-    // Vercel gestisce automaticamente il parsing del JSON nel req.body
     try {
         const reportData = req.body;
         
@@ -41,13 +37,16 @@ export default async function handler(req, res) {
                     .detail-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #eee; }
                     .summary { background-color: #dbeafe; font-size: 1.2em; font-weight: bold; text-align: center; padding: 10px 0; }
                     .total { font-size: 1.5em; color: #1e40af; }
-                    .logo-placeholder { text-align: center; margin-bottom: 20px; }
+                    .logo-container { text-align: center; margin-bottom: 20px; }
                 </style>
             </head>
             <body>
                 <div class="container">
-                    <div class="logo-placeholder">
-                        <h1 style="color: #1e40af;">Report Intervento</h1>
+                    
+                    <div class="logo-container">
+                        <img src="URL_PUBBLICO_DEL_TUO_LOGO.png" 
+                             alt="Logo Aziendale" 
+                             style="max-width: 150px; height: auto;">
                     </div>
                     
                     <div class="header">
@@ -88,17 +87,15 @@ export default async function handler(req, res) {
         // --- 2. Invio Email tramite Resend ---
 
         const { data, error } = await resend.emails.send({
-            // 🚨 IMPORTANTE: Devi sostituire 'onboarding@resend.dev' con una TUA email verificata su Resend.
             from: 'Report Interventi <onboarding@resend.dev>', 
             to: [destinatario],
             subject: `Riepilogo Intervento N° ${nIntervento} - ${nomeScuola}`,
             html: htmlContent,
-            text: `Riepilogo Intervento N° ${nIntervento}. Totale: ${totale}` // Versione testo
+            text: `Riepilogo Intervento N° ${nIntervento}. Totale: ${totale}`
         });
 
         if (error) {
             console.error('Errore Resend:', error);
-            // Non esporre l'errore esatto al frontend per sicurezza
             return res.status(500).json({ 
                 message: 'Invio email fallito. Controlla i log Vercel e la configurazione Resend.', 
                 error: error.message 
