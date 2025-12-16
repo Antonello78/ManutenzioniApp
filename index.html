@@ -47,7 +47,7 @@
                 
                 /* Definisce le dimensioni target A4 (Verticale) */
                 min-height: 297mm; 
-                width: 210mm;  
+                width: 210mm; 
                 
                 /* RIDIMENSIONAMENTO ESTREMO: Scala l'intero contenuto per farlo stare nella pagina */
                 transform: scale(0.75); 
@@ -166,7 +166,7 @@
                     </div>
 
                     <div class="space-y-2 text-gray-700">
-                                        
+                                            
                         <div class="flex justify-between items-center text-lg">
                             <span class="font-medium">Tariffa Oraria Applicata:</span>
                             <span id="tariffaOraria" class="font-semibold text-gray-800">38,00 €</span>
@@ -184,9 +184,9 @@
 
                         <div class="flex justify-between items-center text-lg pt-2">
                             <span class="font-medium">Costo di Uscita (Incl. 1ª Ora):</span>
-                            <span id="costoUscita" class="font-semibold text-gray-800">78,00 €</span>
+                            <span id="costoUscita" class="font-semibold text-gray-800">75,00 €</span>
                         </div>
-                                        
+                                            
                         <div class="flex justify-between items-center text-lg">
                             <span class="font-medium">Costo Manodopera Aggiuntiva:</span>
                             <span id="costoAggiuntivo" class="font-semibold text-gray-800">0,00 €</span>
@@ -195,7 +195,7 @@
 
                 </div> <div class="mt-6 p-4 bg-blue-100 border-2 border-blue-400 rounded-xl flex justify-between items-center">
                     <span class="text-xl font-bold text-blue-800">TOTALE MANODOPERA (€):</span>
-                    <span id="totaleManodopera" class="text-3xl font-extrabold text-blue-800">78,00 €</span>
+                    <span id="totaleManodopera" class="text-3xl font-extrabold text-blue-800">75,00 €</span>
                 </div>
             </div>
 
@@ -243,7 +243,7 @@
 
     <script>
         // Costanti
-        const COSTO_USCITA = 78.00;
+        const COSTO_USCITA = 75.00; // 🔄 MODIFICATO: Da 78.00 a 75.00 €
         const TARIFFA_ORDINARIA = 38.00; // €/ora
         const TARIFFA_STRAORDINARIO = 48.00; // €/ora
         const ORARIO_INIZIO_ORD = 8 * 60; // 08:00 in minuti
@@ -274,7 +274,7 @@
                  document.getElementById('successMsg').classList.add('hidden');
              }
         }
-                
+            
         function showMessage(type, message) {
             hideMessage(type === 'error' ? 'success' : 'error');
             const msgElement = document.getElementById(type === 'error' ? 'errorMsg' : 'successMsg');
@@ -328,7 +328,7 @@
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroPartenza.toString());
                 }
 
-                // 2. Lettura e Impostazione del Prossimo Numero
+                 // 2. Lettura e Impostazione del Prossimo Numero
                 let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY) || '0');
                 let prossimoNumero = ultimoNumero + 1;
 
@@ -366,7 +366,8 @@
                 document.getElementById('minutiEffettivi').textContent = '---';
                 document.getElementById('minutiFatturabili').textContent = '---';
                 document.getElementById('costoAggiuntivo').textContent = '---';
-                document.getElementById('costoUscita').textContent = '---';
+                // Aggiorna il costo di uscita nel riepilogo
+                document.getElementById('costoUscita').textContent = COSTO_USCITA.toFixed(2) + ' €'; 
 
                 document.getElementById('resNIntervento').textContent = nIntervento || '---';
                 document.getElementById('resData').textContent = formatDate(dataIntervento) || '---';
@@ -393,12 +394,12 @@
             const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
             const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
 
-            let tariffaOraria = TARIFFA_ORDINARIA;                        
+            let tariffaOraria = TARIFFA_ORDINARIA; 
             if (flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD) {
                 tariffaOraria = TARIFFA_STRAORDINARIO;
             }
 
-            const minutiOltre60 = Math.max(0, minutiFatturabili - 60);                        
+            const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
             const oreAggiuntiveDecimali = minutiOltre60 / 60;
             const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
 
@@ -435,7 +436,7 @@
              showMessage('success', 'Email di destinazione salvata.');
         }
 
-        function salvaIntervento() {
+        async function salvaIntervento() { 
             calcolaManodopera(); 
                         
             if (!document.getElementById('errorMsg').classList.contains('hidden')) {
@@ -459,11 +460,7 @@
                  return;
             }
             
-            // 1. Aggiorna e Salva il Contatore Globale Anno-Specifico
-            const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-            localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
-
-            // 2. Colleziona e Salva l'intervento
+            // 1. **AZIONI LOCALI DI SALVATAGGIO DEI DATI**
             const intervento = {
                 id: generateId(),
                 nIntervento: nInterventoCompleto,
@@ -480,29 +477,50 @@
             };
                         
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            // Controlla se l'intervento esiste già (per sovrascrivere)
             const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
 
             if (existingIndex > -1) {
-                // Se esiste, aggiorna
                 intervento.id = interventi[existingIndex].id; // Mantieni l'ID originale
                 interventi[existingIndex] = intervento;
                 showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
             } else {
-                // Altrimenti, aggiungi come nuovo
                 interventi.push(intervento);
                 showMessage('success', `Intervento N° ${nInterventoCompleto} salvato correttamente! Totale interventi salvati: ${interventi.length}.`);
             }
             
             localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+            
+            // 2. **AGGIORNAMENTO DEL CONTATORE REMOTO SU VERCEL**
+            try {
+                const response = await fetch('/api/salvaIntervento', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        numeroIntervento: numeroCorrenteSequenziale,
+                        anno: CURRENT_YEAR,
+                        datiIntervento: intervento
+                    })
+                });
 
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Errore nel salvataggio remoto.');
+                }
+                
+                const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+                localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
+
+            } catch (error) {
+                showMessage('error', `Errore Server (Vercel): Il salvataggio remoto (API) è fallito. ${error.message}`);
+            }
 
             // 3. Prepara la UI per il prossimo intervento
             document.getElementById('nomeScuola').value = '';
             document.getElementById('plessoEdificio').value = '';
-            initializeInputs(); // Calcola il prossimo N° e ri-inizializza data/operai
+            initializeInputs(); 
             calcolaManodopera(); 
-            renderArchivio(); // Aggiorna l'archivio
+            renderArchivio();
         }
         
         // FUNZIONE CORRETTA: Carica il vecchio N° Intervento e blocca l'incremento.
@@ -591,81 +609,103 @@
         }
         
         function toggleArchivio() {
+            const archivioDiv = document.getElementById('archivioInterventi');
             const inputSection = document.getElementById('input-section');
-            const archivioSection = document.getElementById('archivioInterventi');
-            const actionButtons = document.getElementById('action-buttons');
-            const btnToggle = document.getElementById('btnToggleArchivio');
-
-            const isArchivioVisibile = !archivioSection.classList.contains('hidden');
-
-            if (!isArchivioVisibile) {
-                // Mostra Archivio
+            const btn = document.getElementById('btnToggleArchivio');
+            
+            if (archivioDiv.classList.contains('hidden')) {
+                // Passa all'archivio
+                archivioDiv.classList.remove('hidden');
                 inputSection.classList.add('hidden');
-                actionButtons.classList.add('hidden');
-                archivioSection.classList.remove('hidden');
-                btnToggle.textContent = 'Torna all\'Intervento Corrente';
+                btn.textContent = 'Torna al Calcolo';
                 renderArchivio();
             } else {
-                // Nascondi Archivio e torna all'Input
-                archivioSection.classList.add('hidden');
+                // Torna al calcolo
+                archivioDiv.classList.add('hidden');
                 inputSection.classList.remove('hidden');
-                actionButtons.classList.remove('hidden');
-                btnToggle.textContent = 'Gestione Archivio';
-                // Assicura che l'input sia pronto per il prossimo numero
-                initializeInputs();
-                calcolaManodopera();
+                btn.textContent = 'Gestione Archivio';
             }
         }
         
-        // --- Reporting / Email ---
-        
         function stampaRiepilogo() {
-            // Aggiorna la data di stampa (anche se invisibile, per il log)
-            const now = new Date();
-            const dateString = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            document.getElementById('dataStampa').textContent = dateString;
+            // Aggiorna l'ultima data di stampa prima di lanciare la finestra di stampa
+            document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
             window.print();
         }
 
-        function inviaReport() {
+        async function inviaReport() { 
             calcolaManodopera();
-            
             const email = document.getElementById('emailDestinatario').value.trim();
-            const nIntervento = document.getElementById('nIntervento').value.trim() || "N/A";
-            const nomeScuola = document.getElementById('nomeScuola').value.trim() || "N/A";
-            const dataIntervento = formatDate(document.getElementById('dataIntervento').value) || "N/A";
-            const totale = document.getElementById('totaleManodopera').textContent || "---";
-
-            let subject = `Riepilogo Intervento Manutenzione N° ${nIntervento}`;
-            if (nomeScuola !== 'N/A') {
-                subject += ` - ${nomeScuola}`;
+            if (!email) {
+                showMessage('error', 'Inserisci un indirizzo email di destinazione valido.');
+                return;
             }
 
-            // Uso la forma "Lei" come richiesto per le comunicazioni professionali
-            const body = `Gentile Referente,\n\nLe invio in allegato il Riepilogo Intervento di Manutenzione N° ${nIntervento} eseguito in data ${dataIntervento} presso ${nomeScuola}.\n\nCosto Totale Manodopera (Imponibile): ${totale}\n\nSi prega di stampare il report (pulsante "Stampa Riepilogo") e allegare il PDF a questa mail prima dell'invio.\n\nCordiali saluti,\n[Il Suo Nome]`;
-            
-            // Encode the subject and body for the mailto link
-            const mailtoLink = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            if (!document.getElementById('errorMsg').classList.contains('hidden')) {
+                 showMessage('error', "Impossibile inviare: ci sono errori nel calcolo.");
+                 return;
+            }
 
-            window.location.href = mailtoLink;
-            
-            showMessage('success', 'Email pronta. Ricorda di allegare il PDF (salvalo tramite "Stampa Riepilogo").');
+            const reportData = {
+                // Raccogli tutti i dati necessari per l'email
+                nIntervento: document.getElementById('nIntervento').value,
+                dataIntervento: formatDate(document.getElementById('dataIntervento').value),
+                nomeScuola: document.getElementById('nomeScuola').value,
+                plessoEdificio: document.getElementById('plessoEdificio').value,
+                orario: document.getElementById('resOrario').textContent,
+                operai: document.getElementById('resOperai').textContent,
+                tariffa: document.getElementById('tariffaOraria').textContent,
+                minutiFatturabili: document.getElementById('minutiFatturabili').textContent,
+                costoUscita: document.getElementById('costoUscita').textContent,
+                costoAggiuntivo: document.getElementById('costoAggiuntivo').textContent,
+                totale: document.getElementById('totaleManodopera').textContent,
+                destinatario: email
+            };
+
+            showMessage('success', 'Invio Report in corso...');
+
+            try {
+                const response = await fetch('/api/inviaReport', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('success', `Report inviato con successo a ${email}!`);
+                } else {
+                    throw new Error(data.message || 'Errore di invio report (Server Vercel).');
+                }
+            } catch (error) {
+                showMessage('error', `Errore durante l'invio del report: ${error.message}`);
+            }
+        }
+        
+        // 🔄 NUOVA FUNZIONE: Aggiorna il testo dell'ultimo aggiornamento (data/ora corrente)
+        function updateLastModifiedText() {
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'numeric', day: 'numeric' });
+            const formattedTime = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('dataStampa').textContent = `${formattedDate} ${formattedTime}`;
         }
 
-        // Initialize all on load
+
+        // Funzioni da chiamare all'avvio
         document.addEventListener('DOMContentLoaded', () => {
-            // Aggiungo gli event listener per calcolare al cambiamento di qualsiasi campo chiave
-            ['nIntervento', 'dataIntervento', 'nomeScuola', 'plessoEdificio', 'oraInizio', 'oraFine', 'numOperai', 'flagUrgenza'].forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
+            updateLastModifiedText(); // 🔄 CHIAMATA AGGIUNTA
+            initializeInputs();
+            calcolaManodopera(); // Esegue il calcolo iniziale con i valori di default
+            // Rende l'interfaccia utente interattiva
+            document.querySelectorAll('input, select').forEach(element => {
+                if (element.id !== 'nIntervento') {
                     element.addEventListener('change', calcolaManodopera);
                     element.addEventListener('input', calcolaManodopera);
                 }
             });
-            
-            initializeInputs();
-            calcolaManodopera();
         });
+
     </script>
 </body>
 </html>
