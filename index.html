@@ -436,22 +436,20 @@
                 const dataCorrente = new Date();
                 const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
 
-                // 1. Carica l'archivio completo degli interventi
-                const interventiResponse = await fetch('/api/caricaInterventi'); // Endpoint da creare su Vercel
+                // 1. Carica l'archivio completo degli interventi (getArchivio.js)
+                const interventiResponse = await fetch('/api/getArchivio'); 
                 const interventiData = await interventiResponse.json();
                 
                 if (interventiResponse.ok && interventiData.interventi) {
-                    // Cache locale per l'archivio
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiData.interventi));
                 }
 
-                // 2. Carica l'ultimo contatore sequenziale
-                const contatoreResponse = await fetch(`/api/getContatore?anno=${CURRENT_YEAR}`); // Endpoint da creare su Vercel
+                // 2. Carica l'ultimo contatore sequenziale (getNextNumber.js)
+                const contatoreResponse = await fetch(`/api/getNextNumber?anno=${CURRENT_YEAR}`); 
                 const contatoreData = await contatoreResponse.json();
 
                 if (contatoreResponse.ok && contatoreData.numero) {
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-                    // Aggiorna il contatore locale con il valore più recente dal server
                     localStorage.setItem(COUNTER_KEY_YEARLY, contatoreData.numero.toString());
                 }
 
@@ -513,9 +511,9 @@
                 totaleManodopera: document.getElementById('totaleManodopera').textContent
             };
             
-            // 2. **AZIONI SINCRONIZZATE: Salvataggio Remoto**
+            // 2. **AZIONI SINCRONIZZATE: Salvataggio Remoto (saveIntervento.js)**
             try {
-                const response = await fetch('/api/salvaIntervento', { 
+                const response = await fetch('/api/saveIntervento', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -586,22 +584,44 @@
             }
         }
 
+        // ✅ AGGIORNATO: Funzione per cancellazione sincronizzata (chiama deleteIntervento.js)
         function cancellaIntervento(id) {
-            if (confirm("Sei sicuro di voler cancellare questo intervento?")) {
-                let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-                const index = interventi.findIndex(i => i.id === id);
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const intervento = interventi.find(i => i.id === id);
 
-                if (index > -1) {
-                    const nInterventoCancellato = interventi[index].nIntervento;
-                    interventi.splice(index, 1);
+            if (!intervento) {
+                showMessage('error', 'Intervento non trovato in locale.');
+                return;
+            }
+
+            const nInterventoCancellato = intervento.nIntervento;
+            
+            if (confirm(`Sei sicuro di voler cancellare l'intervento N° ${nInterventoCancellato}? Questa operazione è permanente e sarà sincronizzata.`)) {
+                
+                // 1. CHIAMATA API DI CANCELLAZIONE REMOTA
+                fetch(`/api/deleteIntervento?nIntervento=${nInterventoCancellato}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Eliminazione remota fallita: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    // 2. AGGIORNAMENTO LOCALE (SOLO DOPO SUCCESSO REMOTO)
+                    interventi = interventi.filter(i => i.id !== id);
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
                     
-                    showMessage('success', `Intervento N° ${nInterventoCancellato} cancellato.`);
+                    showMessage('success', `Intervento N° ${nInterventoCancellato} cancellato e sincronizzato!`);
                     renderArchivio();
-                    // Dopo la cancellazione, assicurati che il contatore non sia rimasto bloccato
                     initializeInputs();
                     calcolaManodopera();
-                }
+                })
+                .catch(error => {
+                    showMessage('error', `Errore durante la cancellazione remota: ${error.message}`);
+                    console.error(error);
+                });
             }
         }
         
@@ -720,7 +740,7 @@
             }
         }
         
-        // ✅ Funzione per la data/ora corrente (Ultimo aggiornamento)
+        // Funzione per la data/ora corrente (Ultimo aggiornamento)
         function updateLastModifiedText() {
             const now = new Date();
             const formattedDate = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'numeric', day: 'numeric' });
@@ -732,10 +752,10 @@
         // Funzioni da chiamare all'avvio
         document.addEventListener('DOMContentLoaded', async () => { 
             updateLastModifiedText();
-            await caricaDatiServer(); // 🔄 Carica prima i dati remoti (sincronizzazione)
-            initializeInputs(); // Poi inizializza gli input con i dati remoti
-            calcolaManodopera(); // Esegue il calcolo iniziale con i valori di default
-            renderArchivio(); // Visualizza gli archivi caricati
+            await caricaDatiServer(); 
+            initializeInputs(); 
+            calcolaManodopera(); 
+            renderArchivio(); 
             
             // Rende l'interfaccia utente interattiva
             document.querySelectorAll('input, select').forEach(element => {
