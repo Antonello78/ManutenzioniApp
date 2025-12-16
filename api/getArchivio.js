@@ -1,6 +1,6 @@
 // /api/getArchivio.js (oppure caricaInterventi.js)
 
-import { getArchivioCompleto } from './db';
+import { getArchivioCompleto } from './db.js';
 
 export default async function handler(req, res) {
     try {
@@ -12,3 +12,4 @@ export default async function handler(req, res) {
         return res.status(500).json({ message: 'Errore nel recupero dell\'archivio.' });
     }
 }
+
