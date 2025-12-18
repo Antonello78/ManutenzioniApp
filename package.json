@@ -10,7 +10,5 @@
   "dependencies": {
     "@vercel/kv": "^1.0.1",
     "nodemailer": "^6.9.0"
-  },
-  "devDependencies": {
   }
 }
