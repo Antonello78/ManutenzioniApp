@@ -1,6 +1,6 @@
 {
   "name": "calcolo-manodopera-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "API per la gestione e sincronizzazione del calcolo manodopera con Vercel KV e Gmail.",
   "type": "module",
   "main": "api/index.js",
@@ -12,3 +12,4 @@
     "nodemailer": "^6.9.0"
   }
 }
+
