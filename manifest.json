@@ -1,21 +1,14 @@
 {
   "name": "Calcolo Manodopera",
   "short_name": "CalcoloMan",
-  "description": "App per il calcolo della manodopera in regime forfettario",
-  "start_url": "index.html",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#f7f9fc",
+  "background_color": "#ffffff",
   "theme_color": "#1e40af",
-  "orientation": "portrait",
+  "description": "Gestione interventi ditta edile",
   "icons": [
     {
-      "src": "https://placehold.co/192x192/4F46E5/ffffff?text=C",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "https://placehold.co/512x512/4F46E5/ffffff?text=C",
+      "src": "https://cdn-icons-png.flaticon.com/512/1048/1048953.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
