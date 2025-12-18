@@ -11,8 +11,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Calcolo Manodopera">
-<link rel="manifest" href="manifest.json">
-    <style>
+    <link rel="manifest" href="manifest.json">
+<style>
     body {
         font-family: 'Inter', sans-serif;
         background-color: #f7f9fc;
@@ -420,7 +420,6 @@
             document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
             document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
             
-            // 🛠️ MODIFICA STEP 3: FORMATO OPERAI CON URGENZA IN ROSSO E GRASSETTO
             let operaiDisplay = numOperai;
             if (flagUrgenza) {
                 operaiDisplay += ' <span class="text-red-600 font-bold">(URGENZA)</span>';
@@ -702,8 +701,12 @@
                     element.addEventListener('input', calcolaManodopera);
                 }
             });
+
+            // Registrazione del Service Worker per abilitare l'installazione su Android
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js');
+            }
         });
     </script>
 </body>
 </html>
-
