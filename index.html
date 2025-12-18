@@ -30,61 +30,59 @@
     
     /* 🛠️ INIZIO BLOCCO CRITICO PER LA STAMPA 🛠️ */
     @media print {
-        /* 1. NASCONDI TUTTO CIÒ CHE NON È NECESSARIO */
         .no-print,
-        #input-section > div:not(.border-t) { /* Nasconde i campi di input non usati nel riepilogo */
+        #input-section > div:not(.border-t) { 
             display: none !important;
         }
         
-        /* Forza la visualizzazione della sezione calcolo e riepilogo anche se nascosta */
         #input-section {
             display: block !important;
         }
         
-        /* 2. LAYOUT E SCALA DELLA PAGINA A4 */
         body {
             padding: 0;
             background-color: white;
-            margin: 0; /* Rimuove tutti i margini del body */
+            margin: 0; 
         }
         #app {
             box-shadow: none !important;
             border: none !important;
             max-width: none !important;
             margin: 0 !important; 
-            padding: 0.5rem !important; /* Riduce il padding interno */
+            padding: 0.5rem !important; 
             
-            /* Definisce le dimensioni target A4 (Verticale) */
             width: 210mm; 
             min-height: 297mm; 
             
-            /* SCALA AGGRESSIVA: Scala l'intero contenuto per farlo stare nella pagina. */
             transform: scale(0.85); 
             transform-origin: top left; 
 
-            /* Regola cruciale per prevenire le interruzioni all'interno */
             page-break-inside: avoid !important; 
         }
         
-        /* 3. STILE DELL'HEADER (CON LOGO) PER LA STAMPA */
         #unified-header {
-             display: block !important; /* Rendi visibile l'header (con logo e data) */
+             display: block !important; 
              padding-bottom: 0.5rem;
              margin-bottom: 1rem;
-             border-bottom: 2px solid #ccc; /* Aggiunge una linea netta */
+             border-bottom: 2px solid #ccc; 
         }
 
-        /* 4. MANTIENI I BLOCCHI UNIFICATI */
         .print-avoid-break,
         .print-avoid-break *,
         .flex {
             page-break-inside: avoid !important;
         }
 
-        /* 5. MARGINI DI STAMPA DEL BROWSER (CRITICO) */
+        /* Forza il colore rosso in stampa per l'urgenza */
+        .text-red-600 {
+            color: #dc2626 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
         @page {
             size: A4 portrait; 
-            margin: 0.5cm !important; /* Margini molto ridotti per massimizzare lo spazio */
+            margin: 0.5cm !important; 
         }
     }
     /* 🛠️ FINE BLOCCO CRITICO PER LA STAMPA 🛠️ */
@@ -94,14 +92,11 @@
     <div id="app" class="max-w-xl mx-auto bg-white shadow-2xl rounded-xl p-6 sm:p-8">
         
         <div id="unified-header" class="mb-6 border-b pb-2 text-center no-print">
-            
             <img src="LOGO ANTONELLO.png" alt="Logo Aziendale" class="h-24 object-contain mx-auto mb-2">
-            
             <p class="text-xs text-gray-500">Ultimo aggiornamento: <span id="dataStampa"></span></p>
         </div>
         
         <div id="input-section">
-            
             <h2 class="text-xl font-bold text-gray-700 mb-4 no-print">Dettagli Intervento Corrente</h2>
 
             <div class="grid grid-cols-2 gap-4">
@@ -142,6 +137,11 @@
                 <input type="number" id="numOperai" value="1" min="1" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
             </div>
 
+            <div class="mt-4">
+                <label for="inputCostoUscita" class="block text-sm font-medium text-gray-600">Costo di Uscita / Chiamata (€)</label>
+                <input type="number" id="inputCostoUscita" value="75" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+            </div>
+
             <div class="flex items-center pt-2 mt-4">
                 <input id="flagUrgenza" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-red-600 border-gray-300 rounded">
                 <label for="flagUrgenza" class="ml-3 block text-base font-medium text-red-700">
@@ -149,16 +149,13 @@
                 </label>
             </div>
 
-            <div id="errorMsg" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden no-print" role="alert">
-                </div>
-            <div id="successMsg" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg hidden no-print" role="alert">
-                </div>
+            <div id="errorMsg" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden no-print" role="alert"></div>
+            <div id="successMsg" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg hidden no-print" role="alert"></div>
 
             <div class="mt-8 pt-6 border-t border-gray-200">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4 no-print">Dettaglio Calcolo e Totale</h2>
                             
                 <div class="print-avoid-break">
-
                     <div id="riepilogoDati" class="space-y-2 text-gray-700 p-4 border rounded-lg bg-gray-50 mb-4">
                         <h3 class="text-xl font-bold mb-2 border-b pb-1 text-blue-700">Dati Intervento</h3>
                         <div class="flex justify-between text-base">
@@ -184,62 +181,56 @@
                     </div>
 
                     <div class="space-y-2 text-gray-700">
-                                            
                         <div class="flex justify-between items-center text-lg">
                             <span class="font-medium">Tariffa Oraria Applicata:</span>
                             <span id="tariffaOraria" class="font-semibold text-gray-800">38,00 €</span>
                         </div>
-
                         <div class="flex justify-between items-center text-sm text-gray-500">
                             <span>Tempo Effettivo Lavorato (Minuti/Uomo):</span>
                             <span id="minutiEffettivi" class="font-medium">135 min</span>
                         </div>
-
                         <div class="flex justify-between items-center text-lg border-b pb-2">
                             <span class="font-medium">Tempo Fatturabile (Arrotondato 15 min):</span>
                             <span id="minutiFatturabili" class="font-semibold text-blue-600">135 min</span>
                         </div>
-
                         <div class="flex justify-between items-center text-lg pt-2">
                             <span class="font-medium">Costo di Uscita (Incl. 1ª Ora):</span>
                             <span id="costoUscita" class="font-semibold text-gray-800">75,00 €</span>
                         </div>
-                                            
                         <div class="flex justify-between items-center text-lg">
                             <span class="font-medium">Costo Manodopera Aggiuntiva:</span>
                             <span id="costoAggiuntivo" class="font-semibold text-gray-800">0,00 €</span>
                         </div>
                     </div>
-
-                </div> <div class="mt-6 p-4 bg-blue-100 border-2 border-blue-400 rounded-xl flex justify-between items-center">
+                </div> 
+                
+                <div class="mt-6 p-4 bg-blue-100 border-2 border-blue-400 rounded-xl flex justify-between items-center">
                     <span class="text-xl font-bold text-blue-800">TOTALE MANODOPERA (€):</span>
                     <span id="totaleManodopera" class="text-3xl font-extrabold text-blue-800">75,00 €</span>
                 </div>
             </div>
+        </div> 
 
-        </div> <div id="archivioInterventi" class="hidden mt-4">
+        <div id="archivioInterventi" class="hidden mt-4">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio Interventi Salvati</h2>
-            
             <div id="listaInterventi" class="space-y-3">
                 <p class="text-gray-500">Nessun intervento salvato.</p>
             </div>
-            
-        </div> <div class="border-t border-gray-200 mt-6 pt-4 no-print"></div>
-        
+        </div> 
+
+        <div class="border-t border-gray-200 mt-6 pt-4 no-print"></div>
         <div class="mt-4 space-y-3 no-print">
             <h3 class="text-lg font-semibold text-gray-700">Opzioni Report e Archivio</h3>
             <div>
                 <label for="emailDestinatario" class="block text-sm font-medium text-gray-600">Email di Destinazione (default)</label>
-                <input type="email" id="emailDestinatario" onchange="salvaEmail()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 text-lg" placeholder="amministrazione@scuola.it">
+                <input type="email" id="emailDestinatario" onchange="salvaEmail()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-blue-500 text-lg" placeholder="amministrazione@scuola.it">
             </div>
         </div>
 
         <div class="mt-6 flex flex-col space-y-3 sm:space-y-0 sm:space-x-3 no-print">
-            
             <button onclick="toggleArchivio()" id="btnToggleArchivio" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150 w-full sm:w-1/2 mx-auto mb-4">
                 Gestione Archivio
             </button>
-            
             <div id="action-buttons" class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
                 <button onclick="salvaIntervento()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
                     Salva Intervento
@@ -251,26 +242,22 @@
                     Invia Report (Email)
                 </button>
             </div>
-            
         </div>
 
         <p class="mt-6 text-xs text-gray-400 text-center no-print">
             Orario Ordinario: 08:00 - 17:00. Il calcolo arrotonda i minuti di manodopera per eccesso al quarto d'ora superiore.
         </p>
-            </div>
+    </div>
 
     <script>
         // Costanti
-        const COSTO_USCITA = 75.00; // ✅ MODIFICATO: 75.00 €
-        const TARIFFA_ORDINARIA = 38.00; // €/ora
-        const TARIFFA_STRAORDINARIO = 48.00; // €/ora
-        const ORARIO_INIZIO_ORD = 8 * 60; // 08:00 in minuti
-        const ORARIO_FINE_ORD = 17 * 60; // 17:00 in minuti
+        const TARIFFA_ORDINARIA = 38.00; 
+        const TARIFFA_STRAORDINARIO = 48.00; 
+        const ORARIO_INIZIO_ORD = 8 * 60; 
+        const ORARIO_FINE_ORD = 17 * 60; 
         const STORAGE_KEY = 'manodoperaInterventi';
         const EMAIL_KEY = 'reportEmailDestinatario'; 
         const INIZIO_2025 = 74; 
-
-        // --- Utility Functions ---
 
         function parseTime(timeString) {
             const [hours, minutes] = timeString.split(':').map(Number);
@@ -281,8 +268,13 @@
             if (!dateString) return 'N/A';
             const date = new Date(dateString + 'T00:00:00'); 
             if (isNaN(date.getTime())) return 'N/A';
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return date.toLocaleDateString('it-IT', options);
+            
+            const giornoSett = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
+            const giorno = String(date.getDate()).padStart(2, '0');
+            const mese = String(date.getMonth() + 1).padStart(2, '0');
+            const anno = String(date.getFullYear()).substring(2);
+            
+            return `${giornoSett} ${giorno}/${mese}/${anno}`;
         }
 
         function hideMessage(type) {
@@ -307,16 +299,10 @@
             return Date.now().toString();
         }
         
-        // --- Counter Management ---
-
         function getYearCounterKey(year) {
             return 'numeroIntervento_' + year;
         }
 
-        /**
-         * Inizializza i campi di input e il contatore.
-         * @param {boolean} keepNIntervento - Se true, non aggiorna il N° Intervento (utile dopo il caricamento).
-         */
         function initializeInputs(keepNIntervento = false) {
             const dataInput = document.getElementById('dataIntervento');
             if (!dataInput.value) {
@@ -328,31 +314,24 @@
                  numOperaiInput.value = '1';
             }
             
-            // Carica l'email predefinita
             document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
 
-            // Gestione N° Intervento NNN/YY
             const nInterventoInput = document.getElementById('nIntervento');
             const dataCorrente = new Date();
             const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
             const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
 
             if (!keepNIntervento) {
-                 // 1. Inizializzazione Speciale e Reset Annuale
                 const ultimoNumeroSalvato = localStorage.getItem(COUNTER_KEY_YEARLY);
-
                 if (ultimoNumeroSalvato === null) {
                     let numeroPartenza = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0; 
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroPartenza.toString());
                 }
 
-                 // 2. Lettura e Impostazione del Prossimo Numero
                 let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY) || '0');
                 let prossimoNumero = ultimoNumero + 1;
-
                 const prossimoNumeroFormattato = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
                 
-                // Imposta solo se il campo è vuoto o contiene un numero inferiore a quello atteso
                 const inputValoreSequenziale = parseInt(nInterventoInput.value.split('/')[0]) || 0;
                 if (!nInterventoInput.value || inputValoreSequenziale < prossimoNumero) {
                     nInterventoInput.value = prossimoNumeroFormattato;
@@ -360,8 +339,6 @@
             }
         }
         
-        // --- Calculation ---
-
         function calcolaManodopera() {
             hideMessage('error');
             hideMessage('success');
@@ -369,10 +346,10 @@
             const oraInizioInput = document.getElementById('oraInizio').value;
             const oraFineInput = document.getElementById('oraFine').value;
             const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
+            const costoUscitaInput = parseFloat(document.getElementById('inputCostoUscita').value) || 0;
             document.getElementById('numOperai').value = numOperai; 
                         
             const flagUrgenza = document.getElementById('flagUrgenza').checked;
-
             const nIntervento = document.getElementById('nIntervento').value; 
             const dataIntervento = document.getElementById('dataIntervento').value;
             const nomeScuola = document.getElementById('nomeScuola').value;
@@ -384,14 +361,13 @@
                 document.getElementById('minutiEffettivi').textContent = '---';
                 document.getElementById('minutiFatturabili').textContent = '---';
                 document.getElementById('costoAggiuntivo').textContent = '---';
-                // Aggiorna il costo di uscita nel riepilogo
-                document.getElementById('costoUscita').textContent = COSTO_USCITA.toFixed(2) + ' €'; 
+                document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €'; 
 
                 document.getElementById('resNIntervento').textContent = nIntervento || '---';
                 document.getElementById('resData').textContent = formatDate(dataIntervento) || '---';
                 document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
                 document.getElementById('resOrario').textContent = (oraInizioInput && oraFineInput) ? oraInizioInput + ' - ' + oraFineInput : '---';
-                document.getElementById('resOperai').textContent = numOperai + (flagUrgenza ? ' (URGENZA)' : '');
+                document.getElementById('resOperai').textContent = numOperai;
             }
 
             if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) {
@@ -421,7 +397,7 @@
             const oreAggiuntiveDecimali = minutiOltre60 / 60;
             const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
 
-            const totaleManodopera = COSTO_USCITA + costoManodoperaAggiuntiva;
+            const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
             const totaleManodoperaArrotondato = parseFloat(totaleManodopera.toFixed(2)); 
             
             document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
@@ -435,7 +411,7 @@
             }
                         
             document.getElementById('minutiFatturabili').textContent = minutiFatturabiliDesc;
-            document.getElementById('costoUscita').textContent = COSTO_USCITA.toFixed(2) + ' €';
+            document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €';
             document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2) + ' €';
             document.getElementById('totaleManodopera').textContent = totaleManodoperaArrotondato.toFixed(2) + ' €'; 
             
@@ -443,18 +419,21 @@
             document.getElementById('resData').textContent = formatDate(dataIntervento); 
             document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
             document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
-            document.getElementById('resOperai').textContent = numOperai + (flagUrgenza ? ' (URGENZA)' : '');
+            
+            // 🛠️ MODIFICA STEP 3: FORMATO OPERAI CON URGENZA IN ROSSO E GRASSETTO
+            let operaiDisplay = numOperai;
+            if (flagUrgenza) {
+                operaiDisplay += ' <span class="text-red-600 font-bold">(URGENZA)</span>';
+            }
+            document.getElementById('resOperai').innerHTML = operaiDisplay;
         }
 
-        // --- Server Synchronization Functions ---
-        
         async function caricaDatiServer() {
             showMessage('success', 'Sincronizzazione dati in corso...');
             try {
                 const dataCorrente = new Date();
                 const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
 
-                // 1. Carica l'archivio completo degli interventi (getArchivio.js)
                 const interventiResponse = await fetch('/api/getArchivio'); 
                 const interventiData = await interventiResponse.json();
                 
@@ -462,7 +441,6 @@
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiData.interventi));
                 }
 
-                // 2. Carica l'ultimo contatore sequenziale (getNextNumber.js)
                 const contatoreResponse = await fetch(`/api/getNextNumber?anno=${CURRENT_YEAR}`); 
                 const contatoreData = await contatoreResponse.json();
 
@@ -474,12 +452,10 @@
                 showMessage('success', 'Dati sincronizzati con successo. Pronto.');
                 
             } catch (error) {
-                showMessage('error', 'Sincronizzazione dati fallita. Lavorerai con dati locali non aggiornati. Verifica la connessione o l\'API Vercel.');
+                showMessage('error', 'Sincronizzazione dati fallita. Lavorerai con dati locali non aggiornati.');
                 console.error('Errore sincronizzazione:', error);
             }
         }
-        
-        // --- Save / Delete / Load / Render ---
         
         function salvaEmail() {
              const email = document.getElementById('emailDestinatario').value.trim();
@@ -491,31 +467,25 @@
             calcolaManodopera(); 
                         
             if (!document.getElementById('errorMsg').classList.contains('hidden')) {
-                showMessage('error', "Impossibile salvare: ci sono errori nel calcolo. Risolvi prima di salvare.");
+                showMessage('error', "Impossibile salvare: ci sono errori nel calcolo.");
                 return;
             }
                         
             const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
             const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
             
-            // Validazione N° Intervento
             const nInterventoParts = nInterventoCompleto.split('/');
             if (nInterventoParts.length !== 2 || nInterventoParts[1] !== CURRENT_YEAR) {
                  showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/${CURRENT_YEAR}.`); 
                  return;
             }
             const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
-            if (isNaN(numeroCorrenteSequenziale) || nInterventoParts[0].length !== 3) { 
-                 showMessage('error', "Il 'N° Intervento' non è valido. Deve contenere un numero sequenziale di 3 cifre."); 
-                 return;
-            }
             
-            // 1. **PREPARAZIONE DEI DATI**
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
 
             const intervento = {
-                id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(), // Usa ID esistente se è un aggiornamento
+                id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
                 nIntervento: nInterventoCompleto,
                 dataIntervento: document.getElementById('dataIntervento').value, 
                 nomeScuola: document.getElementById('nomeScuola').value,
@@ -523,13 +493,12 @@
                 oraInizio: document.getElementById('oraInizio').value,
                 oraFine: document.getElementById('oraFine').value,
                 numOperai: parseInt(document.getElementById('numOperai').value),
+                costoUscita: document.getElementById('inputCostoUscita').value,
                 flagUrgenza: document.getElementById('flagUrgenza').checked,
-                                
                 tariffaOraria: document.getElementById('tariffaOraria').textContent,
                 totaleManodopera: document.getElementById('totaleManodopera').textContent
             };
             
-            // 2. **AZIONI SINCRONIZZATE: Salvataggio Remoto (saveIntervento.js)**
             try {
                 const response = await fetch('/api/saveIntervento', { 
                     method: 'POST',
@@ -543,20 +512,14 @@
                 });
 
                 const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.message || 'Errore nel salvataggio remoto.');
-                }
+                if (!response.ok) throw new Error(data.message || 'Errore nel salvataggio remoto.');
                 
-                // --- 3. AGGIORNAMENTO LOCALE (SOLO DOPO SUCCESSO REMOTO) ---
                 if (existingIndex > -1) {
                     interventi[existingIndex] = intervento;
-                    showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente! (Sincronizzato)`);
+                    showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
                     interventi.push(intervento); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
-                    
-                    // Aggiorna il contatore locale SOLO SE è un nuovo inserimento
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
                 }
@@ -564,11 +527,10 @@
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
 
             } catch (error) {
-                showMessage('error', `Errore Server (Vercel): Il salvataggio/sincronizzazione è fallito. ${error.message}`);
+                showMessage('error', `Errore Server: ${error.message}`);
                 return; 
             }
 
-            // 4. Prepara la UI per il prossimo intervento
             document.getElementById('nomeScuola').value = '';
             document.getElementById('plessoEdificio').value = '';
             initializeInputs(); 
@@ -576,13 +538,11 @@
             renderArchivio();
         }
         
-        // FUNZIONE CORRETTA: Carica il vecchio N° Intervento e blocca l'incremento.
         function caricaIntervento(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
 
             if (intervento) {
-                // Riempie i campi principali, INCLUSO il vecchio N° Intervento
                 document.getElementById('nIntervento').value = intervento.nIntervento; 
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola;
@@ -590,55 +550,41 @@
                 document.getElementById('oraInizio').value = intervento.oraInizio;
                 document.getElementById('oraFine').value = intervento.oraFine;
                 document.getElementById('numOperai').value = intervento.numOperai;
+                document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
                 document.getElementById('flagUrgenza').checked = intervento.flagUrgenza;
                 
-                calcolaManodopera(); // Riesegue il calcolo e riempie i totali
-                
+                calcolaManodopera(); 
                 toggleArchivio(); 
                 showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
-                
-                // Disattiva l'incremento automatico per non sovrascrivere il N° caricato
                 initializeInputs(true);
             }
         }
 
-        // ✅ AGGIORNATO: Funzione per cancellazione sincronizzata (chiama deleteIntervento.js)
         function cancellaIntervento(id) {
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
 
-            if (!intervento) {
-                showMessage('error', 'Intervento non trovato in locale.');
-                return;
-            }
-
+            if (!intervento) return;
             const nInterventoCancellato = intervento.nIntervento;
             
-            if (confirm(`Sei sicuro di voler cancellare l'intervento N° ${nInterventoCancellato}? Questa operazione è permanente e sarà sincronizzata.`)) {
-                
-                // 1. CHIAMATA API DI CANCELLAZIONE REMOTA
+            if (confirm(`Sei sicuro di voler cancellare l'intervento N° ${nInterventoCancellato}?`)) {
                 fetch(`/api/deleteIntervento?nIntervento=${nInterventoCancellato}`, {
                     method: 'DELETE'
                 })
                 .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Eliminazione remota fallita: ${response.statusText}`);
-                    }
+                    if (!response.ok) throw new Error(`Eliminazione remota fallita.`);
                     return response.json();
                 })
                 .then(() => {
-                    // 2. AGGIORNAMENTO LOCALE (SOLO DOPO SUCCESSO REMOTO)
                     interventi = interventi.filter(i => i.id !== id);
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
-                    
-                    showMessage('success', `Intervento N° ${nInterventoCancellato} cancellato e sincronizzato!`);
+                    showMessage('success', `Intervento N° ${nInterventoCancellato} cancellato.`);
                     renderArchivio();
                     initializeInputs();
                     calcolaManodopera();
                 })
                 .catch(error => {
-                    showMessage('error', `Errore durante la cancellazione remota: ${error.message}`);
-                    console.error(error);
+                    showMessage('error', `Errore: ${error.message}`);
                 });
             }
         }
@@ -647,7 +593,6 @@
             const listaDiv = document.getElementById('listaInterventi');
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             
-            // Ordina per N° Intervento in modo decrescente
             interventi.sort((a, b) => {
                  const numA = parseInt(a.nIntervento.split('/')[0]);
                  const numB = parseInt(b.nIntervento.split('/')[0]);
@@ -655,12 +600,11 @@
             });
 
             if (interventi.length === 0) {
-                listaDiv.innerHTML = '<p class="text-gray-500">Nessun intervento salvato. Usa il pulsante "Salva Intervento" per iniziare.</p>';
+                listaDiv.innerHTML = '<p class="text-gray-500">Nessun intervento salvato.</p>';
                 return;
             }
 
-            listaDiv.innerHTML = ''; // Pulisce la lista
-
+            listaDiv.innerHTML = ''; 
             interventi.forEach(i => {
                 const itemHtml = `
                     <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
@@ -670,12 +614,8 @@
                             <p class="text-sm font-semibold text-gray-800">${i.totaleManodopera || 'N/A'}</p>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
-                            <button onclick="caricaIntervento('${i.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-3 rounded">
-                                Carica
-                            </button>
-                            <button onclick="cancellaIntervento('${i.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded">
-                                Cancella
-                            </button>
+                            <button onclick="caricaIntervento('${i.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-3 rounded">Carica</button>
+                            <button onclick="cancellaIntervento('${i.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded">Cancella</button>
                         </div>
                     </div>
                 `;
@@ -689,13 +629,11 @@
             const btn = document.getElementById('btnToggleArchivio');
             
             if (archivioDiv.classList.contains('hidden')) {
-                // Passa all'archivio
                 archivioDiv.classList.remove('hidden');
                 inputSection.classList.add('hidden');
                 btn.textContent = 'Torna al Calcolo';
                 renderArchivio();
             } else {
-                // Torna al calcolo
                 archivioDiv.classList.add('hidden');
                 inputSection.classList.remove('hidden');
                 btn.textContent = 'Gestione Archivio';
@@ -703,7 +641,6 @@
         }
         
         function stampaRiepilogo() {
-            // Aggiorna l'ultima data di stampa prima di lanciare la finestra di stampa
             document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
             window.print();
         }
@@ -716,13 +653,7 @@
                 return;
             }
 
-            if (!document.getElementById('errorMsg').classList.contains('hidden')) {
-                 showMessage('error', "Impossibile inviare: ci sono errori nel calcolo.");
-                 return;
-            }
-
             const reportData = {
-                // Raccogli tutti i dati necessari per l'email
                 nIntervento: document.getElementById('nIntervento').value,
                 dataIntervento: formatDate(document.getElementById('dataIntervento').value),
                 nomeScuola: document.getElementById('nomeScuola').value,
@@ -738,27 +669,19 @@
             };
 
             showMessage('success', 'Invio Report in corso...');
-
             try {
                 const response = await fetch('/api/inviaReport', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(reportData)
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage('success', `Report inviato con successo a ${email}!`);
-                } else {
-                    throw new Error(data.message || 'Errore di invio report (Server Vercel).');
-                }
+                if (response.ok) showMessage('success', `Report inviato a ${email}!`);
+                else throw new Error('Errore di invio report.');
             } catch (error) {
-                showMessage('error', `Errore durante l'invio del report: ${error.message}`);
+                showMessage('error', `Errore: ${error.message}`);
             }
         }
         
-        // Funzione per la data/ora corrente (Ultimo aggiornamento)
         function updateLastModifiedText() {
             const now = new Date();
             const formattedDate = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'numeric', day: 'numeric' });
@@ -766,8 +689,6 @@
             document.getElementById('dataStampa').textContent = `${formattedDate} ${formattedTime}`;
         }
 
-
-        // Funzioni da chiamare all'avvio
         document.addEventListener('DOMContentLoaded', async () => { 
             updateLastModifiedText();
             await caricaDatiServer(); 
@@ -775,7 +696,6 @@
             calcolaManodopera(); 
             renderArchivio(); 
             
-            // Rende l'interfaccia utente interattiva
             document.querySelectorAll('input, select').forEach(element => {
                 if (element.id !== 'nIntervento') {
                     element.addEventListener('change', calcolaManodopera);
@@ -783,8 +703,6 @@
                 }
             });
         });
-
     </script>
 </body>
 </html>
-
