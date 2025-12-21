@@ -5,277 +5,719 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calcolo Manodopera</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+        
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Calcolo Manodopera">
     <link rel="manifest" href="manifest.json">
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white !important; padding: 0 !important; }
-            .container { max-width: 100% !important; box-shadow: none !important; border: none !important; margin: 0 !important; }
-            .bg-white { border: none !important; }
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f7f9fc;
+        padding-top: 1rem;
+     }
+    /* Style specific to hide the number input arrows */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    
+    /* 🛠️ INIZIO BLOCCO CRITICO PER LA STAMPA 🛠️ */
+    @media print {
+        .no-print,
+        #input-section > div:not(.border-t) { 
+            display: none !important;
         }
-    </style>
+        
+        #input-section {
+            display: block !important;
+        }
+        
+        body {
+            padding: 0;
+            background-color: white;
+            margin: 0; 
+        }
+        #app {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: none !important;
+            margin: 0 !important; 
+            padding: 0.5rem !important; 
+            
+            width: 210mm; 
+            min-height: 297mm; 
+            
+            transform: scale(0.85); 
+            transform-origin: top left; 
+
+            page-break-inside: avoid !important; 
+        }
+        
+        #unified-header {
+             display: block !important; 
+             padding-bottom: 0.5rem;
+             margin-bottom: 1rem;
+             border-bottom: 2px solid #ccc; 
+        }
+
+        .print-avoid-break,
+        .print-avoid-break *,
+        .flex {
+            page-break-inside: avoid !important;
+        }
+
+        /* Forza il colore rosso in stampa per l'urgenza */
+        .text-red-600 {
+            color: #dc2626 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        @page {
+            size: A4 portrait; 
+            margin: 0.5cm !important; 
+        }
+    }
+    /* 🛠️ FINE BLOCCO CRITICO PER LA STAMPA 🛠️ */
+</style>
 </head>
-<body class="bg-gray-100 p-4 font-sans leading-tight">
-    <div class="max-w-md mx-auto container">
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-4 relative overflow-hidden">
-            <div class="flex justify-between items-center mb-6">
+<body class="p-4 sm:p-8">
+    <div id="app" class="max-w-xl mx-auto bg-white shadow-2xl rounded-xl p-6 sm:p-8">
+        
+        <div id="unified-header" class="mb-6 border-b pb-2 text-center no-print">
+            <img src="LOGO ANTONELLO.png" alt="Logo Aziendale" class="h-24 object-contain mx-auto mb-2">
+            <p class="text-xs text-gray-500">Ultimo aggiornamento: <span id="dataStampa"></span></p>
+        </div>
+        
+        <div id="input-section">
+            <h2 class="text-xl font-bold text-gray-700 mb-4 no-print">Dettagli Intervento Corrente</h2>
+
+            <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800">Intervento</h1>
-                    <p class="text-xs text-gray-500 italic">Riepilogo Manodopera</p>
+                    <label for="nIntervento" class="block text-sm font-medium text-gray-600">N° Intervento</label>
+                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Es. 075/25">
                 </div>
-                <div class="text-right">
-                    <div id="numero-intervento" class="text-lg font-black text-blue-600">--/--</div>
-                    <div id="last-modified" class="text-[10px] text-gray-400"></div>
+                <div>
+                    <label for="dataIntervento" class="block text-sm font-medium text-gray-600">Data</label>
+                    <input type="date" id="dataIntervento" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
                 </div>
             </div>
 
-            <div class="space-y-4 no-print">
+            <div class="mt-4">
+                <label for="nomeScuola" class="block text-sm font-medium text-gray-600">Nome Scuola</label>
+                <input type="text" id="nomeScuola" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Istituto Comprensivo G. Pascoli">
+            </div>
+
+            <div class="mt-4">
+                <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso/Edificio</label>
+                <input type="text" id="plessoEdificio" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Sede Centrale / Plesso Via Roma">
+            </div>
+
+            <div class="border-t border-gray-200 pt-4 mt-4"></div>
+
+            <div>
+                <label for="oraInizio" class="block text-sm font-medium text-gray-600">Ora Inizio Intervento (HH:MM)</label>
+                <input type="time" id="oraInizio" value="09:00" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+            </div>
+
+            <div class="mt-4">
+                <label for="oraFine" class="block text-sm font-medium text-gray-600">Ora Fine Intervento (HH:MM)</label>
+                <input type="time" id="oraFine" value="10:15" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+            </div>
+
+            <div class="mt-4">
+                <label for="numOperai" class="block text-sm font-medium text-gray-600">Numero Operai Coinvolti</label>
+                <input type="number" id="numOperai" value="1" min="1" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1 caps">Scuola</label>
-                    <input type="text" id="scuola" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Nome della scuola">
+                    <label for="inputCostoUscita" class="block text-sm font-medium text-gray-600">Costo Uscita (€)</label>
+                    <input type="number" id="inputCostoUscita" value="75" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
                 </div>
+                <div>
+                    <label for="inputTariffaBase" class="block text-sm font-medium text-gray-600">Tariffa Oraria (€/h)</label>
+                    <input type="number" id="inputTariffaBase" value="38" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+                </div>
+            </div>
+
+            <div class="flex items-center pt-2 mt-4">
+                <input id="flagUrgenza" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-red-600 border-gray-300 rounded">
+                <label for="flagUrgenza" class="ml-3 block text-base font-medium text-red-700">
+                    Marca come "Urgenza Immediata" (+10 €/h)
+                </label>
+            </div>
+
+            <div id="errorMsg" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden no-print" role="alert"></div>
+            <div id="successMsg" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg hidden no-print" role="alert"></div>
+
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4 no-print">Dettaglio Calcolo e Totale</h2>
+                            
+                <div class="print-avoid-break">
+                    <div id="riepilogoDati" class="space-y-2 text-gray-700 p-4 border rounded-lg bg-gray-50 mb-4">
+                        <h3 class="text-xl font-bold mb-2 border-b pb-1 text-blue-700">Dati Intervento</h3>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">N° Intervento:</span>
+                            <span id="resNIntervento" class="font-semibold text-gray-800">---</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">Data:</span>
+                            <span id="resData" class="font-semibold text-gray-800">---</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">Scuola/Plesso:</span>
+                            <span id="resScuola" class="font-semibold text-gray-800 text-right max-w-[60%]">---</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">Orario Lavorato:</span>
+                            <span id="resOrario" class="font-semibold text-gray-800">---</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">Operai:</span>
+                            <span id="resOperai" class="font-semibold text-gray-800">---</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-gray-700">
+                        <div class="flex justify-between items-center text-lg">
+                            <span class="font-medium">Tariffa Oraria Applicata:</span>
+                            <span id="tariffaOraria" class="font-semibold text-gray-800">38,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <span>Tempo Effettivo Lavorato (Minuti/Uomo):</span>
+                            <span id="minutiEffettivi" class="font-medium">135 min</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg border-b pb-2">
+                            <span class="font-medium">Tempo Fatturabile (Arrotondato 15 min):</span>
+                            <span id="minutiFatturabili" class="font-semibold text-blue-600">135 min</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg pt-2">
+                            <span class="font-medium">Costo di Uscita (Incl. 1ª Ora):</span>
+                            <span id="costoUscita" class="font-semibold text-gray-800">75,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg">
+                            <span class="font-medium">Costo Manodopera Aggiuntiva:</span>
+                            <span id="costoAggiuntivo" class="font-semibold text-gray-800">0,00 €</span>
+                        </div>
+                    </div>
+                </div> 
                 
-                <div>
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">Dettaglio Plesso / Edificio</label>
-                    <input type="text" id="plesso" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Es: Sede Centrale, Palestra...">
+                <div class="mt-6 p-4 bg-blue-100 border-2 border-blue-400 rounded-xl flex justify-between items-center">
+                    <span class="text-xl font-bold text-blue-800">TOTALE MANODOPERA (€):</span>
+                    <span id="totaleManodopera" class="text-3xl font-extrabold text-blue-800">75,00 €</span>
                 </div>
+            </div>
+        </div> 
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Data</label>
-                        <input type="date" id="data" class="w-full border rounded p-2 text-sm outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">N° Operai</label>
-                        <input type="number" id="operai" value="1" min="1" class="w-full border rounded p-2 text-sm outline-none">
-                    </div>
-                </div>
+        <div id="archivioInterventi" class="hidden mt-4">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio Interventi Salvati</h2>
+            <div id="listaInterventi" class="space-y-3">
+                <p class="text-gray-500">Nessun intervento salvato.</p>
+            </div>
+        </div> 
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Ora Inizio</label>
-                        <input type="time" id="oraInizio" class="w-full border rounded p-2 text-sm outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-600 mb-1">Ora Fine</label>
-                        <input type="time" id="oraFine" class="w-full border rounded p-2 text-sm outline-none">
-                    </div>
-                </div>
+        <div class="border-t border-gray-200 mt-6 pt-4 no-print"></div>
+        <div class="mt-4 space-y-3 no-print">
+            <h3 class="text-lg font-semibold text-gray-700">Opzioni Report e Archivio</h3>
+            <div>
+                <label for="emailDestinatario" class="block text-sm font-medium text-gray-600">Email di Destinazione (default)</label>
+                <input type="email" id="emailDestinatario" onchange="salvaEmail()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-blue-500 text-lg" placeholder="amministrazione@scuola.it">
+            </div>
+        </div>
 
-                <div class="flex items-center space-x-2 bg-yellow-50 p-2 rounded border border-yellow-200">
-                    <input type="checkbox" id="urgenza" class="w-4 h-4 text-yellow-600">
-                    <label for="urgenza" class="text-xs font-bold text-yellow-800 uppercase tracking-wider">Intervento Urgente</label>
-                </div>
-
-                <button onclick="calcola()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition duration-200 uppercase text-sm tracking-widest">
-                    Calcola Importo
+        <div class="mt-6 flex flex-col space-y-3 sm:space-y-0 sm:space-x-3 no-print">
+            <button onclick="toggleArchivio()" id="btnToggleArchivio" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150 w-full sm:w-1/2 mx-auto mb-4">
+                Gestione Archivio
+            </button>
+            <div id="action-buttons" class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                <button onclick="salvaIntervento()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                    Salva Intervento
+                </button>
+                <button onclick="stampaRiepilogo()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                    Stampa Riepilogo / Crea PDF
+                </button>
+                <button onclick="inviaReport()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                    Invia Report (Email)
                 </button>
             </div>
-
-            <div id="risultato" class="mt-8 border-t pt-6 hidden">
-                <div class="space-y-3">
-                    <div class="flex justify-between text-sm border-b pb-2">
-                        <span class="text-gray-600">Data Intervento:</span>
-                        <span id="resData" class="font-bold uppercase"></span>
-                    </div>
-                    <div class="flex justify-between text-sm border-b pb-2">
-                        <span class="text-gray-600">Scuola:</span>
-                        <span id="resScuola" class="font-bold uppercase"></span>
-                    </div>
-                    <div class="flex justify-between text-sm border-b pb-2">
-                        <span class="text-gray-600">Plesso/Edificio:</span>
-                        <span id="resPlesso" class="font-bold uppercase text-right max-w-[200px]"></span>
-                    </div>
-                    <div class="flex justify-between text-sm border-b pb-2">
-                        <span class="text-gray-600 font-bold" id="resTariffaLabel">Tariffa:</span>
-                        <span id="resTariffa" class="font-bold text-blue-700 uppercase"></span>
-                    </div>
-                    <div class="flex justify-between text-sm border-b pb-2">
-                        <span class="text-gray-600 italic">Tempo Fatturabile:</span>
-                        <span id="resTempo" class="font-bold"></span>
-                    </div>
-                    
-                    <div class="space-y-1 bg-gray-50 p-3 rounded">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600 font-medium">Costo di Uscita (Incl. 1ª Ora):</span>
-                            <span id="resUscita" class="font-medium"></span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-600">Manodopera Aggiuntiva:</span>
-                            <span id="resAggiuntiva" class="font-medium"></span>
-                        </div>
-                        <div class="flex justify-between text-base font-black border-t mt-2 pt-2 text-blue-800">
-                            <span>TOTALE MANODOPERA:</span>
-                            <span id="resTotale"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-6 flex gap-2 no-print">
-                    <button onclick="window.print()" class="flex-1 bg-gray-800 hover:bg-black text-white py-3 rounded-lg font-bold text-xs uppercase tracking-tighter">
-                        Stampa PDF
-                    </button>
-                    <button onclick="inviaReport()" id="btnInvia" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold text-xs uppercase tracking-tighter">
-                        Invia Report
-                    </button>
-                </div>
-            </div>
-
-            <div class="text-center text-gray-400 text-[10px] mt-8 no-print border-t pt-4">
-                Ditta D'Angelo Antonello — v1.0.1 (Release 2025)
-            </div>
-
-            <p class="mt-4 text-xs text-gray-400 text-center no-print">
-                Orario Ordinario: 08:00 - 17:00. Il calcolo arrotonda i minuti di manodopera per eccesso al quarto d'ora superiore.
-            </p>
         </div>
+
+        <div class="text-center text-gray-400 text-[10px] mt-8 no-print border-t pt-4">
+            Ditta D'Angelo Antonello — v1.0.1 (Release 2025)
+        </div>
+
+        <p class="mt-4 text-xs text-gray-400 text-center no-print">
+            Orario Ordinario: 08:00 - 17:00. Il calcolo arrotonda i minuti di manodopera per eccesso al quarto d'ora superiore.
+        </p>
     </div>
 
     <script>
+        // Costanti
         const ORARIO_INIZIO_ORD = 8 * 60; 
         const ORARIO_FINE_ORD = 17 * 60; 
         const STORAGE_KEY = 'manodoperaInterventi';
         const EMAIL_KEY = 'reportEmailDestinatario'; 
         const INIZIO_2025 = 74; 
 
-        let datiCorrenti = null;
+        function parseTime(timeString) {
+            const [hours, minutes] = timeString.split(':').map(Number);
+            return (hours * 60) + minutes;
+        }
 
-        document.getElementById('data').valueAsDate = new Date();
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString + 'T00:00:00'); 
+            if (isNaN(date.getTime())) return 'N/A';
+            
+            const giornoSett = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
+            const giorno = String(date.getDate()).padStart(2, '0');
+            const mese = String(date.getMonth() + 1).padStart(2, '0');
+            const anno = String(date.getFullYear()).substring(2);
+            
+            return `${giornoSett} ${giorno}/${mese}/${anno}`;
+        }
+
+        function hideMessage(type) {
+             if (type === 'error') {
+                 document.getElementById('errorMsg').classList.add('hidden');
+             } else if (type === 'success') {
+                 document.getElementById('successMsg').classList.add('hidden');
+             }
+        }
+            
+        function showMessage(type, message) {
+            hideMessage(type === 'error' ? 'success' : 'error');
+            const msgElement = document.getElementById(type === 'error' ? 'errorMsg' : 'successMsg');
+            msgElement.textContent = message;
+            msgElement.classList.remove('hidden');
+            if (type === 'success') {
+                 setTimeout(() => msgElement.classList.add('hidden'), 5000); 
+            }
+        }
+
+        function generateId() {
+            return Date.now().toString();
+        }
+        
+        function getYearCounterKey(year) {
+            return 'numeroIntervento_' + year;
+        }
+
+        function initializeInputs(keepNIntervento = false) {
+            const dataInput = document.getElementById('dataIntervento');
+            if (!dataInput.value) {
+                dataInput.valueAsDate = new Date();
+            }
+            
+            const numOperaiInput = document.getElementById('numOperai');
+            if (parseInt(numOperaiInput.value) < 1 || isNaN(parseInt(numOperaiInput.value))) {
+                 numOperaiInput.value = '1';
+            }
+            
+            document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
+
+            const nInterventoInput = document.getElementById('nIntervento');
+            const dataCorrente = new Date();
+            const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
+            const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+
+            if (!keepNIntervento) {
+                const ultimoNumeroSalvato = localStorage.getItem(COUNTER_KEY_YEARLY);
+                if (ultimoNumeroSalvato === null) {
+                    let numeroPartenza = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0; 
+                    localStorage.setItem(COUNTER_KEY_YEARLY, numeroPartenza.toString());
+                }
+
+                let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY) || '0');
+                let prossimoNumero = ultimoNumero + 1;
+                const prossimoNumeroFormattato = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
+                
+                const inputValoreSequenziale = parseInt(nInterventoInput.value.split('/')[0]) || 0;
+                if (!nInterventoInput.value || inputValoreSequenziale < prossimoNumero) {
+                    nInterventoInput.value = prossimoNumeroFormattato;
+                }
+            }
+        }
+        
+        function calcolaManodopera() {
+            hideMessage('error');
+            hideMessage('success');
+
+            const oraInizioInput = document.getElementById('oraInizio').value;
+            const oraFineInput = document.getElementById('oraFine').value;
+            const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
+            const costoUscitaInput = parseFloat(document.getElementById('inputCostoUscita').value) || 0;
+            const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
+            document.getElementById('numOperai').value = numOperai; 
+                        
+            const flagUrgenza = document.getElementById('flagUrgenza').checked;
+            const nIntervento = document.getElementById('nIntervento').value; 
+            const dataIntervento = document.getElementById('dataIntervento').value;
+            const nomeScuola = document.getElementById('nomeScuola').value;
+            const plessoEdificio = document.getElementById('plessoEdificio').value;
+
+            function resetResults() {
+                document.getElementById('totaleManodopera').textContent = '---';
+                document.getElementById('tariffaOraria').textContent = '---';
+                document.getElementById('minutiEffettivi').textContent = '---';
+                document.getElementById('minutiFatturabili').textContent = '---';
+                document.getElementById('costoAggiuntivo').textContent = '---';
+                document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €'; 
+
+                document.getElementById('resNIntervento').textContent = nIntervento || '---';
+                document.getElementById('resData').textContent = formatDate(dataIntervento) || '---';
+                document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
+                document.getElementById('resOrario').textContent = (oraInizioInput && oraFineInput) ? oraInizioInput + ' - ' + oraFineInput : '---';
+                document.getElementById('resOperai').textContent = numOperai;
+            }
+
+            if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) {
+                 resetResults();
+                 return;
+            }
+
+            const oraInizioMinuti = parseTime(oraInizioInput);
+            const oraFineMinuti = parseTime(oraFineInput);
+                        
+            if (oraFineMinuti <= oraInizioMinuti) {
+                showMessage('error', "L'Ora Fine deve essere successiva all'Ora Inizio.");
+                resetResults();
+                return;
+            }
+
+            const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
+            const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
+            const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
+
+            let tariffaOraria = tariffaBaseInput; 
+            if (flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD) {
+                tariffaOraria = tariffaBaseInput + 10;
+            }
+
+            const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
+            const oreAggiuntiveDecimali = minutiOltre60 / 60;
+            const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
+
+            const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
+            const totaleManodoperaArrotondato = parseFloat(totaleManodopera.toFixed(2)); 
+            
+            document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
+            document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
+                        
+            let minutiFatturabiliDesc = minutiFatturabili + ' min/uomo';
+            if (minutiFatturabili > 60) { 
+                 minutiFatturabiliDesc += ` (${minutiOltre60} min oltre la 1ª ora)`;
+            } else { 
+                 minutiFatturabiliDesc += ` (1ª ora inclusa o non superata)`;
+            }
+                        
+            document.getElementById('minutiFatturabili').textContent = minutiFatturabiliDesc;
+            document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €';
+            document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2) + ' €';
+            document.getElementById('totaleManodopera').textContent = totaleManodoperaArrotondato.toFixed(2) + ' €'; 
+            
+            document.getElementById('resNIntervento').textContent = nIntervento || 'N/A';
+            document.getElementById('resData').textContent = formatDate(dataIntervento); 
+            document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
+            document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
+            
+            let operaiDisplay = numOperai;
+            if (flagUrgenza) {
+                operaiDisplay += ' <span class="text-red-600 font-bold">(URGENZA)</span>';
+            }
+            document.getElementById('resOperai').innerHTML = operaiDisplay;
+        }
 
         async function caricaDatiServer() {
+            showMessage('success', 'Sincronizzazione dati in corso...');
             try {
-                const res = await fetch('/api/getContatore');
-                const data = await res.json();
-                const num = (INIZIO_2025 + data.count).toString().padStart(3, '0');
-                document.getElementById('numero-intervento').textContent = `${num}/25`;
-            } catch (e) {
-                document.getElementById('numero-intervento').textContent = 'ERR/25';
+                const dataCorrente = new Date();
+                const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
+
+                const interventiResponse = await fetch('/api/getArchivio'); 
+                const interventiData = await interventiResponse.json();
+                
+                if (interventiResponse.ok && interventiData.interventi) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiData.interventi));
+                }
+
+                const contatoreResponse = await fetch(`/api/getNextNumber?anno=${CURRENT_YEAR}`); 
+                const contatoreData = await contatoreResponse.json();
+
+                if (contatoreResponse.ok && contatoreData.numero) {
+                    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+                    localStorage.setItem(COUNTER_KEY_YEARLY, contatoreData.numero.toString());
+                }
+
+                showMessage('success', 'Dati sincronizzati con successo. Pronto.');
+                
+            } catch (error) {
+                showMessage('error', 'Sincronizzazione dati fallita. Lavorerai con dati locali non aggiornati.');
+                console.error('Errore sincronizzazione:', error);
+            }
+        }
+        
+        function salvaEmail() {
+             const email = document.getElementById('emailDestinatario').value.trim();
+             localStorage.setItem(EMAIL_KEY, email);
+             showMessage('success', 'Email di destinazione salvata.');
+        }
+
+        async function salvaIntervento() { 
+            calcolaManodopera(); 
+                        
+            if (!document.getElementById('errorMsg').classList.contains('hidden')) {
+                showMessage('error', "Impossibile salvare: ci sono errori nel calcolo.");
+                return;
+            }
+                        
+            const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
+            const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
+            
+            const nInterventoParts = nInterventoCompleto.split('/');
+            if (nInterventoParts.length !== 2 || nInterventoParts[1] !== CURRENT_YEAR) {
+                 showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/${CURRENT_YEAR}.`); 
+                 return;
+            }
+            const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
+            
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
+
+            const intervento = {
+                id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
+                nIntervento: nInterventoCompleto,
+                dataIntervento: document.getElementById('dataIntervento').value, 
+                nomeScuola: document.getElementById('nomeScuola').value,
+                plessoEdificio: document.getElementById('plessoEdificio').value,
+                oraInizio: document.getElementById('oraInizio').value,
+                oraFine: document.getElementById('oraFine').value,
+                numOperai: parseInt(document.getElementById('numOperai').value),
+                costoUscita: document.getElementById('inputCostoUscita').value,
+                tariffaBase: document.getElementById('inputTariffaBase').value,
+                flagUrgenza: document.getElementById('flagUrgenza').checked,
+                tariffaOraria: document.getElementById('tariffaOraria').textContent,
+                totaleManodopera: document.getElementById('totaleManodopera').textContent
+            };
+            
+            try {
+                const response = await fetch('/api/saveIntervento', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        numeroIntervento: numeroCorrenteSequenziale,
+                        anno: CURRENT_YEAR,
+                        datiIntervento: intervento,
+                        isUpdate: existingIndex > -1
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || 'Errore nel salvataggio remoto.');
+                
+                if (existingIndex > -1) {
+                    interventi[existingIndex] = intervento;
+                    showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
+                } else {
+                    interventi.push(intervento); 
+                    showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
+                    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+                    localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
+                }
+
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+
+            } catch (error) {
+                showMessage('error', `Errore Server: ${error.message}`);
+                return; 
+            }
+
+            document.getElementById('nomeScuola').value = '';
+            document.getElementById('plessoEdificio').value = '';
+            initializeInputs(); 
+            calcolaManodopera(); 
+            renderArchivio();
+        }
+        
+        function caricaIntervento(id) {
+            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const intervento = interventi.find(i => i.id === id);
+
+            if (intervento) {
+                document.getElementById('nIntervento').value = intervento.nIntervento; 
+                document.getElementById('dataIntervento').value = intervento.dataIntervento;
+                document.getElementById('nomeScuola').value = intervento.nomeScuola;
+                document.getElementById('plessoEdificio').value = intervento.plessoEdificio;
+                document.getElementById('oraInizio').value = intervento.oraInizio;
+                document.getElementById('oraFine').value = intervento.oraFine;
+                document.getElementById('numOperai').value = intervento.numOperai;
+                document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
+                document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
+                document.getElementById('flagUrgenza').checked = intervento.flagUrgenza;
+                
+                calcolaManodopera(); 
+                toggleArchivio(); 
+                showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
+                initializeInputs(true);
             }
         }
 
-        function updateLastModifiedText() {
-            const now = new Date();
-            document.getElementById('last-modified').textContent = 
-                `Ultimo avvio: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
+        function cancellaIntervento(id) {
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const intervento = interventi.find(i => i.id === id);
+
+            if (!intervento) return;
+            const nInterventoCancellato = intervento.nIntervento;
+            
+            if (confirm(`Sei sicuro di voler cancellare l'intervento N° ${nInterventoCancellato}?`)) {
+                fetch(`/api/deleteIntervento?nIntervento=${nInterventoCancellato}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error(`Eliminazione remota fallita.`);
+                    return response.json();
+                })
+                .then(() => {
+                    interventi = interventi.filter(i => i.id !== id);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+                    showMessage('success', `Intervento N° ${nInterventoCancellato} cancellato.`);
+                    renderArchivio();
+                    initializeInputs();
+                    calcolaManodopera();
+                })
+                .catch(error => {
+                    showMessage('error', `Errore: ${error.message}`);
+                });
+            }
+        }
+        
+        function renderArchivio() {
+            const listaDiv = document.getElementById('listaInterventi');
+            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            
+            interventi.sort((a, b) => {
+                 const numA = parseInt(a.nIntervento.split('/')[0]);
+                 const numB = parseInt(b.nIntervento.split('/')[0]);
+                 return numB - numA;
+            });
+
+            if (interventi.length === 0) {
+                listaDiv.innerHTML = '<p class="text-gray-500">Nessun intervento salvato.</p>';
+                return;
+            }
+
+            listaDiv.innerHTML = ''; 
+            interventi.forEach(i => {
+                const itemHtml = `
+                    <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
+                        <div class="flex-1 min-w-[50%]">
+                            <p class="font-bold text-lg text-blue-700">N° ${i.nIntervento} (${formatDate(i.dataIntervento)})</p>
+                            <p class="text-sm text-gray-600">${i.nomeScuola || 'N/A'}</p>
+                            <p class="text-sm font-semibold text-gray-800">${i.totaleManodopera || 'N/A'}</p>
+                        </div>
+                        <div class="flex space-x-2 mt-2 sm:mt-0">
+                            <button onclick="caricaIntervento('${i.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-3 rounded">Carica</button>
+                            <button onclick="cancellaIntervento('${i.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded">Cancella</button>
+                        </div>
+                    </div>
+                `;
+                listaDiv.innerHTML += itemHtml;
+            });
+        }
+        
+        function toggleArchivio() {
+            const archivioDiv = document.getElementById('archivioInterventi');
+            const inputSection = document.getElementById('input-section');
+            const btn = document.getElementById('btnToggleArchivio');
+            
+            if (archivioDiv.classList.contains('hidden')) {
+                archivioDiv.classList.remove('hidden');
+                inputSection.classList.add('hidden');
+                btn.textContent = 'Torna al Calcolo';
+                renderArchivio();
+            } else {
+                archivioDiv.classList.add('hidden');
+                inputSection.classList.remove('hidden');
+                btn.textContent = 'Gestione Archivio';
+            }
+        }
+        
+        function stampaRiepilogo() {
+            document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+            window.print();
         }
 
-        function calcola() {
-            const scuola = document.getElementById('scuola').value;
-            const plesso = document.getElementById('plesso').value;
-            const dataInput = document.getElementById('data').value;
-            const operai = parseInt(document.getElementById('operai').value);
-            const oraInizio = document.getElementById('oraInizio').value;
-            const oraFine = document.getElementById('oraFine').value;
-            const urgenza = document.getElementById('urgenza').checked;
-
-            if (!scuola || !oraInizio || !oraFine) {
-                alert("Inserisci Scuola e Orari!");
+        async function inviaReport() { 
+            calcolaManodopera();
+            const email = document.getElementById('emailDestinatario').value.trim();
+            if (!email) {
+                showMessage('error', 'Inserisci un indirizzo email di destinazione valido.');
                 return;
             }
 
-            const [hIn, mIn] = oraInizio.split(':').map(Number);
-            const [hOut, mOut] = oraFine.split(':').map(Number);
-            
-            const inizioInMinuti = hIn * 60 + mIn;
-            const fineInMinuti = hOut * 60 + mOut;
-            const durataMinutiEffettivi = fineInMinuti - inizioInMinuti;
-
-            if (durataMinutiEffettivi <= 0) {
-                alert("L'ora di fine deve essere successiva all'ora di inizio!");
-                return;
-            }
-
-            const durataArrotondata = Math.ceil(durataMinutiEffettivi / 15) * 15;
-            
-            let isStraordinario = urgenza;
-            if (inizioInMinuti < ORARIO_INIZIO_ORD || fineInMinuti > ORARIO_FINE_ORD) {
-                isStraordinario = true;
-            }
-
-            const tariffaUscita = isStraordinario ? 45.00 : 35.00;
-            const tariffaOraria = isStraordinario ? 37.50 : 30.00;
-
-            const oreAggiuntive = Math.max(0, (durataArrotondata - 60) / 60);
-            const costoUscitaTotale = tariffaUscita * operai;
-            const costoManodoperaAggiuntiva = oreAggiuntive * tariffaOraria * operai;
-            const totale = costoUscitaTotale + costoManodoperaAggiuntiva;
-
-            const oreIntere = Math.floor(durataArrotondata / 60);
-            const minutiRimanenti = durataArrotondata % 60;
-            const tempoFatturabile = `${oreIntere}h ${minutiRimanenti}min`;
-
-            datiCorrenti = {
-                numero: document.getElementById('numero-intervento').textContent,
-                scuola: scuola.toUpperCase(),
-                plesso: plesso.toUpperCase(),
-                data: new Date(dataInput).toLocaleDateString('it-IT'),
-                orario: `${oraInizio} - ${oraFine}`,
-                operai: operai,
-                tariffaLabel: isStraordinario ? "STRAORDINARIA / URGENZA" : "ORDINARIA",
-                tempo: tempoFatturabile,
-                uscita: costoUscitaTotale.toFixed(2),
-                aggiuntiva: costoManodoperaAggiuntiva.toFixed(2),
-                totale: totale.toFixed(2)
+            const reportData = {
+                nIntervento: document.getElementById('nIntervento').value,
+                dataIntervento: formatDate(document.getElementById('dataIntervento').value),
+                nomeScuola: document.getElementById('nomeScuola').value,
+                plessoEdificio: document.getElementById('plessoEdificio').value,
+                orario: document.getElementById('resOrario').textContent,
+                operai: document.getElementById('resOperai').textContent,
+                tariffa: document.getElementById('tariffaOraria').textContent,
+                minutiFatturabili: document.getElementById('minutiFatturabili').textContent,
+                costoUscita: document.getElementById('costoUscita').textContent,
+                costoAggiuntivo: document.getElementById('costoAggiuntivo').textContent,
+                totale: document.getElementById('totaleManodopera').textContent,
+                destinatario: email
             };
 
-            document.getElementById('resData').textContent = datiCorrenti.data;
-            document.getElementById('resScuola').textContent = datiCorrenti.scuola;
-            document.getElementById('resPlesso').textContent = datiCorrenti.plesso;
-            document.getElementById('resTariffa').textContent = datiCorrenti.tariffaLabel;
-            document.getElementById('resTempo').textContent = tempoFatturabile;
-            document.getElementById('resUscita').textContent = `€ ${datiCorrenti.uscita}`;
-            document.getElementById('resAggiuntiva').textContent = `€ ${datiCorrenti.aggiuntiva}`;
-            document.getElementById('resTotale').textContent = `€ ${datiCorrenti.totale}`;
-            
-            document.getElementById('risultato').classList.remove('hidden');
-            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }
-
-        async function inviaReport() {
-            if (!datiCorrenti) return;
-            
-            const btn = document.getElementById('btnInvia');
-            const originalText = btn.innerHTML;
-            
-            let email = localStorage.getItem(EMAIL_KEY) || "";
-            const nuovaEmail = prompt("Invia report a:", email);
-            
-            if (nuovaEmail === null) return;
-            if (nuovaEmail) localStorage.setItem(EMAIL_KEY, nuovaEmail);
-
-            btn.disabled = true;
-            btn.innerHTML = "INVIO IN CORSO...";
-
+            showMessage('success', 'Invio Report in corso...');
             try {
                 const response = await fetch('/api/inviaReport', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        destinatario: nuovaEmail,
-                        dati: datiCorrenti
-                    })
+                    body: JSON.stringify(reportData)
                 });
-
-                if (response.ok) {
-                    alert("Report inviato con successo!");
-                    await caricaDatiServer();
-                } else {
-                    alert("Errore durante l'invio.");
-                }
-            } catch (e) {
-                alert("Errore di connessione.");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = originalText;
+                if (response.ok) showMessage('success', `Report inviato a ${email}!`);
+                else throw new Error('Errore di invio report.');
+            } catch (error) {
+                showMessage('error', `Errore: ${error.message}`);
             }
         }
-
-        caricaDatiServer();
-        updateLastModifiedText();
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
+        
+        function updateLastModifiedText() {
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'numeric', day: 'numeric' });
+            const formattedTime = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('dataStampa').textContent = `${formattedDate} ${formattedTime}`;
         }
+
+        document.addEventListener('DOMContentLoaded', async () => { 
+            updateLastModifiedText();
+            await caricaDatiServer(); 
+            initializeInputs(); 
+            calcolaManodopera(); 
+            renderArchivio(); 
+            
+            document.querySelectorAll('input, select').forEach(element => {
+                if (element.id !== 'nIntervento') {
+                    element.addEventListener('change', calcolaManodopera);
+                    element.addEventListener('input', calcolaManodopera);
+                }
+            });
+
+            // Registrazione del Service Worker per abilitare l'installazione su Android
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js');
+            }
+        });
     </script>
 </body>
 </html>
