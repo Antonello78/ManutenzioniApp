@@ -440,7 +440,7 @@
                     interventi[existingIndex] = intervento;
                     showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
-                    interventi.push(intervento); 
+                    interventi.push(intervention); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
@@ -461,7 +461,7 @@
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
             if (intervento) {
-                document.getElementById('nIntervento').value = intervention.nIntervento; 
+                document.getElementById('nIntervento').value = intervento.nIntervento; 
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola;
                 document.getElementById('plessoEdificio').value = intervento.plessoEdificio;
