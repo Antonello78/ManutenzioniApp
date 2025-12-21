@@ -527,7 +527,7 @@
                     interventi[existingIndex] = intervento;
                     showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
-                    interventi.push(intervento); 
+                    interventi.push(intervention); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
@@ -598,6 +598,27 @@
                 });
             }
         }
+
+        function copiaRigaPreventivo(id) {
+            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const i = interventi.find(item => item.id === id);
+            if (!i) return;
+
+            const dataFormattata = formatDate(i.dataIntervento);
+            let testo = "";
+
+            if (i.flagUrgenza) {
+                testo = `Rif. Intervento N° ${i.nIntervento} del ${dataFormattata}. La prestazione è stata eseguita con carattere di urgenza immediata dalle ore ${i.oraInizio} alle ore ${i.oraFine} con l'impiego di n. ${i.numOperai} operai specializzati. Il corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva con tariffa per urgenza arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+            } else {
+                testo = `Rif. Intervento N° ${i.nIntervento} del ${dataFormattata}. La prestazione è stata eseguita dalle ore ${i.oraInizio} alle ore ${i.oraFine} con l'impiego di n. ${i.numOperai} operai specializzati. Il corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+            }
+
+            navigator.clipboard.writeText(testo).then(() => {
+                showMessage('success', 'Riga preventivo copiata negli appunti!');
+            }).catch(err => {
+                showMessage('error', 'Errore nella copia: ' + err);
+            });
+        }
         
         function renderArchivio() {
             const listaDiv = document.getElementById('listaInterventi');
@@ -624,6 +645,7 @@
                             <p class="text-sm font-semibold text-gray-800">${i.totaleManodopera || 'N/A'}</p>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
+                            <button onclick="copiaRigaPreventivo('${i.id}')" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-2 px-3 rounded">Copia Riga</button>
                             <button onclick="caricaIntervento('${i.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-3 rounded">Carica</button>
                             <button onclick="cancellaIntervento('${i.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded">Cancella</button>
                         </div>
