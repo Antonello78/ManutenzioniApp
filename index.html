@@ -461,7 +461,7 @@
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
             if (intervento) {
-                document.getElementById('nIntervento').value = intervento.nIntervento; 
+                document.getElementById('nIntervento').value = intervention.nIntervento; 
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola;
                 document.getElementById('plessoEdificio').value = intervento.plessoEdificio;
@@ -538,7 +538,7 @@
                                 ${badgeUrgenza}
                             </div>
                             <p class="text-xs text-gray-500 font-medium">${formatDate(i.dataIntervento)}</p>
-                            <p class="text-sm text-gray-600 truncate max-w-[200px]">${i.nomeScuola || 'N/A'}</p>
+                            <p class="text-sm font-bold text-gray-800 truncate max-w-[200px]">${i.nomeScuola || 'N/A'}</p>
                             <p class="text-sm font-semibold text-gray-800">${i.totaleManodopera || 'N/A'}</p>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
