@@ -286,20 +286,21 @@
         }
 
         function hideMessage(type) {
-             if (type === 'error') {
-                 document.getElementById('errorMsg').classList.add('hidden');
-             } else if (type === 'success') {
-                 document.getElementById('successMsg').classList.add('hidden');
-             }
+             const element = document.getElementById(type === 'error' ? 'errorMsg' : 'successMsg');
+             if (element) element.classList.add('hidden');
         }
             
         function showMessage(type, message) {
-            hideMessage(type === 'error' ? 'success' : 'error');
+            // Nasconde eventuali messaggi precedenti
+            document.getElementById('errorMsg').classList.add('hidden');
+            document.getElementById('successMsg').classList.add('hidden');
+
             const msgElement = document.getElementById(type === 'error' ? 'errorMsg' : 'successMsg');
-            msgElement.textContent = message;
-            msgElement.classList.remove('hidden');
-            if (type === 'success') {
-                 setTimeout(() => msgElement.classList.add('hidden'), 5000); 
+            if (msgElement) {
+                msgElement.textContent = message;
+                msgElement.classList.remove('hidden');
+                // Auto-nascondi dopo 5 secondi
+                setTimeout(() => msgElement.classList.add('hidden'), 5000); 
             }
         }
 
@@ -348,15 +349,11 @@
         }
         
         function calcolaManodopera() {
-            hideMessage('error');
-            hideMessage('success');
-
             const oraInizioInput = document.getElementById('oraInizio').value;
             const oraFineInput = document.getElementById('oraFine').value;
             const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
             const costoUscitaInput = parseFloat(document.getElementById('inputCostoUscita').value) || 0;
             const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
-            document.getElementById('numOperai').value = numOperai; 
                         
             const flagUrgenza = document.getElementById('flagUrgenza').checked;
             const nIntervento = document.getElementById('nIntervento').value; 
@@ -388,7 +385,6 @@
             const oraFineMinuti = parseTime(oraFineInput);
                         
             if (oraFineMinuti <= oraInizioMinuti) {
-                showMessage('error', "L'Ora Fine deve essere successiva all'Ora Inizio.");
                 resetResults();
                 return;
             }
@@ -407,7 +403,6 @@
             const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
 
             const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
-            const totaleManodoperaArrotondato = parseFloat(totaleManodopera.toFixed(2)); 
             
             document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
             document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
@@ -415,14 +410,12 @@
             let minutiFatturabiliDesc = minutiFatturabili + ' min/uomo';
             if (minutiFatturabili > 60) { 
                  minutiFatturabiliDesc += ` (${minutiOltre60} min oltre la 1ª ora)`;
-            } else { 
-                 minutiFatturabiliDesc += ` (1ª ora inclusa o non superata)`;
             }
                         
             document.getElementById('minutiFatturabili').textContent = minutiFatturabiliDesc;
             document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €';
             document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2) + ' €';
-            document.getElementById('totaleManodopera').textContent = totaleManodoperaArrotondato.toFixed(2) + ' €'; 
+            document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2) + ' €'; 
             
             document.getElementById('resNIntervento').textContent = nIntervento || 'N/A';
             document.getElementById('resData').textContent = formatDate(dataIntervento); 
@@ -437,7 +430,6 @@
         }
 
         async function caricaDatiServer() {
-            showMessage('success', 'Sincronizzazione dati in corso...');
             try {
                 const dataCorrente = new Date();
                 const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
@@ -456,11 +448,7 @@
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, contatoreData.numero.toString());
                 }
-
-                showMessage('success', 'Dati sincronizzati con successo. Pronto.');
-                
             } catch (error) {
-                showMessage('error', 'Sincronizzazione dati fallita. Lavorerai con dati locali non aggiornati.');
                 console.error('Errore sincronizzazione:', error);
             }
         }
@@ -473,11 +461,6 @@
 
         async function salvaIntervento() { 
             calcolaManodopera(); 
-                        
-            if (!document.getElementById('errorMsg').classList.contains('hidden')) {
-                showMessage('error', "Impossibile salvare: ci sono errori nel calcolo.");
-                return;
-            }
                         
             const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
             const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
@@ -527,7 +510,7 @@
                     interventi[existingIndex] = intervento;
                     showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
-                    interventi.push(intervento); 
+                    interventi.push(intervention); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
@@ -614,6 +597,7 @@
             }
 
             navigator.clipboard.writeText(testo).then(() => {
+                // Questo comando mostra il messaggio sia su PC che su Cellulare
                 showMessage('success', 'riga di preventivo creata');
             }).catch(err => {
                 showMessage('error', 'Errore nella copia: ' + err);
@@ -678,7 +662,6 @@
         }
 
         async function inviaReport() { 
-            calcolaManodopera();
             const email = document.getElementById('emailDestinatario').value.trim();
             if (!email) {
                 showMessage('error', 'Inserisci un indirizzo email di destinazione valido.');
@@ -735,7 +718,6 @@
                 }
             });
 
-            // Registrazione del Service Worker per abilitare l'installazione su Android
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('sw.js');
             }
