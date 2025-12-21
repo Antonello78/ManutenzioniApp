@@ -291,7 +291,6 @@
         }
             
         function showMessage(type, message) {
-            // Nasconde eventuali messaggi precedenti
             document.getElementById('errorMsg').classList.add('hidden');
             document.getElementById('successMsg').classList.add('hidden');
 
@@ -299,7 +298,6 @@
             if (msgElement) {
                 msgElement.textContent = message;
                 msgElement.classList.remove('hidden');
-                // Auto-nascondi dopo 5 secondi
                 setTimeout(() => msgElement.classList.add('hidden'), 5000); 
             }
         }
@@ -510,7 +508,7 @@
                     interventi[existingIndex] = intervento;
                     showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
-                    interventi.push(intervention); 
+                    interventi.push(intervento); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
@@ -597,7 +595,6 @@
             }
 
             navigator.clipboard.writeText(testo).then(() => {
-                // Questo comando mostra il messaggio sia su PC che su Cellulare
                 showMessage('success', 'riga di preventivo creata');
             }).catch(err => {
                 showMessage('error', 'Errore nella copia: ' + err);
@@ -621,11 +618,20 @@
 
             listaDiv.innerHTML = ''; 
             interventi.forEach(i => {
+                // Genera il badge urgenza se necessario
+                const badgeUrgenza = i.flagUrgenza 
+                    ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-red-100 text-red-700 border border-red-200 rounded">Urgente</span>` 
+                    : '';
+
                 const itemHtml = `
                     <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
                         <div class="flex-1 min-w-[50%]">
-                            <p class="font-bold text-lg text-blue-700">N° ${i.nIntervento} (${formatDate(i.dataIntervento)})</p>
-                            <p class="text-sm text-gray-600">${i.nomeScuola || 'N/A'}</p>
+                            <div class="flex items-center">
+                                <p class="font-bold text-lg text-blue-700">N° ${i.nIntervento}</p>
+                                ${badgeUrgenza}
+                            </div>
+                            <p class="text-xs text-gray-500 font-medium">${formatDate(i.dataIntervento)}</p>
+                            <p class="text-sm text-gray-600 truncate max-w-[200px]">${i.nomeScuola || 'N/A'}</p>
                             <p class="text-sm font-semibold text-gray-800">${i.totaleManodopera || 'N/A'}</p>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
