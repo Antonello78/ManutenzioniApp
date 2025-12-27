@@ -507,20 +507,21 @@
         }
 
         function copiaRigaPreventivo(id) {
-            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const i = interventi.find(item => item.id === id);
-            if (!i) return;
-            const dataFormattata = formatDate(i.dataIntervento);
-            let testo = "";
-            if (i.flagUrgenza) {
-                testo = `Rif. Intervento N° ${i.nIntervento} del ${dataFormattata}. La prestazione è stata eseguita con carattere di urgenza immediata dalle ore ${i.oraInizio} alle ore ${i.oraFine} con l'impiego di n. ${i.numOperai} operai specializzati. Il corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva con tariffa per urgenza arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
-            } else {
-                testo = `Rif. Intervento N° ${i.nIntervento} del ${dataFormattata}. La prestazione è stata eseguita dalle ore ${i.oraInizio} alle ore ${i.oraFine} con l'impiego di n. ${i.numOperai} operai specializzati. Il corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
-            }
-            navigator.clipboard.writeText(testo).then(() => {
-                showMessage('success', 'riga di preventivo creata');
-            }).catch(err => { showMessage('error', 'Errore nella copia: ' + err); });
-        }
+    const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const i = interventi.find(item => item.id === id);
+    if (!i) return;
+    const dataFormattata = formatDate(i.dataIntervento);
+    const scuolaPlesso = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
+    let testo = "";
+    if (i.flagUrgenza) {
+        testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nIntervento tecnico con carattere di URGENZA IMMEDIATA: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata e il calcolo della manodopera con tariffa urgenza arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+    } else {
+        testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+    }
+    navigator.clipboard.writeText(testo).then(() => {
+        showMessage('success', 'riga di preventivo creata');
+    }).catch(err => { showMessage('error', 'Errore nella copia: ' + err); });
+}
         
         function renderArchivio() {
             const listaDiv = document.getElementById('listaInterventi');
@@ -660,3 +661,4 @@
     </script>
 </body>
 </html>
+
