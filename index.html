@@ -28,11 +28,24 @@
         -moz-appearance: textfield;
     }
     
-    /* Regole solo per la stampa fisica */
     @media print {
-        .no-print { display: none !important; }
-        body { background-color: white; padding: 0; }
-        #app { box-shadow: none !important; border: none !important; }
+        .no-print,
+        #input-section > div:not(.border-t) { 
+            display: none !important;
+        }
+        #input-section { display: block !important; }
+        body { padding: 0; background-color: white; margin: 0; }
+        #app {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: none !important;
+            margin: 0 !important; 
+            padding: 0.5rem !important; 
+            width: 210mm; 
+            transform: scale(0.82); 
+            transform-origin: top left; 
+        }
+        #unified-header { display: block !important; border-bottom: 2px solid #ccc; }
     }
 </style>
 </head>
@@ -49,72 +62,73 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-600">N° Intervento</label>
-                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg">
+                    <label for="nIntervento" class="block text-sm font-medium text-gray-600">N° Intervento</label>
+                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg" placeholder="Es. 075/25">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-600">Data</label>
-                    <input type="date" id="dataIntervento" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg">
+                    <label for="dataIntervento" class="block text-sm font-medium text-gray-600">Data</label>
+                    <input type="date" id="dataIntervento" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg">
                 </div>
             </div>
 
             <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-600">Nome Scuola</label>
-                <input type="text" id="nomeScuola" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg">
+                <label for="nomeScuola" class="block text-sm font-medium text-gray-600">Nome Scuola</label>
+                <input type="text" id="nomeScuola" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg">
             </div>
 
             <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-600">Plesso/Edificio</label>
-                <input type="text" id="plessoEdificio" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg">
+                <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso/Edificio</label>
+                <input type="text" id="plessoEdificio" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg">
             </div>
 
             <div class="grid grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-600">Ora Inizio</label>
-                    <input type="time" id="oraInizio" value="09:00" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg">
+                    <label for="oraInizio" class="block text-sm font-medium text-gray-600">Ora Inizio</label>
+                    <input type="time" id="oraInizio" value="09:00" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-600">Ora Fine</label>
-                    <input type="time" id="oraFine" value="10:15" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg">
+                    <label for="oraFine" class="block text-sm font-medium text-gray-600">Ora Fine</label>
+                    <input type="time" id="oraFine" value="10:15" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg">
                 </div>
             </div>
 
             <div class="mt-4">
-                <label class="block text-sm font-medium text-gray-600">Numero Operai</label>
-                <input type="number" id="numOperai" value="1" min="1" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg">
+                <label for="numOperai" class="block text-sm font-medium text-gray-600">Numero Operai</label>
+                <input type="number" id="numOperai" value="1" min="1" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg">
             </div>
 
             <div class="grid grid-cols-2 gap-4 mt-4 no-print">
                 <div>
-                    <label class="block text-sm font-medium text-gray-600">Costo Uscita (€)</label>
-                    <input type="number" id="inputCostoUscita" value="75" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    <label for="inputCostoUscita" class="block text-sm font-medium text-gray-600">Costo Uscita (€)</label>
+                    <input type="number" id="inputCostoUscita" value="75" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-600">Tariffa (€/h)</label>
-                    <input type="number" id="inputTariffaBase" value="38" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg">
+                    <label for="inputTariffaBase" class="block text-sm font-medium text-gray-600">Tariffa (€/h)</label>
+                    <input type="number" id="inputTariffaBase" value="38" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
                 </div>
             </div>
 
-            <div class="flex items-center mt-4 no-print">
-                <input id="flagUrgenza" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-red-600">
-                <label for="flagUrgenza" class="ml-3 text-red-700 font-medium">Urgenza Immediata (+10 €/h)</label>
+            <div class="flex items-center pt-2 mt-4 no-print">
+                <input id="flagUrgenza" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-red-600 border-gray-300 rounded">
+                <label for="flagUrgenza" class="ml-3 block text-base font-medium text-red-700">Urgenza Immediata (+10 €/h)</label>
             </div>
 
-            <div id="area-report" class="mt-8 pt-6 border-t border-gray-200">
+            <div class="mt-8 pt-6 border-t border-gray-200" id="area-da-stampare">
                 <div id="riepilogoDati" class="space-y-2 text-gray-700 p-4 border rounded-lg bg-gray-50 mb-4">
-                    <div class="flex justify-between"><span>N° Intervento:</span><span id="resNIntervento" class="font-bold text-blue-700">---</span></div>
-                    <div class="flex justify-between"><span>Data:</span><span id="resData" class="font-bold">---</span></div>
-                    <div class="flex justify-between"><span>Scuola:</span><span id="resScuola" class="font-bold text-right">---</span></div>
-                    <div class="flex justify-between"><span>Orario:</span><span id="resOrario" class="font-bold">---</span></div>
-                    <div class="flex justify-between"><span>Operai:</span><span id="resOperai" class="font-bold">---</span></div>
+                    <h3 class="text-xl font-bold mb-2 border-b pb-1 text-blue-700">Dati Intervento</h3>
+                    <div class="flex justify-between"><span>N° Intervento:</span><span id="resNIntervento" class="font-semibold text-gray-800">---</span></div>
+                    <div class="flex justify-between"><span>Data:</span><span id="resData" class="font-semibold text-gray-800">---</span></div>
+                    <div class="flex justify-between"><span>Scuola:</span><span id="resScuola" class="font-semibold text-gray-800 text-right">---</span></div>
+                    <div class="flex justify-between"><span>Orario:</span><span id="resOrario" class="font-semibold text-gray-800">---</span></div>
+                    <div class="flex justify-between"><span>Operai:</span><span id="resOperai" class="font-semibold text-gray-800">---</span></div>
                 </div>
 
                 <div class="space-y-2 text-gray-700">
-                    <div class="flex justify-between"><span>Tariffa Oraria:</span><span id="tariffaOraria" class="font-bold">---</span></div>
+                    <div class="flex justify-between"><span>Tariffa Oraria:</span><span id="tariffaOraria" class="font-semibold text-gray-800">---</span></div>
                     <div class="flex justify-between text-sm text-gray-500"><span>Minuti effettivi:</span><span id="minutiEffettivi">---</span></div>
-                    <div class="flex justify-between border-b pb-2"><span>Tempo Fatturabile:</span><span id="minutiFatturabili" class="font-bold text-blue-600">---</span></div>
-                    <div class="flex justify-between pt-2"><span>Uscita (incl. 1ª ora):</span><span id="costoUscita" class="font-bold">---</span></div>
-                    <div class="flex justify-between"><span>Manodopera extra:</span><span id="costoAggiuntivo" class="font-bold">---</span></div>
+                    <div class="flex justify-between border-b pb-2"><span>Tempo Fatturabile:</span><span id="minutiFatturabili" class="font-semibold text-blue-600">---</span></div>
+                    <div class="flex justify-between pt-2"><span>Costo Uscita:</span><span id="costoUscita" class="font-semibold text-gray-800">---</span></div>
+                    <div class="flex justify-between"><span>Manodopera extra:</span><span id="costoAggiuntivo" class="font-semibold text-gray-800">---</span></div>
                 </div>
 
                 <div class="mt-6 p-4 bg-blue-100 border-2 border-blue-400 rounded-xl flex justify-between items-center">
@@ -124,47 +138,43 @@
             </div>
         </div> 
 
-        <div id="errorMsg" class="hidden p-3 bg-red-100 text-red-700 mt-4 rounded no-print"></div>
-        <div id="successMsg" class="hidden p-3 bg-green-100 text-green-700 mt-4 rounded no-print"></div>
+        <div id="errorMsg" class="mt-4 p-3 bg-red-100 text-red-700 rounded-lg hidden no-print"></div>
+        <div id="successMsg" class="mt-4 p-3 bg-green-100 text-green-700 rounded-lg hidden no-print"></div>
 
-        <div id="controlli" class="mt-6 space-y-3 no-print">
+        <div id="archivioInterventi" class="hidden mt-4">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio</h2>
+            <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca..." class="w-full px-4 py-2 border rounded-lg mb-4">
+            <div id="listaInterventi" class="space-y-3"></div>
+        </div> 
+
+        <div class="mt-6 space-y-3 no-print">
             <input type="email" id="emailDestinatario" onchange="salvaEmail()" class="w-full px-4 py-2 border rounded-lg" placeholder="Email scuola...">
-            <div class="flex space-x-2">
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
                 <button onclick="salvaIntervento()" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg">Salva</button>
-                <button onclick="stampaRiepilogo()" class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-lg">Stampa</button>
+                <button onclick="stampaRiepilogo()" class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-lg">Stampa / PDF</button>
+                <button id="btnInviaReport" onclick="inviaReport()" class="flex-1 bg-yellow-600 text-white font-bold py-3 rounded-lg">Invia Email PDF</button>
             </div>
-            <button id="btnInviaReport" onclick="inviaReport()" class="w-full bg-yellow-600 text-white font-bold py-4 rounded-lg">Invia Report (PDF Identico)</button>
-            <button onclick="toggleArchivio()" id="btnToggleArchivio" class="w-full bg-gray-500 text-white py-2 rounded-lg">Archivio</button>
+            <button onclick="toggleArchivio()" id="btnToggleArchivio" class="w-full bg-gray-500 text-white py-2 rounded-lg">Gestione Archivio</button>
         </div>
 
-        <div id="archivioInterventi" class="hidden mt-4 no-print">
-            <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca..." class="w-full px-4 py-2 border rounded mb-4">
-            <div id="listaInterventi" class="space-y-2"></div>
-        </div>
-
-        <div class="text-center text-gray-400 text-[10px] mt-8 pt-2 border-t">
-            Ditta D'Angelo Antonello — v1.2.9 (WYSIWYG PDF)
+        <div class="text-center text-gray-400 text-[10px] mt-8 border-t pt-4">
+            Ditta D'Angelo Antonello — v1.3.0
         </div>
     </div>
 
     <script>
-        // --- LOGICA E CALCOLI (IDENTICI AL TUO ORIGINALE) ---
         const STORAGE_KEY = 'manodoperaInterventi';
         const EMAIL_KEY = 'reportEmailDestinatario';
 
-        function formatDate(d) { if(!d) return '---'; const date = new Date(d + 'T00:00:00'); return date.toLocaleDateString('it-IT'); }
-        function showMessage(t, m) { 
-            const e = document.getElementById(t === 'error' ? 'errorMsg' : 'successMsg');
-            e.textContent = m; e.classList.remove('hidden');
-            setTimeout(() => e.classList.add('hidden'), 3000);
-        }
+        function formatDate(d) { if(!d) return 'N/A'; const date = new Date(d + 'T00:00:00'); return date.toLocaleDateString('it-IT'); }
+        function showMessage(t, m) { const e = document.getElementById(t === 'error' ? 'errorMsg' : 'successMsg'); e.textContent = m; e.classList.remove('hidden'); setTimeout(() => e.classList.add('hidden'), 5000); }
 
         function calcolaManodopera() {
             const inH = document.getElementById('oraInizio').value;
             const outH = document.getElementById('oraFine').value;
             const op = parseInt(document.getElementById('numOperai').value) || 1;
-            const tariffa = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
-            const uscita = parseFloat(document.getElementById('inputCostoUscita').value) || 75;
+            const usc = parseFloat(document.getElementById('inputCostoUscita').value) || 0;
+            const base = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
             const urg = document.getElementById('flagUrgenza').checked;
 
             if(!inH || !outH) return;
@@ -173,52 +183,40 @@
             const dur = mOut - mIn;
             const totMin = dur * op;
             const minFatt = Math.ceil(totMin / 15) * 15;
-            const tApp = urg ? tariffa + 10 : tariffa;
-            const extra = Math.max(0, (minFatt - 60) / 60) * tApp;
-            const tot = uscita + extra;
+            const tariffa = urg ? base + 10 : base;
+            const extra = Math.max(0, (minFatt - 60) / 60) * tariffa;
+            const tot = usc + extra;
 
             document.getElementById('resNIntervento').textContent = document.getElementById('nIntervento').value || '---';
             document.getElementById('resData').textContent = formatDate(document.getElementById('dataIntervento').value);
-            document.getElementById('resScuola').textContent = (document.getElementById('nomeScuola').value || '---') + ' ' + (document.getElementById('plessoEdificio').value || '');
+            document.getElementById('resScuola').textContent = (document.getElementById('nomeScuola').value || '---') + ' / ' + (document.getElementById('plessoEdificio').value || '');
             document.getElementById('resOrario').textContent = inH + ' - ' + outH;
-            document.getElementById('resOperai').textContent = op + (urg ? ' (URG)' : '');
-            document.getElementById('tariffaOraria').textContent = tApp.toFixed(2) + ' €';
+            document.getElementById('resOperai').textContent = op + (urg ? ' (URGENTE)' : '');
+            document.getElementById('tariffaOraria').textContent = tariffa.toFixed(2) + ' €';
             document.getElementById('minutiEffettivi').textContent = totMin + ' min';
             document.getElementById('minutiFatturabili').textContent = minFatt + ' min';
-            document.getElementById('costoUscita').textContent = uscita.toFixed(2) + ' €';
+            document.getElementById('costoUscita').textContent = usc.toFixed(2) + ' €';
             document.getElementById('costoAggiuntivo').textContent = extra.toFixed(2) + ' €';
             document.getElementById('totaleManodopera').textContent = tot.toFixed(2) + ' €';
         }
 
-        // --- FUNZIONE INVIA PDF (LA MODIFICA RICHIESTA) ---
         async function inviaReport() {
             calcolaManodopera();
             const email = localStorage.getItem(EMAIL_KEY);
-            if (!email) { alert('Manca email scuola'); return; }
-
+            if (!email) { showMessage('error', 'Configura email scuola!'); return; }
             const btn = document.getElementById('btnInviaReport');
-            btn.disabled = true;
-            btn.textContent = 'Generazione copia esatta...';
+            btn.disabled = true; btn.textContent = 'Creazione PDF...';
 
             const element = document.getElementById('app');
-            
             const opt = {
-                margin: 5,
+                margin: 10,
                 filename: 'intervento.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { 
-                    scale: 2, 
-                    useCORS: true,
-                    // Questo è il segreto: diciamo di ignorare i CSS di stampa per restare uguali al video
-                    logging: false,
-                    ignoreElements: (el) => el.classList.contains('no-print')
-                },
+                html2canvas: { scale: 2, useCORS: true, ignoreElements: (el) => el.classList.contains('no-print') },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             try {
                 const pdfBase64 = await html2pdf().set(opt).from(element).outputPdf('datauristring').then(uri => uri.split(',')[1]);
-                
                 const response = await fetch('/api/inviaReport', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -229,29 +227,72 @@
                         pdfBase64: pdfBase64
                     })
                 });
+                if (response.ok) showMessage('success', 'Email inviata con il PDF!');
+                else throw new Error('Errore invio');
+            } catch (e) { showMessage('error', e.message); }
+            finally { btn.disabled = false; btn.textContent = 'Invia Email PDF'; }
+        }
 
-                if (response.ok) showMessage('success', 'Email inviata con PDF identico!');
-            } catch (e) {
-                alert('Errore: ' + e.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Invia Report (PDF Identico)';
+        // --- GESTIONE ARCHIVIO ---
+        async function salvaIntervento() {
+            calcolaManodopera();
+            const n = document.getElementById('nIntervento').value;
+            if(!n) { showMessage('error', 'Inserisci N° Intervento'); return; }
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const nuovo = {
+                id: Date.now().toString(),
+                nIntervento: n,
+                dataIntervento: document.getElementById('dataIntervento').value,
+                nomeScuola: document.getElementById('nomeScuola').value,
+                plessoEdificio: document.getElementById('plessoEdificio').value,
+                oraInizio: document.getElementById('oraInizio').value,
+                oraFine: document.getElementById('oraFine').value,
+                numOperai: document.getElementById('numOperai').value,
+                totaleManodopera: document.getElementById('totaleManodopera').textContent
+            };
+            interventi.push(nuovo);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+            showMessage('success', 'Intervento salvato in archivio!');
+            renderArchivio();
+        }
+
+        function renderArchivio() {
+            const lista = document.getElementById('listaInterventi');
+            const term = document.getElementById('cercaIntervento').value.toLowerCase();
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            lista.innerHTML = '';
+            interventi.filter(i => i.nIntervento.toLowerCase().includes(term) || i.nomeScuola.toLowerCase().includes(term))
+            .forEach(i => {
+                lista.innerHTML += `<div class="p-3 border rounded bg-white flex justify-between items-center">
+                    <div><b>#${i.nIntervento}</b> - ${i.nomeScuola}<br><small>${formatDate(i.dataIntervento)} - ${i.totaleManodopera}</small></div>
+                    <button onclick="caricaIntervento('${i.id}')" class="text-blue-600">Carica</button>
+                </div>`;
+            });
+        }
+
+        function caricaIntervento(id) {
+            const i = JSON.parse(localStorage.getItem(STORAGE_KEY)).find(x => x.id === id);
+            if(i) {
+                document.getElementById('nIntervento').value = i.nIntervento;
+                document.getElementById('nomeScuola').value = i.nomeScuola;
+                document.getElementById('dataIntervento').value = i.dataIntervento;
+                document.getElementById('plessoEdificio').value = i.plessoEdificio;
+                document.getElementById('oraInizio').value = i.oraInizio;
+                document.getElementById('oraFine').value = i.oraFine;
+                document.getElementById('numOperai').value = i.numOperai;
+                calcolaManodopera();
+                toggleArchivio();
             }
         }
 
-        // --- GESTIONE ARCHIVIO E ALTRO ---
-        function salvaEmail() { localStorage.setItem(EMAIL_KEY, document.getElementById('emailDestinatario').value); }
-        function stampaRiepilogo() { window.print(); }
-        function toggleArchivio() { 
-            const a = document.getElementById('archivioInterventi');
-            a.classList.toggle('hidden');
-            if(!a.classList.contains('hidden')) renderArchivio();
+        function toggleArchivio() {
+            document.getElementById('archivioInterventi').classList.toggle('hidden');
+            document.getElementById('input-section').classList.toggle('hidden');
+            if(!document.getElementById('archivioInterventi').classList.contains('hidden')) renderArchivio();
         }
 
-        async function salvaIntervento() {
-            // Logica di salvataggio identica al tuo standard...
-            showMessage('success', 'Salvato con successo!');
-        }
+        function salvaEmail() { localStorage.setItem(EMAIL_KEY, document.getElementById('emailDestinatario').value); }
+        function stampaRiepilogo() { window.print(); }
 
         window.onload = () => {
             document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT');
