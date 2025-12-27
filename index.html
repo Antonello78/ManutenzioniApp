@@ -104,12 +104,12 @@
 
             <div class="mt-4">
                 <label for="nomeScuola" class="block text-sm font-medium text-gray-600">Nome Scuola</label>
-                <input type="text" id="nomeScuola" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Istituto Comprensivo G. Pascoli">
+                <input type="text" id="nomeScuola" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Istituto Comprensivo G. Pascoli">
             </div>
 
             <div class="mt-4">
                 <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso/Edificio</label>
-                <input type="text" id="plessoEdificio" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Sede Centrale / Plesso Via Roma">
+                <input type="text" id="plessoEdificio" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Sede Centrale / Plesso Via Roma">
             </div>
 
             <div class="border-t border-gray-200 pt-4 mt-4"></div>
@@ -185,11 +185,11 @@
                         </div>
                         <div class="flex justify-between items-center text-sm text-gray-500">
                             <span>Tempo Effettivo Lavorato (Minuti/Uomo):</span>
-                            <span id="minutiEffettivi" class="font-medium">135 min</span>
+                            <span id="minutiEffettivi" class="font-medium">---</span>
                         </div>
                         <div class="flex justify-between items-center text-lg border-b pb-2">
                             <span class="font-medium">Tempo Fatturabile (Arrotondato 15 min):</span>
-                            <span id="minutiFatturabili" class="font-semibold text-blue-600">135 min</span>
+                            <span id="minutiFatturabili" class="font-semibold text-blue-600">---</span>
                         </div>
                         <div class="flex justify-between items-center text-lg pt-2">
                             <span class="font-medium">Costo di Uscita (Incl. 1ª Ora):</span>
@@ -252,7 +252,7 @@
         </p>
 
         <div class="text-center text-gray-400 text-[10px] mt-4 border-t pt-4">
-            Ditta D'Angelo Antonello — v1.1.1 (Release 2025)
+            Ditta D'Angelo Antonello — v1.1.2 (Release 2025)
         </div>
     </div>
 
@@ -465,11 +465,11 @@
         function caricaIntervento(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
-            if (intervention) {
+            if (intervento) {
                 document.getElementById('nIntervento').value = intervento.nIntervento; 
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
-                document.getElementById('nomeScuola').value = intervento.nomeScuola;
-                document.getElementById('plessoEdificio').value = intervento.plessoEdificio;
+                document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
+                document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
                 document.getElementById('oraInizio').value = intervento.oraInizio;
                 document.getElementById('oraFine').value = intervento.oraFine;
                 document.getElementById('numOperai').value = intervento.numOperai;
@@ -600,8 +600,8 @@
 
         function stampaRiepilogo() { window.print(); }
 
-        // --- NUOVA FUNZIONE INVIA REPORT (SERVER-SIDE) ---
         async function inviaReport() {
+            calcolaManodopera();
             const email = localStorage.getItem(EMAIL_KEY);
             if (!email) { 
                 showMessage('error', 'Configura prima l\'email di destinazione nelle opzioni.'); 
@@ -612,12 +612,11 @@
             btn.disabled = true;
             btn.textContent = 'Invio in corso...';
 
-            // Prepariamo i dati come richiesto dal file inviaReport.js
             const payload = {
                 nIntervento: document.getElementById('resNIntervento').textContent,
                 dataIntervento: document.getElementById('resData').textContent,
                 nomeScuola: document.getElementById('nomeScuola').value || "N/A",
-                plessoEdificio: document.getElementById('plessoEdificio').value,
+                plessoEdificio: document.getElementById('plessoEdificio').value || "",
                 orario: document.getElementById('resOrario').textContent,
                 operai: document.getElementById('numOperai').value,
                 tariffa: document.getElementById('tariffaOraria').textContent,
