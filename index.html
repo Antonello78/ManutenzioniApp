@@ -211,6 +211,11 @@
 
         <div id="archivioInterventi" class="hidden mt-4">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio Interventi Salvati</h2>
+            
+            <div class="mb-4">
+                <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca scuola, plesso o N° intervento..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            </div>
+
             <div id="listaInterventi" class="space-y-3">
                 <p class="text-gray-500">Nessun intervento salvato.</p>
             </div>
@@ -440,7 +445,7 @@
                     interventi[existingIndex] = intervento;
                     showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
-                    interventi.push(intervento); 
+                    interventi.push(intervention); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
@@ -519,12 +524,25 @@
         
         function renderArchivio() {
             const listaDiv = document.getElementById('listaInterventi');
-            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            
+            // FILTRO DI RICERCA
+            if (termineRicerca) {
+                interventi = interventi.filter(i => 
+                    i.nIntervento.toLowerCase().includes(termineRicerca) ||
+                    (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termineRicerca)) ||
+                    (i.plessoEdificio && i.plessoEdificio.toLowerCase().includes(termineRicerca))
+                );
+            }
+
             interventi.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
+            
             if (interventi.length === 0) {
-                listaDiv.innerHTML = '<p class="text-gray-500">Nessun intervento salvato.</p>';
+                listaDiv.innerHTML = '<p class="text-gray-500">Nessun intervento trovato.</p>';
                 return;
             }
+            
             listaDiv.innerHTML = ''; 
             interventi.forEach(i => {
                 const badgeUrgenza = i.flagUrgenza 
@@ -532,97 +550,76 @@
                     : '';
                 const itemHtml = `
                     <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
-                        <div class="flex-1 min-w-[50%]">
+                        <div class="flex-1 min-w-[200px]">
                             <div class="flex items-center">
-                                <p class="font-bold text-lg text-blue-700">N° ${i.nIntervento}</p>
+                                <span class="font-bold text-blue-700 text-lg"># ${i.nIntervento}</span>
                                 ${badgeUrgenza}
                             </div>
-                            <p class="text-xs text-gray-500 font-medium">${formatDate(i.dataIntervento)}</p>
-                            <p class="text-sm font-bold text-gray-800 truncate max-w-[200px]">${i.nomeScuola || 'N/A'}</p>
-                            <p class="text-sm font-semibold text-gray-800">${i.totaleManodopera || 'N/A'}</p>
+                            <div class="text-sm font-semibold text-gray-800">${i.nomeScuola || 'N/A'}</div>
+                            <div class="text-xs text-gray-500">${i.plessoEdificio || ''} — ${formatDate(i.dataIntervento)}</div>
+                            <div class="text-sm font-bold text-green-600 mt-1">${i.totaleManodopera}</div>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
-                            <button onclick="copiaRigaPreventivo('${i.id}')" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-2 px-3 rounded">Copia Riga</button>
-                            <button onclick="caricaIntervento('${i.id}')" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-3 rounded">Carica</button>
-                            <button onclick="cancellaIntervento('${i.id}')" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded">Cancella</button>
+                             <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100" title="Copia riga preventivo">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            </button>
+                            <button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200" title="Carica/Modifica">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </button>
+                            <button onclick="cancellaIntervento('${i.id}')" class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100" title="Elimina">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 `;
                 listaDiv.innerHTML += itemHtml;
             });
         }
-        
+
         function toggleArchivio() {
-            const archivioDiv = document.getElementById('archivioInterventi');
+            const archivio = document.getElementById('archivioInterventi');
             const inputSection = document.getElementById('input-section');
             const btn = document.getElementById('btnToggleArchivio');
-            if (archivioDiv.classList.contains('hidden')) {
-                archivioDiv.classList.remove('hidden');
+            const isHidden = archivio.classList.contains('hidden');
+            if (isHidden) {
+                archivio.classList.remove('hidden');
                 inputSection.classList.add('hidden');
                 btn.textContent = 'Torna al Calcolo';
                 renderArchivio();
             } else {
-                archivioDiv.classList.add('hidden');
+                archivio.classList.add('hidden');
                 inputSection.classList.remove('hidden');
                 btn.textContent = 'Gestione Archivio';
             }
         }
-        
-        function stampaRiepilogo() {
-            document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
-            window.print();
+
+        function stampaRiepilogo() { window.print(); }
+
+        function inviaReport() {
+            const email = localStorage.getItem(EMAIL_KEY);
+            if (!email) { showMessage('error', 'Configura prima l\'email di destinazione.'); return; }
+            const nIntervento = document.getElementById('resNIntervento').textContent;
+            const scuola = document.getElementById('resScuola').textContent;
+            const totale = document.getElementById('totaleManodopera').textContent;
+            const oggetto = encodeURIComponent(`Report Manodopera - Intervento ${nIntervento} - ${scuola}`);
+            const corpo = encodeURIComponent(`Dettagli Intervento:\nN°: ${nIntervento}\nScuola: ${scuola}\nTotale: ${totale}\n\nGenerato da Calcolo Manodopera.`);
+            window.location.href = `mailto:${email}?subject=${oggetto}&body=${corpo}`;
         }
 
-        async function inviaReport() { 
-            const email = document.getElementById('emailDestinatario').value.trim();
-            if (!email) { showMessage('error', 'Inserisci un indirizzo email di destinazione valido.'); return; }
-            const reportData = {
-                nIntervento: document.getElementById('nIntervento').value,
-                dataIntervento: formatDate(document.getElementById('dataIntervento').value),
-                nomeScuola: document.getElementById('nomeScuola').value,
-                plessoEdificio: document.getElementById('plessoEdificio').value,
-                orario: document.getElementById('resOrario').textContent,
-                operai: document.getElementById('resOperai').textContent,
-                tariffa: document.getElementById('tariffaOraria').textContent,
-                minutiFatturabili: document.getElementById('minutiFatturabili').textContent,
-                costoUscita: document.getElementById('costoUscita').textContent,
-                costoAggiuntivo: document.getElementById('costoAggiuntivo').textContent,
-                totale: document.getElementById('totaleManodopera').textContent,
-                destinatario: email
-            };
-            showMessage('success', 'Invio Report in corso...');
-            try {
-                const response = await fetch('/api/inviaReport', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(reportData)
-                });
-                if (response.ok) showMessage('success', `Report inviato a ${email}!`);
-                else throw new Error('Errore di invio report.');
-            } catch (error) { showMessage('error', `Errore: ${error.message}`); }
-        }
-        
-        function updateLastModifiedText() {
-            const now = new Date();
-            const formattedDate = now.toLocaleDateString('it-IT', { year: 'numeric', month: 'numeric', day: 'numeric' });
-            const formattedTime = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
-            document.getElementById('dataStampa').textContent = `${formattedDate} ${formattedTime}`;
-        }
-
-        document.addEventListener('DOMContentLoaded', async () => { 
-            updateLastModifiedText();
-            await caricaDatiServer(); 
-            initializeInputs(); 
-            calcolaManodopera(); 
-            renderArchivio(); 
-            document.querySelectorAll('input, select').forEach(element => {
-                if (element.id !== 'nIntervento') {
-                    element.addEventListener('change', calcolaManodopera);
-                    element.addEventListener('input', calcolaManodopera);
-                }
+        window.onload = () => {
+            const dataOggi = new Date().toLocaleDateString('it-IT');
+            document.getElementById('dataStampa').textContent = dataOggi;
+            caricaDatiServer().finally(() => {
+                initializeInputs();
+                calcolaManodopera();
             });
-            if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }
-        });
+        };
     </script>
 </body>
 </html>
