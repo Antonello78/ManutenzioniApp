@@ -253,7 +253,7 @@
         </p>
 
         <div class="text-center text-gray-400 text-[10px] mt-4 border-t pt-4">
-            Ditta D'Angelo Antonello — v1.2.7 (DB RESTORED + PDF EXACT)
+            Ditta D'Angelo Antonello — v1.2.8 (Identical PDF Flow)
         </div>
     </div>
 
@@ -601,7 +601,7 @@
 
         function stampaRiepilogo() { window.print(); }
 
-        // FUNZIONE INVIA PDF AGGIORNATA (IDENTICA ALLA STAMPA)
+        // NUOVA FUNZIONE INVIA PDF (IDENTICA ALLA STAMPA)
         async function inviaReport() {
             calcolaManodopera();
             const email = localStorage.getItem(EMAIL_KEY);
@@ -615,7 +615,7 @@
             btn.disabled = true;
             btn.textContent = 'Generazione PDF...';
 
-            // Configuriamo html2pdf per catturare esattamente il layout di stampa
+            // Configuriamo html2pdf per catturare esattamente il layout visualizzato nell'app
             const element = document.getElementById('app');
             const opt = {
                 margin: 10,
@@ -630,35 +630,24 @@
             };
 
             try {
-                // Generazione stringa PDF Base64 esatta
+                // Generazione PDF come stringa Base64
                 const pdfBase64 = await html2pdf().set(opt).from(element).outputPdf('datauristring').then(uri => uri.split(',')[1]);
                 
                 btn.textContent = 'Invio Email...';
 
-                const payload = {
-                    nIntervento: document.getElementById('resNIntervento').textContent,
-                    dataIntervento: document.getElementById('resData').textContent,
-                    nomeScuola: document.getElementById('nomeScuola').value || "N/A",
-                    plessoEdificio: document.getElementById('plessoEdificio').value || "",
-                    orario: document.getElementById('resOrario').textContent,
-                    operai: document.getElementById('numOperai').value,
-                    tariffa: document.getElementById('tariffaOraria').textContent,
-                    minutiFatturabili: document.getElementById('minutiFatturabili').textContent,
-                    costoUscita: document.getElementById('costoUscita').textContent,
-                    costoAggiuntivo: document.getElementById('costoAggiuntivo').textContent,
-                    totale: document.getElementById('totaleManodopera').textContent,
-                    destinatario: email,
-                    pdfBase64: pdfBase64 
-                };
-
                 const response = await fetch('/api/inviaReport', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({
+                        nIntervento: document.getElementById('resNIntervento').textContent,
+                        nomeScuola: document.getElementById('nomeScuola').value || "N/A",
+                        destinatario: email,
+                        pdfBase64: pdfBase64 // Il PDF generato
+                    })
                 });
 
                 if (response.ok) {
-                    showMessage('success', 'Report PDF inviato correttamente!');
+                    showMessage('success', 'Email inviata con il PDF identico alla stampa!');
                 } else {
                     const result = await response.json();
                     throw new Error(result.message || 'Errore invio.');
