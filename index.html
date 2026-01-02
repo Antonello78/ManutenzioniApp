@@ -27,9 +27,15 @@
         -moz-appearance: textfield;
     }
     
+    /* Stili per la modale */
+    #modalPreventivo {
+        transition: opacity 0.3s ease;
+    }
+
     @media print {
         .no-print,
-        #input-section > div:not(.border-t) { 
+        #input-section > div:not(.border-t),
+        #modalPreventivo { 
             display: none !important;
         }
         
@@ -81,6 +87,21 @@
 </style>
 </head>
 <body class="p-4 sm:p-8">
+    <div id="modalPreventivo" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden no-print">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg mx-4">
+            <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Controlla Riga Preventivo</h3>
+            <textarea id="testoPreventivoModal" class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm mb-4" spellcheck="false"></textarea>
+            <div class="flex space-x-3">
+                <button onclick="chiudiModale()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-150">
+                    Annulla
+                </button>
+                <button onclick="copiaEChiudi()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                    Copia Negli Appunti
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="app" class="max-w-xl mx-auto bg-white shadow-2xl rounded-xl p-6 sm:p-8">
         
         <div id="unified-header" class="mb-6 border-b pb-2 text-center no-print">
@@ -366,7 +387,6 @@
             const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
             const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
 
-            // MODIFICA 1: Ore decimali
             const oreFatturabili = (minutiFatturabili / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
@@ -514,6 +534,18 @@
             }
         }
 
+        function chiudiModale() {
+            document.getElementById('modalPreventivo').classList.add('hidden');
+        }
+
+        function copiaEChiudi() {
+            const testo = document.getElementById('testoPreventivoModal').value;
+            navigator.clipboard.writeText(testo).then(() => {
+                showMessage('success', 'riga di preventivo copiata');
+                chiudiModale();
+            }).catch(err => { showMessage('error', 'Errore nella copia: ' + err); });
+        }
+
         function copiaRigaPreventivo(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const i = interventi.find(item => item.id === id);
@@ -526,12 +558,12 @@
             } else {
                 testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
             }
-            navigator.clipboard.writeText(testo).then(() => {
-                showMessage('success', 'riga di preventivo creata');
-            }).catch(err => { showMessage('error', 'Errore nella copia: ' + err); });
+            
+            // Invece di copiare subito, mostro la modale
+            document.getElementById('testoPreventivoModal').value = testo;
+            document.getElementById('modalPreventivo').classList.remove('hidden');
         }
         
-        // MODIFICA 3: Logica Archivio Filtrato per Anno
         function renderArchivio() {
             const listaDiv = document.getElementById('listaInterventi');
             const filtroAnniDiv = document.getElementById('filtroAnni');
@@ -618,7 +650,6 @@
             }
         }
 
-        // MODIFICA 2: Nome File PDF
         function stampaRiepilogo() {
             const nIntervento = document.getElementById('nIntervento').value.replace(/\//g, '-');
             const nomeScuola = document.getElementById('nomeScuola').value.trim() || 'SenzaNome';
