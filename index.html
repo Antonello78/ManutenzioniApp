@@ -3,192 +3,360 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calcolo Manodopera - Ditta D'Angelo</title>
+    <title>Calcolo Manodopera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+        
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Calcolo Manodopera">
     <link rel="manifest" href="manifest.json">
 <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f7f9fc;
+        padding-top: 1rem;
+     }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+    
     @media print {
-        .no-print { display: none !important; }
-        #app { box-shadow: none !important; border: none !important; width: 100%; margin: 0; transform: scale(0.9); transform-origin: top left; }
+        .no-print,
+        #input-section > div:not(.border-t) { 
+            display: none !important;
+        }
+        
+        #input-section {
+            display: block !important;
+        }
+        
+        body {
+            padding: 0;
+            background-color: white;
+            margin: 0; 
+        }
+        #app {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: none !important;
+            margin: 0 !important; 
+            padding: 0.5rem !important; 
+            width: 210mm; 
+            transform: scale(0.82); 
+            transform-origin: top left; 
+            page-break-inside: avoid !important; 
+        }
+        
+        #unified-header {
+             display: block !important; 
+             padding-bottom: 0.5rem;
+             margin-bottom: 1rem;
+             border-bottom: 2px solid #ccc; 
+        }
+
+        .print-avoid-break,
+        .print-avoid-break *,
+        .flex {
+            page-break-inside: avoid !important;
+        }
+
+        .text-red-600 {
+            color: #dc2626 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        @page {
+            size: A4 portrait; 
+            margin: 0.5cm !important; 
+        }
     }
 </style>
 </head>
 <body class="p-4 sm:p-8">
-    <div id="app" class="max-w-xl mx-auto bg-white shadow-2xl rounded-xl p-6">
+    <div id="app" class="max-w-xl mx-auto bg-white shadow-2xl rounded-xl p-6 sm:p-8">
         
         <div id="unified-header" class="mb-6 border-b pb-2 text-center no-print">
-            <img src="LOGO ANTONELLO.png" alt="Logo" class="h-20 mx-auto mb-2">
-            <p class="text-xs text-gray-400">Versione Stabile 1.1.6</p>
+            <img src="LOGO ANTONELLO.png" alt="Logo Aziendale" class="h-24 object-contain mx-auto mb-2">
+            <p class="text-xs text-gray-500">Ultimo aggiornamento: <span id="dataStampa"></span></p>
         </div>
         
         <div id="input-section">
-            <div class="flex justify-between items-center mb-4 no-print">
-                <h2 class="text-xl font-bold text-gray-700">Dettagli Intervento</h2>
-                <button onclick="nuovoIntervento()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-blue-700 transition">
-                    + NUOVO / PULISCI
-                </button>
-            </div>
+            <h2 class="text-xl font-bold text-gray-700 mb-4 no-print">Dettagli Intervento Corrente</h2>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">N° Intervento</label>
-                    <input type="text" id="nIntervento" class="mt-1 w-full px-3 py-2 border rounded-lg bg-gray-50 font-bold">
+                    <label for="nIntervento" class="block text-sm font-medium text-gray-600">N° Intervento</label>
+                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Es. 075/25">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Data</label>
-                    <input type="date" id="dataIntervento" onchange="calcolaManodopera()" class="mt-1 w-full px-3 py-2 border rounded-lg">
+                    <label for="dataIntervento" class="block text-sm font-medium text-gray-600">Data</label>
+                    <input type="date" id="dataIntervento" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
                 </div>
             </div>
 
             <div class="mt-4">
-                <label class="block text-xs font-bold text-gray-500 uppercase">Scuola</label>
-                <input type="text" id="nomeScuola" oninput="calcolaManodopera()" class="mt-1 w-full px-3 py-2 border rounded-lg" placeholder="Es: G. Pascoli">
+                <label for="nomeScuola" class="block text-sm font-medium text-gray-600">Nome Scuola</label>
+                <input type="text" id="nomeScuola" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Istituto Comprensivo G. Pascoli">
             </div>
 
             <div class="mt-4">
-                <label class="block text-xs font-bold text-gray-500 uppercase">Plesso/Edificio</label>
-                <input type="text" id="plessoEdificio" oninput="calcolaManodopera()" class="mt-1 w-full px-3 py-2 border rounded-lg" placeholder="Es: Sede Centrale">
+                <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso/Edificio</label>
+                <input type="text" id="plessoEdificio" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Sede Centrale / Plesso Via Roma">
+            </div>
+
+            <div class="border-t border-gray-200 pt-4 mt-4"></div>
+
+            <div>
+                <label for="oraInizio" class="block text-sm font-medium text-gray-600">Ora Inizio (HH:MM)</label>
+                <input type="time" id="oraInizio" value="09:00" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+            </div>
+
+            <div class="mt-4">
+                <label for="oraFine" class="block text-sm font-medium text-gray-600">Ora Fine (HH:MM)</label>
+                <input type="time" id="oraFine" value="10:15" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+            </div>
+
+            <div class="mt-4">
+                <label for="numOperai" class="block text-sm font-medium text-gray-600">Numero Operai</label>
+                <input type="number" id="numOperai" value="1" min="1" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
             </div>
 
             <div class="grid grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Inizio</label>
-                    <input type="time" id="oraInizio" value="09:00" onchange="calcolaManodopera()" class="mt-1 w-full px-3 py-2 border rounded-lg">
+                    <label for="inputCostoUscita" class="block text-sm font-medium text-gray-600">Costo Uscita (€)</label>
+                    <input type="number" id="inputCostoUscita" value="75" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Fine</label>
-                    <input type="time" id="oraFine" value="10:15" onchange="calcolaManodopera()" class="mt-1 w-full px-3 py-2 border rounded-lg">
+                    <label for="inputTariffaBase" class="block text-sm font-medium text-gray-600">Tariffa (€/h)</label>
+                    <input type="number" id="inputTariffaBase" value="38" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
                 </div>
             </div>
 
-            <div class="grid grid-cols-3 gap-4 mt-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Operai</label>
-                    <input type="number" id="numOperai" value="1" min="1" onchange="calcolaManodopera()" class="mt-1 w-full px-3 py-2 border rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Uscita €</label>
-                    <input type="number" id="inputCostoUscita" value="75" onchange="calcolaManodopera()" class="mt-1 w-full px-3 py-2 border rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase">Tariffa €/h</label>
-                    <input type="number" id="inputTariffaBase" value="38" onchange="calcolaManodopera()" class="mt-1 w-full px-3 py-2 border rounded-lg">
-                </div>
+            <div class="flex items-center pt-2 mt-4">
+                <input id="flagUrgenza" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-red-600 border-gray-300 rounded">
+                <label for="flagUrgenza" class="ml-3 block text-base font-medium text-red-700">
+                    Marca come "Urgenza Immediata" (+10 €/h)
+                </label>
             </div>
 
-            <div class="mt-4 p-3 bg-red-50 rounded-lg flex items-center">
-                <input id="flagUrgenza" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-red-600">
-                <label for="flagUrgenza" class="ml-3 text-sm font-bold text-red-700 uppercase">Urgenza Immediata (+10€/h)</label>
+            <div id="errorMsg" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden no-print" role="alert"></div>
+            <div id="successMsg" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg hidden no-print" role="alert"></div>
+
+            <div class="mt-8 pt-6 border-t border-gray-200">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4 no-print">Dettaglio Calcolo e Totale</h2>
+                            
+                <div class="print-avoid-break">
+                    <div id="riepilogoDati" class="space-y-2 text-gray-700 p-4 border rounded-lg bg-gray-50 mb-4">
+                        <h3 class="text-xl font-bold mb-2 border-b pb-1 text-blue-700">Dati Intervento</h3>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">N° Intervento:</span>
+                            <span id="resNIntervento" class="font-semibold text-gray-800">---</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">Data:</span>
+                            <span id="resData" class="font-semibold text-gray-800">---</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">Scuola/Plesso:</span>
+                            <span id="resScuola" class="font-semibold text-gray-800 text-right max-w-[60%]">---</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">Orario Lavorato:</span>
+                            <span id="resOrario" class="font-semibold text-gray-800">---</span>
+                        </div>
+                        <div class="flex justify-between text-base">
+                            <span class="font-medium">Operai:</span>
+                            <span id="resOperai" class="font-semibold text-gray-800">---</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-gray-700">
+                        <div class="flex justify-between items-center text-lg">
+                            <span class="font-medium">Tariffa Oraria Applicata:</span>
+                            <span id="tariffaOraria" class="font-semibold text-gray-800">38,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <span>Tempo Effettivo Lavorato (Min/Uomo):</span>
+                            <span id="minutiEffettivi" class="font-medium">---</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg border-b pb-2">
+                            <span class="font-medium">Tempo Fatturabile (Arrotondato):</span>
+                            <span id="minutiFatturabili" class="font-semibold text-blue-600">---</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg pt-2">
+                            <span class="font-medium">Costo di Uscita (Incl. 1ª Ora):</span>
+                            <span id="costoUscita" class="font-semibold text-gray-800">75,00 €</span>
+                        </div>
+                        <div class="flex justify-between items-center text-lg">
+                            <span class="font-medium">Costo Manodopera Aggiuntiva:</span>
+                            <span id="costoAggiuntivo" class="font-semibold text-gray-800">0,00 €</span>
+                        </div>
+                    </div>
+                </div> 
+                
+                <div class="mt-6 p-4 bg-blue-100 border-2 border-blue-400 rounded-xl flex justify-between items-center">
+                    <span class="text-xl font-bold text-blue-800">TOTALE (€):</span>
+                    <span id="totaleManodopera" class="text-3xl font-extrabold text-blue-800">75,00 €</span>
+                </div>
+            </div>
+        </div> 
+
+        <div id="archivioInterventi" class="hidden mt-4">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio Interventi</h2>
+            
+            <div id="filtroAnni" class="flex flex-wrap gap-2 mb-4"></div>
+
+            <div class="mb-4">
+                <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca scuola, plesso o N°..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
             </div>
 
-            <div class="mt-6 p-4 border-2 border-dashed rounded-xl bg-gray-50">
-                <div class="flex justify-between text-sm mb-1">
-                    <span class="text-gray-500">N° Interv / Data:</span>
-                    <span id="resInfo" class="font-bold">---</span>
-                </div>
-                <div class="flex justify-between text-sm mb-1">
-                    <span class="text-gray-500">Scuola:</span>
-                    <span id="resScuola" class="font-bold">---</span>
-                </div>
-                <div class="flex justify-between text-sm border-b pb-2 mb-2">
-                    <span class="text-gray-500">Tempo Fatturabile:</span>
-                    <span id="resTempo" class="font-bold text-blue-600">---</span>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span class="text-xl font-black text-gray-700">TOTALE:</span>
-                    <span id="resTotale" class="text-3xl font-black text-blue-700">75,00 €</span>
-                </div>
+            <div id="listaInterventi" class="space-y-3">
+                <p class="text-gray-500">Nessun intervento salvato.</p>
+            </div>
+        </div> 
+
+        <div class="border-t border-gray-200 mt-6 pt-4 no-print"></div>
+
+        <div class="mt-6 flex flex-col space-y-3 sm:space-y-0 sm:space-x-3 no-print">
+            <button onclick="toggleArchivio()" id="btnToggleArchivio" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150 w-full sm:w-1/2 mx-auto mb-4">
+                Gestione Archivio
+            </button>
+            <div id="action-buttons" class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
+                <button onclick="salvaIntervento()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                    Salva Intervento
+                </button>
+                <button onclick="stampaRiepilogo()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                    Stampa / Crea PDF
+                </button>
             </div>
         </div>
 
-        <div id="msg" class="mt-4 p-3 rounded-lg hidden text-center font-bold no-print"></div>
-
-        <div id="archivioSection" class="hidden mt-4 no-print">
-            <h3 class="font-bold text-lg mb-2">📂 Archivio Interventi</h3>
-            <div id="anniFiltro" class="flex gap-2 mb-3"></div>
-            <input type="text" id="search" onkeyup="renderArchivio()" placeholder="Cerca scuola..." class="w-full p-2 border rounded-lg mb-3">
-            <div id="lista" class="space-y-2 max-h-80 overflow-y-auto"></div>
-        </div>
-
-        <div class="mt-6 flex flex-col gap-3 no-print">
-            <button onclick="salvaIntervento()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg shadow-lg hover:bg-green-700">SALVA INTERVENTO</button>
-            <div class="flex gap-2">
-                <button onclick="stampaRiepilogo()" class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700">STAMPA PDF</button>
-                <button onclick="toggleArchivio()" id="btnArc" class="flex-1 bg-gray-500 text-white font-bold py-3 rounded-lg">ARCHIVIO</button>
-            </div>
+        <div class="text-center text-gray-400 text-[10px] mt-8 border-t pt-4">
+            Ditta D'Angelo Antonello — v1.1.4 (Release 2025)
         </div>
     </div>
 
-    <div id="modalCopia" class="fixed inset-0 bg-black bg-opacity-60 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg">
-            <div class="p-4 border-b font-bold text-lg">Revisione Riga Preventivo</div>
-            <div class="p-4">
-                <textarea id="testoModale" rows="10" class="w-full p-3 border rounded-lg font-mono text-sm bg-gray-50"></textarea>
+    <div id="modalCopia" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden">
+            <div class="p-4 border-b bg-gray-50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-700">Revisione Riga Preventivo</h3>
+                <button onclick="chiudiModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
             </div>
-            <div class="p-4 flex gap-3">
-                <button onclick="copiaTesto()" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-lg">COPIA ORA</button>
-                <button onclick="chiudiModal()" class="flex-1 bg-gray-200 py-2 rounded-lg font-bold">CHIUDI</button>
+            <div class="p-4">
+                <p class="text-sm text-gray-500 mb-2">Revisiona il testo prima di copiarlo nel gestionale:</p>
+                <textarea id="testoPreventivoModale" rows="10" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-700 font-mono"></textarea>
+            </div>
+            <div class="p-4 border-t bg-gray-50 flex space-x-3">
+                <button onclick="copiaTestoDaModal()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow transition">
+                    Copia negli Appunti
+                </button>
+                <button onclick="chiudiModal()" class="flex-1 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold py-2 px-4 rounded-lg transition">
+                    Annulla
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        const KEY = 'manodoperaInterventi';
-        let annoCorrente = new Date().getFullYear().toString().substring(2);
+        const STORAGE_KEY = 'manodoperaInterventi';
+        const INIZIO_2025 = 74; 
+        let annoSelezionato = new Date().getFullYear().toString().substring(2);
 
-        function showMsg(txt, isErr=false) {
-            const m = document.getElementById('msg');
-            m.textContent = txt;
-            m.className = `mt-4 p-3 rounded-lg font-bold text-center ${isErr ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
-            m.classList.remove('hidden');
-            setTimeout(() => m.classList.add('hidden'), 3000);
+        function parseTime(timeString) {
+            const [hours, minutes] = timeString.split(':').map(Number);
+            return (hours * 60) + minutes;
         }
 
-        function calcolaManodopera() {
-            const ini = document.getElementById('oraInizio').value;
-            const fin = document.getElementById('oraFine').value;
-            const nOp = parseInt(document.getElementById('numOperai').value) || 1;
-            const base = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
-            const usc = parseFloat(document.getElementById('inputCostoUscita').value) || 0;
-            const urg = document.getElementById('flagUrgenza').checked;
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString + 'T00:00:00'); 
+            const giornoSett = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
+            const giorno = String(date.getDate()).padStart(2, '0');
+            const mese = String(date.getMonth() + 1).padStart(2, '0');
+            const anno = String(date.getFullYear()).substring(2);
+            return `${giornoSett} ${giorno}/${mese}/${anno}`;
+        }
 
-            const [h1, m1] = ini.split(':').map(Number);
-            const [h2, m2] = fin.split(':').map(Number);
-            const diff = (h2 * 60 + m2) - (h1 * 60 + m1);
+        function showMessage(type, message) {
+            document.getElementById('errorMsg').classList.add('hidden');
+            document.getElementById('successMsg').classList.add('hidden');
+            const msgElement = document.getElementById(type === 'error' ? 'errorMsg' : 'successMsg');
+            if (msgElement) {
+                msgElement.textContent = message;
+                msgElement.classList.remove('hidden');
+                setTimeout(() => msgElement.classList.add('hidden'), 5000); 
+            }
+        }
+
+        function initializeInputs() {
+            const dataInput = document.getElementById('dataIntervento');
+            if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
             
-            if (diff <= 0) return;
+            const year = new Date().getFullYear().toString().substring(2);
+            const counterKey = 'numeroIntervento_' + year;
+            let ultimo = parseInt(localStorage.getItem(counterKey));
+            if (isNaN(ultimo)) {
+                ultimo = (year === '25') ? INIZIO_2025 : 0;
+                localStorage.setItem(counterKey, ultimo.toString());
+            }
+            document.getElementById('nIntervento').value = (ultimo + 1).toString().padStart(3, '0') + '/' + year;
+        }
+        
+        function calcolaManodopera() {
+            const oraInizioInput = document.getElementById('oraInizio').value;
+            const oraFineInput = document.getElementById('oraFine').value;
+            const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
+            const costoUscitaInput = parseFloat(document.getElementById('inputCostoUscita').value) || 0;
+            const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
+            const flagUrgenza = document.getElementById('flagUrgenza').checked;
 
-            const minTot = diff * nOp;
-            const minFatt = Math.ceil(minTot / 15) * 15;
-            const tarff = urg ? base + 10 : base;
-            const costoAgg = (Math.max(0, minFatt - 60) / 60) * tarff;
-            const tot = usc + costoAgg;
+            if (!oraInizioInput || !oraFineInput) return;
+            const oraInizioMinuti = parseTime(oraInizioInput);
+            const oraFineMinuti = parseTime(oraFineInput);
+            if (oraFineMinuti <= oraInizioMinuti) return;
 
-            document.getElementById('resTempo').textContent = `${minFatt} min (${(minFatt/60).toFixed(2).replace('.',',')} ore)`;
-            document.getElementById('resTotale').textContent = tot.toFixed(2).replace('.',',') + ' €';
-            document.getElementById('resInfo').textContent = document.getElementById('nIntervento').value + " del " + document.getElementById('dataIntervento').value;
-            document.getElementById('resScuola').textContent = document.getElementById('nomeScuola').value || "---";
+            const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
+            const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
+            const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
+            
+            let tariffaOraria = flagUrgenza ? tariffaBaseInput + 10 : tariffaBaseInput;
+            const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
+            const costoManodoperaAggiuntiva = (minutiOltre60 / 60) * tariffaOraria;
+            const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
+
+            const oreFatturabiliDec = (minutiFatturabili / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
+            document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
+            document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${oreFatturabiliDec} ore)`;
+            document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €';
+            document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2) + ' €';
+            document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2) + ' €'; 
+            
+            document.getElementById('resNIntervento').textContent = document.getElementById('nIntervento').value || '---';
+            document.getElementById('resData').textContent = formatDate(document.getElementById('dataIntervento').value); 
+            document.getElementById('resScuola').textContent = (document.getElementById('nomeScuola').value || '---') + (document.getElementById('plessoEdificio').value ? ' / ' + document.getElementById('plessoEdificio').value : '');
+            document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
+            document.getElementById('resOperai').innerHTML = numOperai + (flagUrgenza ? ' <span class="text-red-600 font-bold">(URG)</span>' : '');
         }
 
-        function nuovoIntervento() {
-            document.getElementById('nomeScuola').value = '';
-            document.getElementById('plessoEdificio').value = '';
-            document.getElementById('flagUrgenza').checked = false;
-            // Incremento numero
-            const nAttuale = document.getElementById('nIntervento').value.split('/')[0];
-            const nuovoN = (parseInt(nAttuale) + 1).toString().padStart(3, '0');
-            document.getElementById('nIntervento').value = `${nuovoN}/${annoCorrente}`;
-            calcolaManodopera();
-            showMsg("Campi resettati. Pronto per nuovo intervento.");
-        }
-
-        async function salvaIntervento() {
-            const data = {
+        function salvaIntervento() { 
+            const nI = document.getElementById('nIntervento').value;
+            const year = nI.split('/')[1];
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            
+            const intervento = {
                 id: Date.now().toString(),
-                nIntervento: document.getElementById('nIntervento').value,
-                dataIntervento: document.getElementById('dataIntervento').value,
+                nIntervento: nI,
+                dataIntervento: document.getElementById('dataIntervento').value, 
                 nomeScuola: document.getElementById('nomeScuola').value,
                 plessoEdificio: document.getElementById('plessoEdificio').value,
                 oraInizio: document.getElementById('oraInizio').value,
@@ -197,92 +365,140 @@
                 costoUscita: document.getElementById('inputCostoUscita').value,
                 tariffaBase: document.getElementById('inputTariffaBase').value,
                 flagUrgenza: document.getElementById('flagUrgenza').checked,
-                totale: document.getElementById('resTotale').textContent
+                totaleManodopera: document.getElementById('totaleManodopera').textContent
             };
 
-            let inv = JSON.parse(localStorage.getItem(KEY) || '[]');
-            const idx = inv.findIndex(x => x.nIntervento === data.nIntervento);
-            if(idx > -1) inv[idx] = data; else inv.push(data);
+            interventi.push(intervento);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+            localStorage.setItem('numeroIntervento_' + year, nI.split('/')[0]);
             
-            localStorage.setItem(KEY, JSON.stringify(inv));
-            localStorage.setItem('ultimoNumero_'+annoCorrente, data.nIntervento.split('/')[0]);
-            
-            showMsg("Intervento Salvato con Successo!");
-            renderArchivio();
-        }
-
-        function caricaIntervento(id) {
-            const item = JSON.parse(localStorage.getItem(KEY)).find(x => x.id === id);
-            document.getElementById('nIntervento').value = item.nIntervento;
-            document.getElementById('dataIntervento').value = item.dataIntervento;
-            document.getElementById('nomeScuola').value = item.nomeScuola;
-            document.getElementById('plessoEdificio').value = item.plessoEdificio;
-            document.getElementById('oraInizio').value = item.oraInizio;
-            document.getElementById('oraFine').value = item.oraFine;
-            document.getElementById('numOperai').value = item.numOperai;
-            document.getElementById('inputCostoUscita').value = item.costoUscita;
-            document.getElementById('inputTariffaBase').value = item.tariffaBase;
-            document.getElementById('flagUrgenza').checked = item.flagUrgenza;
+            showMessage('success', 'Intervento salvato!');
+            initializeInputs();
             calcolaManodopera();
-            toggleArchivio();
-            showMsg("Intervento caricato per modifica.");
         }
 
         function renderArchivio() {
-            const list = document.getElementById('lista');
-            const search = document.getElementById('search').value.toLowerCase();
-            const inv = JSON.parse(localStorage.getItem(KEY) || '[]');
-            const filtrati = inv.filter(x => x.nomeScuola.toLowerCase().includes(search));
+            const listaDiv = document.getElementById('listaInterventi');
+            const filtroAnniDiv = document.getElementById('filtroAnni');
+            const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             
-            list.innerHTML = filtrati.map(i => `
-                <div class="p-3 border rounded-lg bg-white shadow-sm flex justify-between items-center">
-                    <div>
-                        <div class="font-bold text-blue-800">#${i.nIntervento}</div>
-                        <div class="text-sm font-semibold">${i.nomeScuola}</div>
-                        <div class="text-xs text-gray-500">${i.dataIntervento} - ${i.totale}</div>
-                    </div>
-                    <div class="flex gap-2">
-                        <button title="Copia Riga Preventivo" onclick="apriCopia('${i.id}')" class="p-2 bg-blue-50 rounded">📋</button>
-                        <button title="Carica e Modifica" onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-50 rounded">✏️</button>
-                    </div>
-                </div>
-            `).join('');
+            const anniPresenti = [...new Set(interventi.map(i => i.nIntervento.split('/')[1]))].sort((a, b) => b - a);
+            filtroAnniDiv.innerHTML = '';
+            anniPresenti.forEach(anno => {
+                const isActive = anno === annoSelezionato;
+                filtroAnniDiv.innerHTML += `
+                    <button onclick="cambiaAnno('${anno}')" class="px-4 py-1 rounded-full font-bold text-sm transition ${isActive ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}">
+                        20${anno}
+                    </button>`;
+            });
+
+            let filtrati = interventi.filter(i => {
+                const matchAnno = i.nIntervento.split('/')[1] === annoSelezionato;
+                const matchRicerca = i.nIntervento.toLowerCase().includes(termineRicerca) || (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termineRicerca));
+                return matchAnno && matchRicerca;
+            });
+
+            filtrati.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
+            
+            listaDiv.innerHTML = filtrati.length ? '' : '<p class="text-gray-500 text-center py-4">Nessun intervento trovato.</p>';
+            
+            filtrati.forEach(i => {
+                listaDiv.innerHTML += `
+                    <div class="p-3 border rounded-lg bg-white flex justify-between items-center shadow-sm">
+                        <div>
+                            <span class="font-bold text-blue-700"># ${i.nIntervento}</span>
+                            <div class="text-sm font-semibold">${i.nomeScuola || 'N/A'}</div>
+                            <div class="text-xs text-gray-500">${formatDate(i.dataIntervento)} — ${i.totaleManodopera}</div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button title="Copia riga preventivo" onclick="apriModalCopia('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100">
+                                📋
+                            </button>
+                            <button title="Carica intervento" onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200">
+                                ✏️
+                            </button>
+                        </div>
+                    </div>`;
+            });
         }
 
-        function apriCopia(id) {
-            const i = JSON.parse(localStorage.getItem(KEY)).find(x => x.id === id);
-            const d = i.dataIntervento.split('-').reverse().join('/');
-            let t = `Rif. Intervento n. ${i.nIntervento} del ${d} presso ${i.nomeScuola}.\n${i.flagUrgenza ? 'URGENZA IMMEDIATA' : 'Manutenzione ordinaria'}: orario ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.\nImporto totale: € ${i.totale}`;
-            document.getElementById('testoModale').value = t;
+        function caricaIntervento(id) {
+            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const i = interventi.find(item => item.id === id);
+            if (!i) return;
+
+            document.getElementById('nIntervento').value = i.nIntervento;
+            document.getElementById('dataIntervento').value = i.dataIntervento;
+            document.getElementById('nomeScuola').value = i.nomeScuola;
+            document.getElementById('plessoEdificio').value = i.plessoEdificio;
+            document.getElementById('oraInizio').value = i.oraInizio;
+            document.getElementById('oraFine').value = i.oraFine;
+            document.getElementById('numOperai').value = i.numOperai;
+            document.getElementById('inputCostoUscita').value = i.costoUscita;
+            document.getElementById('inputTariffaBase').value = i.tariffaBase;
+            document.getElementById('flagUrgenza').checked = i.flagUrgenza;
+
+            calcolaManodopera();
+            toggleArchivio();
+            showMessage('success', 'Intervento caricato!');
+        }
+
+        function apriModalCopia(id) {
+            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const i = interventi.find(item => item.id === id);
+            if (!i) return;
+
+            const dataF = formatDate(i.dataIntervento);
+            const scuolaP = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
+            let testo = i.flagUrgenza 
+                ? `Rif. Intervento n. ${i.nIntervento} del ${dataF} presso ${scuolaP}.\nIntervento tecnico con carattere di URGENZA IMMEDIATA: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata e il calcolo della manodopera con tariffa urgenza arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`
+                : `Rif. Intervento n. ${i.nIntervento} del ${dataF} presso ${scuolaP}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+
+            document.getElementById('testoPreventivoModale').value = testo;
             document.getElementById('modalCopia').classList.remove('hidden');
         }
 
         function chiudiModal() { document.getElementById('modalCopia').classList.add('hidden'); }
-        function copiaTesto() {
-            navigator.clipboard.writeText(document.getElementById('testoModale').value);
-            showMsg("Testo copiato!");
-            chiudiModal();
+
+        function copiaTestoDaModal() {
+            const testo = document.getElementById('testoPreventivoModale').value;
+            navigator.clipboard.writeText(testo).then(() => {
+                showMessage('success', 'Testo copiato!');
+                chiudiModal();
+            });
         }
 
+        function cambiaAnno(anno) { annoSelezionato = anno; renderArchivio(); }
+        
         function toggleArchivio() {
-            const arc = document.getElementById('archivioSection');
-            const inp = document.getElementById('input-section');
-            arc.classList.toggle('hidden');
-            inp.classList.toggle('hidden');
-            document.getElementById('btnArc').textContent = arc.classList.contains('hidden') ? 'ARCHIVIO' : 'TORNA SU';
-            if(!arc.classList.contains('hidden')) renderArchivio();
+            const archivio = document.getElementById('archivioInterventi');
+            const inputS = document.getElementById('input-section');
+            const btn = document.getElementById('btnToggleArchivio');
+            if (archivio.classList.contains('hidden')) {
+                archivio.classList.remove('hidden');
+                inputS.classList.add('hidden');
+                btn.textContent = 'Torna al Calcolo';
+                renderArchivio();
+            } else {
+                archivio.classList.add('hidden');
+                inputS.classList.remove('hidden');
+                btn.textContent = 'Gestione Archivio';
+            }
         }
 
         function stampaRiepilogo() {
-            const tit = `Intervento_${document.getElementById('nIntervento').value.replace('/','-')}_${document.getElementById('nomeScuola').value}`;
-            document.title = tit;
+            const nI = document.getElementById('nIntervento').value.replace(/\//g, '-');
+            const sc = document.getElementById('nomeScuola').value.trim() || 'Scuola';
+            const originalTitle = document.title;
+            document.title = `Intervento_${nI}_${sc}`;
             window.print();
+            setTimeout(() => { document.title = originalTitle; }, 1000);
         }
 
         window.onload = () => {
-            const u = localStorage.getItem('ultimoNumero_'+annoCorrente) || "074";
-            document.getElementById('nIntervento').value = (parseInt(u)+1).toString().padStart(3,'0') + "/" + annoCorrente;
-            document.getElementById('dataIntervento').valueAsDate = new Date();
+            document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT');
+            initializeInputs(); 
             calcolaManodopera();
         };
     </script>
