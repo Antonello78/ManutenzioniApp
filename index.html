@@ -142,7 +142,7 @@
             </div>
         </div>
 
-        <div class="text-center text-gray-400 text-[10px] mt-8 border-t pt-4">Ditta D'Angelo Antonello — v1.1.5</div>
+        <div class="text-center text-gray-400 text-[10px] mt-8 border-t pt-4">Ditta D'Angelo Antonello — v1.1.6</div>
     </div>
 
     <div id="modalCopia" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 no-print">
@@ -158,6 +158,7 @@
 
     <script>
         const STORAGE_KEY = 'manodoperaInterventi';
+        const API_URL = 'https://manodopera-api.vercel.app/api/interventi'; // URL del tuo database Vercel
         const INIZIO_2025 = 74; 
         let annoSelezionato = new Date().getFullYear().toString().substring(2);
 
@@ -184,6 +185,17 @@
             let ultimo = parseInt(localStorage.getItem(counterKey)) || (year === '25' ? INIZIO_2025 : 0);
             if(incrementa) { document.getElementById('nIntervento').value = (ultimo + 1).toString().padStart(3, '0') + '/' + year;
             } else if (!document.getElementById('nIntervento').value) { document.getElementById('nIntervento').value = (ultimo + 1).toString().padStart(3, '0') + '/' + year; }
+        }
+
+        async function syncWithServer() {
+            try {
+                const response = await fetch(API_URL);
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                    renderArchivio();
+                }
+            } catch (e) { console.log("Offline o errore sync"); }
         }
 
         function pulisciEPerparaNuovo() {
@@ -219,11 +231,11 @@
             document.getElementById('resOperai').innerHTML = numOperai + (flagUrgenza ? ' <span class="text-red-600 font-bold">(URG)</span>' : '');
         }
 
-        function salvaIntervento() { 
+        async function salvaIntervento() { 
             const nI = document.getElementById('nIntervento').value;
             const year = nI.split('/')[1];
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            interventi.push({
+            const nuovo = {
                 id: Date.now().toString(),
                 nIntervento: nI,
                 dataIntervento: document.getElementById('dataIntervento').value, 
@@ -236,10 +248,21 @@
                 tariffaBase: document.getElementById('inputTariffaBase').value,
                 flagUrgenza: document.getElementById('flagUrgenza').checked,
                 totaleManodopera: document.getElementById('totaleManodopera').textContent
-            });
+            };
+            interventi.push(nuovo);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
             localStorage.setItem('numeroIntervento_' + year, nI.split('/')[0]);
-            showMessage('success', 'Intervento salvato!');
+            
+            // Sync con Server Vercel
+            try {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(nuovo)
+                });
+            } catch (e) { console.log("Errore invio server"); }
+
+            showMessage('success', 'Intervento salvato e sincronizzato!');
         }
 
         function renderArchivio() {
@@ -252,9 +275,19 @@
             filtrati.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
             listaDiv.innerHTML = filtrati.length ? '' : '<p class="text-gray-500 text-center py-4">Nessun intervento trovato.</p>';
             filtrati.forEach(i => {
-                // AGGIUNTA SEGNALAZIONE "URGENTE" NELL'ELENCO
                 const tagUrgenza = i.flagUrgenza ? '<span class="text-red-600 font-bold ml-1">(URGENTE)</span>' : '';
-                listaDiv.innerHTML += `<div class="p-3 border rounded-lg bg-white flex justify-between items-center shadow-sm"><div><span class="font-bold text-blue-700"># ${i.nIntervento}</span><div class="text-sm font-semibold">${i.nomeScuola || 'N/A'}</div><div class="text-xs text-gray-500">${formatDate(i.dataIntervento)}${tagUrgenza} — ${i.totaleManodopera}</div></div><div class="flex space-x-2"><button onclick="apriModalCopia('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md">📋</button><button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md">✏️</button></div></div>`;
+                listaDiv.innerHTML += `
+                <div class="p-3 border rounded-lg bg-white flex justify-between items-center shadow-sm">
+                    <div>
+                        <span class="font-bold text-blue-700"># ${i.nIntervento}</span>
+                        <div class="text-sm font-semibold">${i.nomeScuola || 'N/A'}</div>
+                        <div class="text-xs text-gray-500">${formatDate(i.dataIntervento)}${tagUrgenza} — ${i.totaleManodopera}</div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button title="Copia riga preventivo" onclick="apriModalCopia('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md">📋</button>
+                        <button title="Carica intervento" onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md">✏️</button>
+                    </div>
+                </div>`;
             });
         }
 
@@ -306,7 +339,9 @@
 
         window.onload = () => {
             document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT');
-            initializeInputs(); calcolaManodopera();
+            initializeInputs(); 
+            calcolaManodopera();
+            syncWithServer(); // Avvia la sincronizzazione all'apertura
         };
     </script>
 </body>
