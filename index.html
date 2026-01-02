@@ -35,7 +35,8 @@
     @media print {
         .no-print,
         #input-section > div:not(.border-t),
-        #modalPreventivo { 
+        #modalPreventivo,
+        #btnNuovoIntervento { 
             display: none !important;
         }
         
@@ -110,6 +111,13 @@
         </div>
         
         <div id="input-section">
+            <button id="btnNuovoIntervento" onclick="nuovoIntervento()" class="w-full mb-6 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-lg border-2 border-blue-200 flex items-center justify-center transition duration-150 no-print">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                NUOVO INTERVENTO
+            </button>
+
             <h2 class="text-xl font-bold text-gray-700 mb-4 no-print">Dettagli Intervento Corrente</h2>
 
             <div class="grid grid-cols-2 gap-4">
@@ -232,17 +240,11 @@
 
         <div id="archivioInterventi" class="hidden mt-4">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio Interventi Salvati</h2>
-            
-            <div id="filtroAnni" class="flex flex-wrap gap-2 mb-4">
-                </div>
-
+            <div id="filtroAnni" class="flex flex-wrap gap-2 mb-4"></div>
             <div class="mb-4">
-                <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca scuola, plesso o N° intervento..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+                <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca scuola, plesso o N° intervento..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm">
             </div>
-
-            <div id="listaInterventi" class="space-y-3">
-                <p class="text-gray-500">Nessun intervento salvato.</p>
-            </div>
+            <div id="listaInterventi" class="space-y-3"></div>
         </div> 
 
         <div class="border-t border-gray-200 mt-6 pt-4 no-print"></div>
@@ -250,7 +252,7 @@
             <h3 class="text-lg font-semibold text-gray-700">Opzioni Report e Archivio</h3>
             <div>
                 <label for="emailDestinatario" class="block text-sm font-medium text-gray-600">Email di Destinazione (default)</label>
-                <input type="email" id="emailDestinatario" onchange="salvaEmail()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-green-500 focus:border-blue-500 text-lg" placeholder="amministrazione@scuola.it">
+                <input type="email" id="emailDestinatario" onchange="salvaEmail()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg" placeholder="amministrazione@scuola.it">
             </div>
         </div>
 
@@ -276,15 +278,15 @@
         </p>
 
         <div class="text-center text-gray-400 text-[10px] mt-4 border-t pt-4">
-            Ditta D'Angelo Antonello — v1.1.3 (Release 2026)
+            Ditta D'Angelo Antonello — v1.1.4 (Final Fix 2026)
         </div>
     </div>
 
     <script>
-        const ORARIO_INIZIO_ORD = 8 * 60; 
-        const ORARIO_FINE_ORD = 17 * 60; 
         const STORAGE_KEY = 'manodoperaInterventi';
         const EMAIL_KEY = 'reportEmailDestinatario'; 
+        const ORARIO_INIZIO_ORD = 8 * 60; 
+        const ORARIO_FINE_ORD = 17 * 60; 
         const INIZIO_2025 = 74; 
         
         let annoSelezionato = new Date().getFullYear().toString().substring(2);
@@ -297,7 +299,6 @@
         function formatDate(dateString) {
             if (!dateString) return 'N/A';
             const date = new Date(dateString + 'T00:00:00'); 
-            if (isNaN(date.getTime())) return 'N/A';
             const giornoSett = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
             const giorno = String(date.getDate()).padStart(2, '0');
             const mese = String(date.getMonth() + 1).padStart(2, '0');
@@ -306,45 +307,48 @@
         }
 
         function showMessage(type, message) {
-            document.getElementById('errorMsg').classList.add('hidden');
-            document.getElementById('successMsg').classList.add('hidden');
-            const msgElement = document.getElementById(type === 'error' ? 'errorMsg' : 'successMsg');
-            if (msgElement) {
-                msgElement.textContent = message;
-                msgElement.classList.remove('hidden');
-                setTimeout(() => msgElement.classList.add('hidden'), 5000); 
-            }
+            const err = document.getElementById('errorMsg');
+            const succ = document.getElementById('successMsg');
+            err.classList.add('hidden'); succ.classList.add('hidden');
+            const msgElement = type === 'error' ? err : succ;
+            msgElement.textContent = message;
+            msgElement.classList.remove('hidden');
+            setTimeout(() => msgElement.classList.add('hidden'), 5000); 
         }
 
-        function generateId() { return Date.now().toString(); }
         function getYearCounterKey(year) { return 'numeroIntervento_' + year; }
 
         function initializeInputs(keepNIntervento = false) {
             const dataInput = document.getElementById('dataIntervento');
             if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
-            const numOperaiInput = document.getElementById('numOperai');
-            if (parseInt(numOperaiInput.value) < 1 || isNaN(parseInt(numOperaiInput.value))) { numOperaiInput.value = '1'; }
             document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
-            const nInterventoInput = document.getElementById('nIntervento');
-            const dataCorrente = new Date();
-            const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
-            const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+            
             if (!keepNIntervento) {
-                const ultimoNumeroSalvato = localStorage.getItem(COUNTER_KEY_YEARLY);
-                if (ultimoNumeroSalvato === null) {
-                    let numeroPartenza = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0; 
-                    localStorage.setItem(COUNTER_KEY_YEARLY, numeroPartenza.toString());
+                const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
+                const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+                if (localStorage.getItem(COUNTER_KEY_YEARLY) === null) {
+                    localStorage.setItem(COUNTER_KEY_YEARLY, (CURRENT_YEAR === '25' ? INIZIO_2025 : 0).toString());
                 }
                 let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY) || '0');
-                let prossimoNumero = ultimoNumero + 1;
-                const prossimoNumeroFormattato = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
-                const inputValoreSequenziale = parseInt(nInterventoInput.value.split('/')[0]) || 0;
-                if (!nInterventoInput.value || inputValoreSequenziale < prossimoNumero) {
-                    nInterventoInput.value = prossimoNumeroFormattato;
-                }
+                document.getElementById('nIntervento').value = (ultimoNumero + 1).toString().padStart(3, '0') + '/' + CURRENT_YEAR;
             }
         }
-        
+
+        // --- FUNZIONE NUOVO INTERVENTO CORRETTA ---
+        function nuovoIntervento() {
+            if(confirm("Vuoi iniziare un nuovo intervento? I dati non salvati andranno persi.")) {
+                document.getElementById('nomeScuola').value = '';
+                document.getElementById('plessoEdificio').value = '';
+                document.getElementById('oraInizio').value = '09:00';
+                document.getElementById('oraFine').value = '10:15';
+                document.getElementById('numOperai').value = '1';
+                document.getElementById('flagUrgenza').checked = false;
+                initializeInputs(false); 
+                calcolaManodopera();
+                showMessage('success', 'Modulo pronto per un nuovo inserimento.');
+            }
+        }
+
         function calcolaManodopera() {
             const oraInizioInput = document.getElementById('oraInizio').value;
             const oraFineInput = document.getElementById('oraFine').value;
@@ -352,369 +356,119 @@
             const costoUscitaInput = parseFloat(document.getElementById('inputCostoUscita').value) || 0;
             const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
             const flagUrgenza = document.getElementById('flagUrgenza').checked;
-            const nIntervento = document.getElementById('nIntervento').value; 
+
+            const nIntervento = document.getElementById('nIntervento').value;
             const dataIntervento = document.getElementById('dataIntervento').value;
             const nomeScuola = document.getElementById('nomeScuola').value;
             const plessoEdificio = document.getElementById('plessoEdificio').value;
 
-            function resetResults() {
-                document.getElementById('totaleManodopera').textContent = '---';
-                document.getElementById('tariffaOraria').textContent = '---';
-                document.getElementById('minutiEffettivi').textContent = '---';
-                document.getElementById('minutiFatturabili').textContent = '---';
-                document.getElementById('costoAggiuntivo').textContent = '---';
-                document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €'; 
-                document.getElementById('resNIntervento').textContent = nIntervento || '---';
-                document.getElementById('resData').textContent = formatDate(dataIntervento) || '---';
-                document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
-                document.getElementById('resOrario').textContent = (oraInizioInput && oraFineInput) ? oraInizioInput + ' - ' + oraFineInput : '---';
-                document.getElementById('resOperai').textContent = numOperai;
-            }
+            if (!oraInizioInput || !oraFineInput) return;
 
-            if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) { resetResults(); return; }
-            const oraInizioMinuti = parseTime(oraInizioInput);
-            const oraFineMinuti = parseTime(oraFineInput);
-            if (oraFineMinuti <= oraInizioMinuti) { resetResults(); return; }
-            const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
-            const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
-            const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
-            let tariffaOraria = tariffaBaseInput; 
-            if (flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD) {
-                tariffaOraria = tariffaBaseInput + 10;
-            }
-            const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
-            const oreAggiuntiveDecimali = minutiOltre60 / 60;
-            const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
-            const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
+            const minI = parseTime(oraInizioInput);
+            const minF = parseTime(oraFineInput);
+            const durata = Math.max(0, minF - minI);
+            const minutiTotali = durata * numOperai;
+            const minutiFatturabili = Math.ceil(minutiTotali / 15) * 15;
 
-            const oreFatturabili = (minutiFatturabili / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            let tariffa = tariffaBaseInput;
+            if (flagUrgenza || minI < ORARIO_INIZIO_ORD || minF > ORARIO_FINE_ORD) tariffa += 10;
 
-            document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
-            document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
-            document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${oreFatturabili} ore)`;
-            
+            const costoAggiuntivo = (Math.max(0, minutiFatturabili - 60) / 60) * tariffa;
+            const totale = costoUscitaInput + costoAggiuntivo;
+
+            document.getElementById('tariffaOraria').textContent = tariffa.toFixed(2) + ' €/ora';
+            document.getElementById('minutiEffettivi').textContent = durata + ' min x ' + numOperai + ' op = ' + minutiTotali + ' min/uomo';
+            document.getElementById('minutiFatturabili').textContent = minutiFatturabili + ' min (' + (minutiFatturabili/60).toFixed(2) + ' ore)';
             document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €';
-            document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2) + ' €';
-            document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2) + ' €'; 
-            document.getElementById('resNIntervento').textContent = nIntervento || 'N/A';
-            document.getElementById('resData').textContent = formatDate(dataIntervento); 
-            document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
+            document.getElementById('costoAggiuntivo').textContent = costoAggiuntivo.toFixed(2) + ' €';
+            document.getElementById('totaleManodopera').textContent = totale.toFixed(2) + ' €';
+
+            document.getElementById('resNIntervento').textContent = nIntervento || '---';
+            document.getElementById('resData').textContent = formatDate(dataIntervento);
+            document.getElementById('resScuola').textContent = (nomeScuola || '---') + (plessoEdificio ? ' / ' + plessoEdificio : '');
             document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
-            let operaiDisplay = numOperai;
-            if (flagUrgenza) { operaiDisplay += ' <span class="text-red-600 font-bold">(URGENZA)</span>'; }
-            document.getElementById('resOperai').innerHTML = operaiDisplay;
+            document.getElementById('resOperai').innerHTML = numOperai + (flagUrgenza ? ' <span class="text-red-600 font-bold">(URGENZA)</span>' : '');
         }
 
-        async function caricaDatiServer() {
-            try {
-                const dataCorrente = new Date();
-                const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
-                const interventiResponse = await fetch('/api/getArchivio'); 
-                const interventiData = await interventiResponse.json();
-                if (interventiResponse.ok && interventiData.interventi) {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiData.interventi));
-                }
-                const contatoreResponse = await fetch(`/api/getNextNumber?anno=${CURRENT_YEAR}`); 
-                const contatoreData = await contatoreResponse.json();
-                if (contatoreResponse.ok && contatoreData.numero) {
-                    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-                    localStorage.setItem(COUNTER_KEY_YEARLY, contatoreData.numero.toString());
-                }
-            } catch (error) { console.error('Errore sincronizzazione:', error); }
-        }
-        
-        function salvaEmail() {
-             const email = document.getElementById('emailDestinatario').value.trim();
-             localStorage.setItem(EMAIL_KEY, email);
-             showMessage('success', 'Email di destinazione salvata.');
-        }
+        async function salvaIntervento() {
+            calcolaManodopera();
+            const niVal = document.getElementById('nIntervento').value;
+            const yr = niVal.split('/')[1];
+            const num = parseInt(niVal.split('/')[0]);
 
-        async function salvaIntervento() { 
-            calcolaManodopera(); 
-            const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
-            const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
-            const nInterventoParts = nInterventoCompleto.split('/');
-            if (nInterventoParts.length !== 2 || nInterventoParts[1] !== CURRENT_YEAR) {
-                 showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/${CURRENT_YEAR}.`); 
-                 return;
-            }
-            const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
-            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
             const intervento = {
-                id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
-                nIntervento: nInterventoCompleto,
-                dataIntervento: document.getElementById('dataIntervento').value, 
+                id: Date.now().toString(),
+                nIntervento: niVal,
+                dataIntervento: document.getElementById('dataIntervento').value,
                 nomeScuola: document.getElementById('nomeScuola').value,
                 plessoEdificio: document.getElementById('plessoEdificio').value,
                 oraInizio: document.getElementById('oraInizio').value,
                 oraFine: document.getElementById('oraFine').value,
-                numOperai: parseInt(document.getElementById('numOperai').value),
+                numOperai: document.getElementById('numOperai').value,
                 costoUscita: document.getElementById('inputCostoUscita').value,
                 tariffaBase: document.getElementById('inputTariffaBase').value,
                 flagUrgenza: document.getElementById('flagUrgenza').checked,
-                tariffaOraria: document.getElementById('tariffaOraria').textContent,
                 totaleManodopera: document.getElementById('totaleManodopera').textContent
             };
-            try {
-                const response = await fetch('/api/saveIntervento', { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        numeroIntervento: numeroCorrenteSequenziale,
-                        anno: CURRENT_YEAR,
-                        datiIntervento: intervento,
-                        isUpdate: existingIndex > -1
-                    })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Errore nel salvataggio remoto.');
-                if (existingIndex > -1) {
-                    interventi[existingIndex] = intervento;
-                    showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
-                } else {
-                    interventi.push(intervento); 
-                    showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
-                    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-                    localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
-                }
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
-            } catch (error) {
-                showMessage('error', `Errore Server: ${error.message}`);
-                return; 
-            }
-            document.getElementById('nomeScuola').value = '';
-            document.getElementById('plessoEdificio').value = '';
-            initializeInputs(); 
-            calcolaManodopera(); 
-            renderArchivio();
-        }
-        
-        function caricaIntervento(id) {
-            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const intervento = interventi.find(i => i.id === id);
-            if (intervento) {
-                document.getElementById('nIntervento').value = intervento.nIntervento; 
-                document.getElementById('dataIntervento').value = intervento.dataIntervento;
-                document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
-                document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
-                document.getElementById('oraInizio').value = intervento.oraInizio;
-                document.getElementById('oraFine').value = intervento.oraFine;
-                document.getElementById('numOperai').value = intervento.numOperai;
-                document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
-                document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
-                document.getElementById('flagUrgenza').checked = intervento.flagUrgenza;
-                calcolaManodopera(); 
-                toggleArchivio(); 
-                showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
-                initializeInputs(true);
-            }
-        }
 
-        function cancellaIntervento(id) {
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const intervento = interventi.find(i => i.id === id);
-            if (!intervento) return;
-            const nInterventoCancellato = intervento.nIntervento;
-            if (confirm(`Sei sicuro di voler cancellare l'intervento N° ${nInterventoCancellato}?`)) {
-                fetch(`/api/deleteIntervento?nIntervento=${nInterventoCancellato}`, { method: 'DELETE' })
-                .then(response => {
-                    if (!response.ok) throw new Error(`Eliminazione remota fallita.`);
-                    return response.json();
-                })
-                .then(() => {
-                    interventi = interventi.filter(i => i.id !== id);
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
-                    showMessage('success', `Intervento N° ${nInterventoCancellato} cancellato.`);
-                    renderArchivio();
-                    initializeInputs();
-                    calcolaManodopera();
-                })
-                .catch(error => { showMessage('error', `Errore: ${error.message}`); });
-            }
-        }
+            const idx = interventi.findIndex(x => x.nIntervento === niVal);
+            if(idx > -1) interventi[idx] = intervento; else interventi.push(intervento);
 
-        function chiudiModale() {
-            document.getElementById('modalPreventivo').classList.add('hidden');
-        }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+            localStorage.setItem(getYearCounterKey(yr), num.toString());
 
-        function copiaEChiudi() {
-            const testo = document.getElementById('testoPreventivoModal').value;
-            navigator.clipboard.writeText(testo).then(() => {
-                showMessage('success', 'riga di preventivo copiata');
-                chiudiModale();
-            }).catch(err => { showMessage('error', 'Errore nella copia: ' + err); });
+            showMessage('success', 'Intervento ' + niVal + ' salvato con successo!');
+            renderArchivio();
+            // NOTA: Non resetto i campi qui per permettere stampa/copia.
         }
 
         function copiaRigaPreventivo(id) {
-            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const i = interventi.find(item => item.id === id);
-            if (!i) return;
-            const dataFormattata = formatDate(i.dataIntervento);
-            const scuolaPlesso = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
-            let testo = "";
-            if (i.flagUrgenza) {
-                testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nIntervento tecnico con carattere di URGENZA IMMEDIATA: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata e il calcolo della manodopera con tariffa urgenza arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
-            } else {
-                testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
-            }
-            
-            // Invece di copiare subito, mostro la modale
+            const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const i = list.find(x => x.id === id);
+            if(!i) return;
+            const desc = i.flagUrgenza ? "URGENZA IMMEDIATA" : "manutenzione ordinaria";
+            const testo = `Rif. Intervento n. ${i.nIntervento} del ${formatDate(i.dataIntervento)} presso ${i.nomeScuola}.\nPrestazione tecnica di ${desc}: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata e il calcolo della manodopera arrotondata al quarto d’ora superiore. Importo totale: € ${i.totaleManodopera}`;
             document.getElementById('testoPreventivoModal').value = testo;
             document.getElementById('modalPreventivo').classList.remove('hidden');
         }
-        
-        function renderArchivio() {
-            const listaDiv = document.getElementById('listaInterventi');
-            const filtroAnniDiv = document.getElementById('filtroAnni');
-            const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
-            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            
-            const anniPresenti = [...new Set(interventi.map(i => i.nIntervento.split('/')[1]))].sort((a, b) => b - a);
-            
-            filtroAnniDiv.innerHTML = '';
-            anniPresenti.forEach(anno => {
-                const isActive = anno === annoSelezionato;
-                const btnClass = isActive ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
-                filtroAnniDiv.innerHTML += `
-                    <button onclick="cambiaAnno('${anno}')" class="px-4 py-1 rounded-full font-bold text-sm transition ${btnClass}">
-                        20${anno}
-                    </button>`;
-            });
 
-            let interventiFiltrati = interventi.filter(i => {
-                const annoIntervento = i.nIntervento.split('/')[1];
-                const matchAnno = annoIntervento === annoSelezionato;
-                const matchRicerca = i.nIntervento.toLowerCase().includes(termineRicerca) ||
-                                    (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termineRicerca)) ||
-                                    (i.plessoEdificio && i.plessoEdificio.toLowerCase().includes(termineRicerca));
-                return matchAnno && matchRicerca;
-            });
-
-            interventiFiltrati.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
-            
-            if (interventiFiltrati.length === 0) {
-                listaDiv.innerHTML = `<p class="text-gray-500 text-center py-8 border-2 border-dashed rounded-lg">Nessun intervento per l'anno 20${annoSelezionato}.</p>`;
-                return;
-            }
-            
-            listaDiv.innerHTML = ''; 
-            interventiFiltrati.forEach(i => {
-                const badgeUrgenza = i.flagUrgenza ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200 rounded">Urgente</span>` : '';
-                const itemHtml = `
-                    <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
-                        <div class="flex-1 min-w-[200px]">
-                            <div class="flex items-center">
-                                <span class="font-bold text-blue-700 text-lg"># ${i.nIntervento}</span>
-                                ${badgeUrgenza}
-                            </div>
-                            <div class="text-sm font-semibold text-gray-800">${i.nomeScuola || 'N/A'}</div>
-                            <div class="text-xs text-gray-500">${i.plessoEdificio || ''} — ${formatDate(i.dataIntervento)}</div>
-                            <div class="text-sm font-bold text-green-600 mt-1">${i.totaleManodopera}</div>
-                        </div>
-                        <div class="flex space-x-2 mt-2 sm:mt-0">
-                             <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100" title="Copia riga preventivo">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-                            </button>
-                            <button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200" title="Carica/Modifica">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            </button>
-                            <button onclick="cancellaIntervento('${i.id}')" class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100" title="Elimina">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
-                        </div>
-                    </div>`;
-                listaDiv.innerHTML += itemHtml;
-            });
+        function chiudiModale() { document.getElementById('modalPreventivo').classList.add('hidden'); }
+        function copiaEChiudi() {
+            navigator.clipboard.writeText(document.getElementById('testoPreventivoModal').value);
+            chiudiModale();
+            showMessage('success', 'Riga di preventivo copiata!');
         }
 
-        function cambiaAnno(anno) {
-            annoSelezionato = anno;
-            renderArchivio();
+        function renderArchivio() {
+            const list = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const container = document.getElementById('listaInterventi');
+            container.innerHTML = '';
+            list.filter(x => x.nIntervento.includes(annoSelezionato)).sort((a,b) => b.nIntervento.localeCompare(a.nIntervento)).forEach(i => {
+                container.innerHTML += `
+                <div class="p-3 border rounded-lg bg-white flex justify-between items-center shadow-sm">
+                    <div>
+                        <div class="font-bold text-blue-700">#${i.nIntervento} - ${i.nomeScuola}</div>
+                        <div class="text-xs text-gray-500">${formatDate(i.dataIntervento)} | Totale: ${i.totaleManodopera}</div>
+                    </div>
+                    <button onclick="copiaRigaPreventivo('${i.id}')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded-md text-sm font-bold">Copia</button>
+                </div>`;
+            });
         }
 
         function toggleArchivio() {
-            const archivio = document.getElementById('archivioInterventi');
-            const inputSection = document.getElementById('input-section');
-            const btn = document.getElementById('btnToggleArchivio');
-            const isHidden = archivio.classList.contains('hidden');
-            if (isHidden) {
-                archivio.classList.remove('hidden');
-                inputSection.classList.add('hidden');
-                btn.textContent = 'Torna al Calcolo';
-                renderArchivio();
-            } else {
-                archivio.classList.add('hidden');
-                inputSection.classList.remove('hidden');
-                btn.textContent = 'Gestione Archivio';
-            }
+            document.getElementById('archivioInterventi').classList.toggle('hidden');
+            document.getElementById('input-section').classList.toggle('hidden');
+            renderArchivio();
         }
 
-        function stampaRiepilogo() {
-            const nIntervento = document.getElementById('nIntervento').value.replace(/\//g, '-');
-            const nomeScuola = document.getElementById('nomeScuola').value.trim() || 'SenzaNome';
-            const titoloOriginale = document.title;
-            
-            document.title = `Intervento_${nIntervento}_${nomeScuola}`;
-            window.print();
-            
-            setTimeout(() => { document.title = titoloOriginale; }, 1000);
-        }
-
-        async function inviaReport() {
-            calcolaManodopera();
-            const email = localStorage.getItem(EMAIL_KEY);
-            if (!email) { 
-                showMessage('error', 'Configura prima l\'email di destinazione nelle opzioni.'); 
-                return; 
-            }
-
-            const btn = document.getElementById('btnInviaReport');
-            btn.disabled = true;
-            btn.textContent = 'Invio in corso...';
-
-            const payload = {
-                nIntervento: document.getElementById('resNIntervento').textContent,
-                dataIntervento: document.getElementById('resData').textContent,
-                nomeScuola: document.getElementById('nomeScuola').value || "N/A",
-                plessoEdificio: document.getElementById('plessoEdificio').value || "",
-                orario: document.getElementById('resOrario').textContent,
-                operai: document.getElementById('numOperai').value,
-                tariffa: document.getElementById('tariffaOraria').textContent,
-                minutiFatturabili: document.getElementById('minutiFatturabili').textContent,
-                costoUscita: document.getElementById('costoUscita').textContent,
-                costoAggiuntivo: document.getElementById('costoAggiuntivo').textContent,
-                totale: document.getElementById('totaleManodopera').textContent,
-                destinatario: email
-            };
-
-            try {
-                const response = await fetch('/api/inviaReport', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    showMessage('success', 'Email inviata con successo!');
-                } else {
-                    throw new Error(result.message || 'Errore durante l\'invio.');
-                }
-            } catch (error) {
-                showMessage('error', 'Errore: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Invia Report (Email)';
-            }
-        }
+        function stampaRiepilogo() { window.print(); }
+        function salvaEmail() { localStorage.setItem(EMAIL_KEY, document.getElementById('emailDestinatario').value); }
 
         window.onload = () => {
-            const dataOggi = new Date().toLocaleDateString('it-IT');
-            document.getElementById('dataStampa').textContent = dataOggi;
-            caricaDatiServer().finally(() => {
-                initializeInputs();
-                calcolaManodopera();
-            });
+            document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT');
+            initializeInputs();
+            calcolaManodopera();
         };
     </script>
 </body>
