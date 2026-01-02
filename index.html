@@ -35,7 +35,8 @@
     @media print {
         .no-print,
         #input-section > div:not(.border-t),
-        #modalPreventivo { 
+        #modalPreventivo,
+        #btnNuovoIntervento { 
             display: none !important;
         }
         
@@ -110,6 +111,13 @@
         </div>
         
         <div id="input-section">
+            <button id="btnNuovoIntervento" onclick="confermaNuovoIntervento()" class="w-full mb-6 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-lg border-2 border-blue-200 flex items-center justify-center transition duration-150 no-print">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                NUOVO INTERVENTO
+            </button>
+
             <h2 class="text-xl font-bold text-gray-700 mb-4 no-print">Dettagli Intervento Corrente</h2>
 
             <div class="grid grid-cols-2 gap-4">
@@ -344,6 +352,21 @@
                 }
             }
         }
+
+        // MODIFICA N. 5: Funzioni per il reset controllato
+        function confermaNuovoIntervento() {
+            if (confirm("Vuoi iniziare un nuovo intervento? I campi attuali verranno svuotati.")) {
+                document.getElementById('nomeScuola').value = '';
+                document.getElementById('plessoEdificio').value = '';
+                document.getElementById('oraInizio').value = '09:00';
+                document.getElementById('oraFine').value = '10:15';
+                document.getElementById('numOperai').value = '1';
+                document.getElementById('flagUrgenza').checked = false;
+                initializeInputs(false); 
+                calcolaManodopera();
+                showMessage('success', 'Modulo pronto per un nuovo intervento.');
+            }
+        }
         
         function calcolaManodopera() {
             const oraInizioInput = document.getElementById('oraInizio').value;
@@ -473,7 +496,7 @@
                     interventi[existingIndex] = intervento;
                     showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
-                    interventi.push(intervento); 
+                    interventi.push(intervention); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
@@ -483,17 +506,14 @@
                 showMessage('error', `Errore Server: ${error.message}`);
                 return; 
             }
-            document.getElementById('nomeScuola').value = '';
-            document.getElementById('plessoEdificio').value = '';
-            initializeInputs(); 
-            calcolaManodopera(); 
+            // MODIFICA N. 5: Non svuoto più i campi qui, lascio all'utente premere "NUOVO"
             renderArchivio();
         }
         
         function caricaIntervento(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
-            if (intervento) {
+            if (intervention) {
                 document.getElementById('nIntervento').value = intervento.nIntervento; 
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
@@ -559,7 +579,6 @@
                 testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
             }
             
-            // Invece di copiare subito, mostro la modale
             document.getElementById('testoPreventivoModal').value = testo;
             document.getElementById('modalPreventivo').classList.remove('hidden');
         }
