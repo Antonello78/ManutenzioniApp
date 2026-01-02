@@ -361,13 +361,11 @@
             const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
             const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
 
-            // CALCOLO ORE PER FATTURA (Modifica N.1)
             const oreFatturabili = (minutiFatturabili / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
             document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
             
-            // AGGIORNAMENTO DESCRIZIONE CON ORE (Modifica N.1)
             document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${oreFatturabili} ore)`;
             
             document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €';
@@ -512,21 +510,21 @@
         }
 
         function copiaRigaPreventivo(id) {
-    const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const i = interventi.find(item => item.id === id);
-    if (!i) return;
-    const dataFormattata = formatDate(i.dataIntervento);
-    const scuolaPlesso = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
-    let testo = "";
-    if (i.flagUrgenza) {
-        testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nIntervento tecnico con carattere di URGENZA IMMEDIATA: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata e il calcolo della manodopera con tariffa urgenza arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
-    } else {
-        testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
-    }
-    navigator.clipboard.writeText(testo).then(() => {
-        showMessage('success', 'riga di preventivo creata');
-    }).catch(err => { showMessage('error', 'Errore nella copia: ' + err); });
-}
+            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const i = interventi.find(item => item.id === id);
+            if (!i) return;
+            const dataFormattata = formatDate(i.dataIntervento);
+            const scuolaPlesso = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
+            let testo = "";
+            if (i.flagUrgenza) {
+                testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nIntervento tecnico con carattere di URGENZA IMMEDIATA: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata e il calcolo della manodopera con tariffa urgenza arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+            } else {
+                testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+            }
+            navigator.clipboard.writeText(testo).then(() => {
+                showMessage('success', 'riga di preventivo creata');
+            }).catch(err => { showMessage('error', 'Errore nella copia: ' + err); });
+        }
         
         function renderArchivio() {
             const listaDiv = document.getElementById('listaInterventi');
@@ -604,7 +602,22 @@
             }
         }
 
-        function stampaRiepilogo() { window.print(); }
+        // MODIFICA N.2: Personalizzazione nome file PDF
+        function stampaRiepilogo() {
+            const nIntervento = document.getElementById('nIntervento').value.replace(/\//g, '-');
+            const nomeScuola = document.getElementById('nomeScuola').value.trim() || 'SenzaNome';
+            const titoloOriginale = document.title;
+            
+            // Imposta temporaneamente il titolo della pagina (usato dal browser come nome file)
+            document.title = `Intervento_${nIntervento}_${nomeScuola}`;
+            
+            window.print();
+            
+            // Ripristina il titolo originale
+            setTimeout(() => {
+                document.title = titoloOriginale;
+            }, 1000);
+        }
 
         async function inviaReport() {
             calcolaManodopera();
