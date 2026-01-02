@@ -13,20 +13,61 @@
     <meta name="apple-mobile-web-app-title" content="Calcolo Manodopera">
     <link rel="manifest" href="manifest.json">
 <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; padding-top: 1rem; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f7f9fc;
+        padding-top: 1rem;
+     }
     input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type=number] { -moz-appearance: textfield; }
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
     
     @media print {
-        .no-print, #input-section > div:not(.border-t) { display: none !important; }
-        #input-section { display: block !important; }
-        body { padding: 0; background-color: white; margin: 0; }
-        #app { box-shadow: none !important; border: none !important; max-width: none !important; margin: 0 !important; padding: 0.5rem !important; width: 210mm; transform: scale(0.82); transform-origin: top left; page-break-inside: avoid !important; }
-        #unified-header { display: block !important; padding-bottom: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #ccc; }
-        .print-avoid-break, .print-avoid-break *, .flex { page-break-inside: avoid !important; }
-        .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        @page { size: A4 portrait; margin: 0.5cm !important; }
+        .no-print, #input-section > div:not(.border-t) {
+            display: none !important;
+        }
+        #input-section {
+            display: block !important;
+        }
+        body {
+            padding: 0;
+            background-color: white;
+            margin: 0;
+        }
+        #app {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0.5rem !important;
+            width: 210mm;
+            transform: scale(0.82);
+            transform-origin: top left;
+            page-break-inside: avoid !important;
+        }
+        #unified-header {
+            display: block !important;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #ccc;
+        }
+        .print-avoid-break, .print-avoid-break *, .flex {
+            page-break-inside: avoid !important;
+        }
+        .text-red-600 {
+            color: #dc2626 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 0.5cm !important;
+        }
     }
 </style>
 </head>
@@ -212,7 +253,7 @@
         const STORAGE_KEY = 'manodoperaInterventi';
         const EMAIL_KEY = 'reportEmailDestinatario'; 
         const INIZIO_2025 = 74; 
-        // INDIRIZZO SERVER CORRETTO
+        // INDIRIZZO SERVER AGGIORNATO
         const API_BASE = 'https://manodopera-storage.vercel.app/api';
 
         function parseTime(timeString) {
@@ -417,7 +458,7 @@
         function caricaIntervento(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
-            if (intervention) {
+            if (intervento) {
                 document.getElementById('nIntervento').value = intervento.nIntervento; 
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
@@ -581,6 +622,7 @@
             };
 
             try {
+                // INDIRIZZO EMAIL AGGIORNATO
                 const response = await fetch(`${API_BASE}/inviaReport`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
