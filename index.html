@@ -360,11 +360,16 @@
             const oreAggiuntiveDecimali = minutiOltre60 / 60;
             const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
             const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
+
+            // CALCOLO ORE PER FATTURA (Modifica N.1)
+            const oreFatturabili = (minutiFatturabili / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
             document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
             document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
-            let minutiFatturabiliDesc = minutiFatturabili + ' min/uomo';
-            if (minutiFatturabili > 60) { minutiFatturabiliDesc += ` (${minutiOltre60} min oltre la 1ª ora)`; }
-            document.getElementById('minutiFatturabili').textContent = minutiFatturabiliDesc;
+            
+            // AGGIORNAMENTO DESCRIZIONE CON ORE (Modifica N.1)
+            document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${oreFatturabili} ore)`;
+            
             document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €';
             document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2) + ' €';
             document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2) + ' €'; 
@@ -661,4 +666,3 @@
     </script>
 </body>
 </html>
-
