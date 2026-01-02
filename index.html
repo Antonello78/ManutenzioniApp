@@ -143,7 +143,7 @@
             </div>
         </div>
 
-        <div class="text-center text-gray-400 text-[10px] mt-8 border-t pt-4">Ditta D'Angelo Antonello — v1.1.9</div>
+        <div class="text-center text-gray-400 text-[10px] mt-8 border-t pt-4">Ditta D'Angelo Antonello — v1.2.0</div>
     </div>
 
     <div id="modalCopia" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden flex items-center justify-center p-4 no-print">
@@ -194,16 +194,16 @@
                 if (response.ok) {
                     const serverData = await response.json();
                     let localData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-                    const combined = [...localData];
-                    serverData.forEach(serverItem => {
-                        if (!combined.some(localItem => localItem.id === serverItem.id)) {
-                            combined.push(serverItem);
-                        }
-                    });
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
+                    // Unione: aggiungi solo se l'ID non esiste già localmente
+                    const newEntries = serverData.filter(s => !localData.some(l => l.id === s.id));
+                    if (newEntries.length > 0) {
+                        const combined = [...localData, ...newEntries];
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
+                        renderArchivio();
+                    }
                     return true;
                 }
-            } catch (e) { console.error("Errore sincronizzazione", e); }
+            } catch (e) { console.error("Sync Fallito", e); }
             return false;
         }
 
@@ -262,13 +262,14 @@
             localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
             localStorage.setItem('numeroIntervento_' + year, nI.split('/')[0]);
             try {
-                await fetch(API_URL, {
+                const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(nuovo)
                 });
-                showMessage('success', 'Salvato e sincronizzato!');
-            } catch (e) { showMessage('success', 'Salvato localmente'); }
+                if(response.ok) showMessage('success', 'Salvato e Sincronizzato!');
+                else throw new Error();
+            } catch (e) { showMessage('error', 'Errore server: Salvato solo sul dispositivo'); }
         }
 
         function renderArchivio() {
