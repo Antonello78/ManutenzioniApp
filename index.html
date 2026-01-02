@@ -13,20 +13,70 @@
     <meta name="apple-mobile-web-app-title" content="Calcolo Manodopera">
     <link rel="manifest" href="manifest.json">
 <style>
-    body { font-family: 'Inter', sans-serif; background-color: #f7f9fc; padding-top: 1rem; }
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f7f9fc;
+        padding-top: 1rem;
+     }
     input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-    input[type=number] { -moz-appearance: textfield; }
+    input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
     
     @media print {
-        .no-print, #input-section > div:not(.border-t) { display: none !important; }
-        #input-section { display: block !important; }
-        body { padding: 0; background-color: white; margin: 0; }
-        #app { box-shadow: none !important; border: none !important; max-width: none !important; margin: 0 !important; padding: 0.5rem !important; width: 210mm; transform: scale(0.82); transform-origin: top left; page-break-inside: avoid !important; }
-        #unified-header { display: block !important; padding-bottom: 0.5rem; margin-bottom: 1rem; border-bottom: 2px solid #ccc; }
-        .print-avoid-break, .print-avoid-break *, .flex { page-break-inside: avoid !important; }
-        .text-red-600 { color: #dc2626 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        @page { size: A4 portrait; margin: 0.5cm !important; }
+        .no-print,
+        #input-section > div:not(.border-t) { 
+            display: none !important;
+        }
+        
+        #input-section {
+            display: block !important;
+        }
+        
+        body {
+            padding: 0;
+            background-color: white;
+            margin: 0; 
+        }
+        #app {
+            box-shadow: none !important;
+            border: none !important;
+            max-width: none !important;
+            margin: 0 !important; 
+            padding: 0.5rem !important; 
+            width: 210mm; 
+            transform: scale(0.82); 
+            transform-origin: top left; 
+            page-break-inside: avoid !important; 
+        }
+        
+        #unified-header {
+             display: block !important; 
+             padding-bottom: 0.5rem;
+             margin-bottom: 1rem;
+             border-bottom: 2px solid #ccc; 
+        }
+
+        .print-avoid-break,
+        .print-avoid-break *,
+        .flex {
+            page-break-inside: avoid !important;
+        }
+
+        .text-red-600 {
+            color: #dc2626 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        @page {
+            size: A4 portrait; 
+            margin: 0.5cm !important; 
+        }
     }
 </style>
 </head>
@@ -212,8 +262,6 @@
         const STORAGE_KEY = 'manodoperaInterventi';
         const EMAIL_KEY = 'reportEmailDestinatario'; 
         const INIZIO_2025 = 74; 
-        // INDIRIZZO SERVER AGGIORNATO PER VERCEL
-        const API_BASE = 'https://manodopera-storage.vercel.app/api';
 
         function parseTime(timeString) {
             const [hours, minutes] = timeString.split(':').map(Number);
@@ -312,11 +360,14 @@
             const oreAggiuntiveDecimali = minutiOltre60 / 60;
             const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
             const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
+
+            const oreFatturabili = (minutiFatturabili / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
             document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2) + ' €/ora';
             document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
-            let minutiFatturabiliDesc = minutiFatturabili + ' min/uomo';
-            if (minutiFatturabili > 60) { minutiFatturabiliDesc += ` (${minutiOltre60} min oltre la 1ª ora)`; }
-            document.getElementById('minutiFatturabili').textContent = minutiFatturabiliDesc;
+            
+            document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${oreFatturabili} ore)`;
+            
             document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €';
             document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2) + ' €';
             document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2) + ' €'; 
@@ -333,12 +384,12 @@
             try {
                 const dataCorrente = new Date();
                 const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
-                const interventiResponse = await fetch(`${API_BASE}/getArchivio`); 
+                const interventiResponse = await fetch('/api/getArchivio'); 
                 const interventiData = await interventiResponse.json();
                 if (interventiResponse.ok && interventiData.interventi) {
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiData.interventi));
                 }
-                const contatoreResponse = await fetch(`${API_BASE}/getNextNumber?anno=${CURRENT_YEAR}`); 
+                const contatoreResponse = await fetch(`/api/getNextNumber?anno=${CURRENT_YEAR}`); 
                 const contatoreData = await contatoreResponse.json();
                 if (contatoreResponse.ok && contatoreData.numero) {
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
@@ -381,7 +432,7 @@
                 totaleManodopera: document.getElementById('totaleManodopera').textContent
             };
             try {
-                const response = await fetch(`${API_BASE}/saveIntervento`, { 
+                const response = await fetch('/api/saveIntervento', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -441,7 +492,7 @@
             if (!intervento) return;
             const nInterventoCancellato = intervento.nIntervento;
             if (confirm(`Sei sicuro di voler cancellare l'intervento N° ${nInterventoCancellato}?`)) {
-                fetch(`${API_BASE}/deleteIntervento?nIntervento=${nInterventoCancellato}`, { method: 'DELETE' })
+                fetch(`/api/deleteIntervento?nIntervento=${nInterventoCancellato}`, { method: 'DELETE' })
                 .then(response => {
                     if (!response.ok) throw new Error(`Eliminazione remota fallita.`);
                     return response.json();
@@ -551,7 +602,22 @@
             }
         }
 
-        function stampaRiepilogo() { window.print(); }
+        // MODIFICA N.2: Personalizzazione nome file PDF
+        function stampaRiepilogo() {
+            const nIntervento = document.getElementById('nIntervento').value.replace(/\//g, '-');
+            const nomeScuola = document.getElementById('nomeScuola').value.trim() || 'SenzaNome';
+            const titoloOriginale = document.title;
+            
+            // Imposta temporaneamente il titolo della pagina (usato dal browser come nome file)
+            document.title = `Intervento_${nIntervento}_${nomeScuola}`;
+            
+            window.print();
+            
+            // Ripristina il titolo originale
+            setTimeout(() => {
+                document.title = titoloOriginale;
+            }, 1000);
+        }
 
         async function inviaReport() {
             calcolaManodopera();
@@ -581,7 +647,7 @@
             };
 
             try {
-                const response = await fetch(`${API_BASE}/inviaReport`, {
+                const response = await fetch('/api/inviaReport', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
