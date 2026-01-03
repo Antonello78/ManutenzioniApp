@@ -479,6 +479,7 @@
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
                 }
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
                 showMessage('error', `Errore Server: ${error.message}`);
                 return; 
@@ -495,7 +496,7 @@
             const intervento = interventi.find(i => i.id === id);
             if (intervento) {
                 document.getElementById('nIntervento').value = intervento.nIntervento; 
-                document.getElementById('dataIntervento').value = intervento.dataIntervento;
+                document.getElementById('dataIntervento').value = intervention.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
                 document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
                 document.getElementById('oraInizio').value = intervento.oraInizio;
@@ -508,6 +509,7 @@
                 toggleArchivio(); 
                 showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
                 initializeInputs(true);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
@@ -638,6 +640,9 @@
             const inputSection = document.getElementById('input-section');
             const btn = document.getElementById('btnToggleArchivio');
             const isHidden = archivio.classList.contains('hidden');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
             if (isHidden) {
                 archivio.classList.remove('hidden');
                 inputSection.classList.add('hidden');
