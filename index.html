@@ -582,15 +582,21 @@
             let testo = "";
             if (i.flagUrgenza) {
                 // TESTO URGENTE [cite: 3, 4]
-                testo = `Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n` +
-                        `Manodopera specializzata aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile.\n` +
+                testo = `Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera.` +
+                        `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n` +
+                    
+                        `Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora.\n` +
                         `Quantità: 1 + ${oreOltre60} ore\n\n` +
+                    
                         `Importo totale: € ${i.totaleManodopera}`;
             } else {
                 // TESTO STANDARD [cite: 1, 2]
-                testo = `Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n` +
-                        `Manodopera specializzata aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale.\n` +
+                testo = `Diritto di chiamata e uscita - inclusa 1ª ora di manodopera.` + 
+                        `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n` +
+                    
+                        `Manodopera aggiuntiva - ${minutiOltre60} min oltre la 1ª ora.\n` +
                         `Quantità: 1 + ${oreOltre60} ore\n\n` +
+                    
                         `Importo totale: € ${i.totaleManodopera}`;
             }
             
@@ -759,4 +765,5 @@
     </script>
 </body>
 </html>
+
 
