@@ -74,8 +74,8 @@ export default async function handler(req, res) {
                     </div>
 
                     <p style="margin-top: 30px; font-size: 0.8em; color: #666; text-align: center; border-top: 1px solid #eee; pt-4;">
-                        Email inviata tramite sistema automatico Manutenzioni D'Angelo.<br>
-                        <span style="font-size: 0.9em; font-weight: bold;">Versione Software: v1.0.1</span>
+                        Email inviata tramite sistema automatico Ditta D'Angelo Antonello.<br>
+                        <span style="font-size: 0.9em; font-weight: bold;">v1.1.4 (Release 2026)</span>
                     </p>
                     </div>
             </body>
@@ -100,3 +100,4 @@ export default async function handler(req, res) {
         });
     }
 }
+
