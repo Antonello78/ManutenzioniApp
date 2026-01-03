@@ -567,25 +567,31 @@
             document.getElementById('modalPreventivo').classList.add('hidden');
         }
 
-        function copiaEChiudi() {
-            const testo = document.getElementById('testoPreventivoModal').value;
-            navigator.clipboard.writeText(testo).then(() => {
-                showMessage('success', 'riga di preventivo copiata');
-                chiudiModale();
-            }).catch(err => { showMessage('error', 'Errore nella copia: ' + err); });
-        }
-
         function copiaRigaPreventivo(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const i = interventi.find(item => item.id === id);
             if (!i) return;
             const dataFormattata = formatDate(i.dataIntervento);
             const scuolaPlesso = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
+            
+            // Calcolo minuti oltre la prima ora per la descrizione
+            const minutiTotali = parseInt(i.tariffaOraria.includes('---') ? 0 : document.getElementById('minutiFatturabili').textContent);
+            const minutiOltre60 = Math.max(0, minutiTotali - 60);
+            const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
             let testo = "";
             if (i.flagUrgenza) {
-                testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nIntervento tecnico con carattere di URGENZA IMMEDIATA: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata e il calcolo della manodopera con tariffa urgenza arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+                // TESTO URGENTE [cite: 3, 4]
+                testo = `Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n` +
+                        `Manodopera specializzata aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile.\n` +
+                        `Quantità: 1 + ${oreOltre60} ore\n\n` +
+                        `Importo totale: € ${i.totaleManodopera}`;
             } else {
-                testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
+                // TESTO STANDARD [cite: 1, 2]
+                testo = `Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n` +
+                        `Manodopera specializzata aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale.\n` +
+                        `Quantità: 1 + ${oreOltre60} ore\n\n` +
+                        `Importo totale: € ${i.totaleManodopera}`;
             }
             
             document.getElementById('testoPreventivoModal').value = testo;
@@ -753,3 +759,4 @@
     </script>
 </body>
 </html>
+
