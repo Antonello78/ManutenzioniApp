@@ -27,7 +27,6 @@
         -moz-appearance: textfield;
     }
     
-    /* Stili per la modale */
     #modalPreventivo {
         transition: opacity 0.3s ease;
     }
@@ -233,8 +232,7 @@
         <div id="archivioInterventi" class="hidden mt-4">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio Interventi Salvati</h2>
             
-            <div id="filtroAnni" class="flex flex-wrap gap-2 mb-4">
-                </div>
+            <div id="filtroAnni" class="flex flex-wrap gap-2 mb-4"></div>
 
             <div class="mb-4">
                 <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca scuola, plesso o N° intervento..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
@@ -276,7 +274,7 @@
         </p>
 
         <div class="text-center text-gray-400 text-[10px] mt-4 border-t pt-4">
-            Ditta D'Angelo Antonello — v1.1.3 (Release 2026)
+            Ditta D'Angelo Antonello — v1.1.4 (Release 2026)
         </div>
     </div>
 
@@ -322,26 +320,27 @@
         function initializeInputs(keepNIntervento = false) {
             const dataInput = document.getElementById('dataIntervento');
             if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
+            
             const numOperaiInput = document.getElementById('numOperai');
             if (parseInt(numOperaiInput.value) < 1 || isNaN(parseInt(numOperaiInput.value))) { numOperaiInput.value = '1'; }
+            
             document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
+            
             const nInterventoInput = document.getElementById('nIntervento');
             const dataCorrente = new Date();
             const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
             const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+
             if (!keepNIntervento) {
-                const ultimoNumeroSalvato = localStorage.getItem(COUNTER_KEY_YEARLY);
-                if (ultimoNumeroSalvato === null) {
-                    let numeroPartenza = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0; 
-                    localStorage.setItem(COUNTER_KEY_YEARLY, numeroPartenza.toString());
+                let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY));
+                
+                if (isNaN(ultimoNumero)) {
+                    ultimoNumero = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0;
+                    localStorage.setItem(COUNTER_KEY_YEARLY, ultimoNumero.toString());
                 }
-                let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY) || '0');
+                
                 let prossimoNumero = ultimoNumero + 1;
-                const prossimoNumeroFormattato = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
-                const currentVal = nInterventoInput.value;
-                if (!currentVal || currentVal.split('/')[1] !== CURRENT_YEAR) {
-                    nInterventoInput.value = prossimoNumeroFormattato;
-                }
+                nInterventoInput.value = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
             }
         }
         
@@ -443,7 +442,8 @@
             const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
-            const intervento = {
+            
+            const interventoObj = {
                 id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
                 nIntervento: nInterventoCompleto,
                 dataIntervento: document.getElementById('dataIntervento').value, 
@@ -458,6 +458,7 @@
                 tariffaOraria: document.getElementById('tariffaOraria').textContent,
                 totaleManodopera: document.getElementById('totaleManodopera').textContent
             };
+
             try {
                 const response = await fetch('/api/saveIntervento', { 
                     method: 'POST',
@@ -465,32 +466,38 @@
                     body: JSON.stringify({ 
                         numeroIntervento: numeroCorrenteSequenziale,
                         anno: CURRENT_YEAR,
-                        datiIntervento: intervento,
+                        datiIntervento: interventoObj,
                         isUpdate: existingIndex > -1
                     })
                 });
+                
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.message || 'Errore nel salvataggio remoto.');
+                
                 if (existingIndex > -1) {
-                    interventi[existingIndex] = intervento;
+                    interventi[existingIndex] = interventoObj;
                     showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
-                    interventi.push(intervento); 
+                    interventi.push(interventoObj); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
                 }
+                
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+                
+                // Pulisci campi scuola e rinfresca il numero intervento
+                document.getElementById('nomeScuola').value = '';
+                document.getElementById('plessoEdificio').value = '';
+                initializeInputs(false); // Qui rinfresca il numero
+                calcolaManodopera(); 
+                renderArchivio();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+
             } catch (error) {
                 showMessage('error', `Errore Server: ${error.message}`);
                 return; 
             }
-            document.getElementById('nomeScuola').value = '';
-            document.getElementById('plessoEdificio').value = '';
-            initializeInputs(); 
-            calcolaManodopera(); 
-            renderArchivio();
         }
         
         function caricaIntervento(id) {
@@ -510,7 +517,6 @@
                 calcolaManodopera(); 
                 toggleArchivio(); 
                 showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
-                initializeInputs(true);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
