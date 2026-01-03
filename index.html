@@ -115,7 +115,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label for="nIntervento" class="block text-sm font-medium text-gray-600">N° Intervento</label>
-                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Es. 075/25">
+                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Es. 075/26">
                 </div>
                 <div>
                     <label for="dataIntervento" class="block text-sm font-medium text-gray-600">Data</label>
@@ -338,8 +338,8 @@
                 let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY) || '0');
                 let prossimoNumero = ultimoNumero + 1;
                 const prossimoNumeroFormattato = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
-                const inputValoreSequenziale = parseInt(nInterventoInput.value.split('/')[0]) || 0;
-                if (!nInterventoInput.value || inputValoreSequenziale < prossimoNumero) {
+                const currentVal = nInterventoInput.value;
+                if (!currentVal || currentVal.split('/')[1] !== CURRENT_YEAR) {
                     nInterventoInput.value = prossimoNumeroFormattato;
                 }
             }
@@ -434,10 +434,12 @@
             const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
             const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
             const nInterventoParts = nInterventoCompleto.split('/');
+            
             if (nInterventoParts.length !== 2 || nInterventoParts[1] !== CURRENT_YEAR) {
                  showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/${CURRENT_YEAR}.`); 
                  return;
             }
+            
             const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
@@ -473,7 +475,7 @@
                     interventi[existingIndex] = intervento;
                     showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
                 } else {
-                    interventi.push(intervento); 
+                    interventi.push(intervention); 
                     showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
                     const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
                     localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
@@ -496,7 +498,7 @@
             const intervento = interventi.find(i => i.id === id);
             if (intervento) {
                 document.getElementById('nIntervento').value = intervento.nIntervento; 
-                document.getElementById('dataIntervento').value = intervention.dataIntervento;
+                document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
                 document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
                 document.getElementById('oraInizio').value = intervento.oraInizio;
@@ -561,7 +563,6 @@
                 testo = `Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\nPrestazione tecnica di manutenzione ordinaria: fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatori.\nIl corrispettivo comprende il diritto di chiamata (comprensivo della prima ora di lavorazione) e il calcolo della manodopera aggiuntiva arrotondata al quarto d’ora superiore. Importo totale:\n\n€ ${i.totaleManodopera}`;
             }
             
-            // Invece di copiare subito, mostro la modale
             document.getElementById('testoPreventivoModal').value = testo;
             document.getElementById('modalPreventivo').classList.remove('hidden');
         }
