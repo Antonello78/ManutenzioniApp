@@ -47,7 +47,7 @@ export default async function handler(req, res) {
                 <div class="container">
                     <div class="logo-container">
                         <img src="https://raw.githubusercontent.com/Antonello78/ManutenzioniApp/6d4ebdefb301ca8a1fe41627af387efd5b142665/LOGO%20ANTONELLO.png" 
-                             alt="Logo Aziendale" style="max-width: 100px; height: auto;">
+                             alt="Logo Aziendale" style="max-width: 70px; height: auto;">
                     </div>
                     <div class="header">
                         <h2>Riepilogo Dati di Fatturazione Manodopera</h2>
@@ -100,5 +100,6 @@ export default async function handler(req, res) {
         });
     }
 }
+
 
 
