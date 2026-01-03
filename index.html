@@ -17,6 +17,8 @@
         font-family: 'Inter', sans-serif;
         background-color: #f7f9fc;
         padding-top: 1rem;
+        /* Spazio extra in fondo per non far coprire il contenuto dalla barra fissa */
+        padding-bottom: 120px;
      }
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
@@ -31,10 +33,25 @@
         transition: opacity 0.3s ease;
     }
 
+    /* Stile per la barra dei pulsanti fissa */
+    .sticky-actions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid #e2e8f0;
+        padding: 1rem;
+        z-index: 40;
+        box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
     @media print {
         .no-print,
         #input-section > div:not(.border-t),
-        #modalPreventivo { 
+        #modalPreventivo,
+        .sticky-actions { 
             display: none !important;
         }
         
@@ -252,29 +269,31 @@
             </div>
         </div>
 
-        <div class="mt-6 flex flex-col space-y-3 sm:space-y-0 sm:space-x-3 no-print">
-            <button onclick="toggleArchivio()" id="btnToggleArchivio" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150 w-full sm:w-1/2 mx-auto mb-4">
-                Gestione Archivio
-            </button>
-            <div id="action-buttons" class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3">
-                <button onclick="salvaIntervento()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
-                    Salva Intervento
-                </button>
-                <button onclick="stampaRiepilogo()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
-                    Stampa Riepilogo / Crea PDF
-                </button>
-                <button id="btnInviaReport" onclick="inviaReport()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
-                    Invia Report (Email)
-                </button>
-            </div>
-        </div>
-
         <p class="mt-8 text-xs text-gray-400 text-center">
             Orario Ordinario: 08:00 - 17:00. Il calcolo arrotonda i minuti di manodopera per eccesso al quarto d'ora superiore.
         </p>
 
         <div class="text-center text-gray-400 text-[10px] mt-4 border-t pt-4">
             Ditta D'Angelo Antonello — v1.1.4 (Release 2026)
+        </div>
+    </div>
+
+    <div class="sticky-actions no-print">
+        <div class="max-w-xl mx-auto flex flex-col space-y-3">
+            <button onclick="toggleArchivio()" id="btnToggleArchivio" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 w-full text-sm">
+                Gestione Archivio
+            </button>
+            <div id="action-buttons" class="flex flex-row space-x-2">
+                <button onclick="salvaIntervento()" id="btnSalva" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
+                    Salva
+                </button>
+                <button onclick="stampaRiepilogo()" id="btnStampa" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
+                    Stampa
+                </button>
+                <button id="btnInviaReport" onclick="inviaReport()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
+                    Invia Email
+                </button>
+            </div>
         </div>
     </div>
 
@@ -646,6 +665,7 @@
             const archivio = document.getElementById('archivioInterventi');
             const inputSection = document.getElementById('input-section');
             const btn = document.getElementById('btnToggleArchivio');
+            const actionButtons = document.getElementById('action-buttons');
             const isHidden = archivio.classList.contains('hidden');
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -654,11 +674,13 @@
                 archivio.classList.remove('hidden');
                 inputSection.classList.add('hidden');
                 btn.textContent = 'Torna al Calcolo';
+                actionButtons.classList.add('hidden'); // Nasconde pulsanti salva/stampa in archivio
                 renderArchivio();
             } else {
                 archivio.classList.add('hidden');
                 inputSection.classList.remove('hidden');
                 btn.textContent = 'Gestione Archivio';
+                actionButtons.classList.remove('hidden'); // Mostra pulsanti salva/stampa in calcolo
             }
         }
 
@@ -683,7 +705,7 @@
 
             const btn = document.getElementById('btnInviaReport');
             btn.disabled = true;
-            btn.textContent = 'Invio in corso...';
+            btn.textContent = 'Invio...';
 
             const payload = {
                 nIntervento: document.getElementById('resNIntervento').textContent,
@@ -716,7 +738,7 @@
                 showMessage('error', 'Errore: ' + error.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Invia Report (Email)';
+                btn.textContent = 'Invia Email';
             }
         }
 
