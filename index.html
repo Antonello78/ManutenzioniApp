@@ -598,7 +598,7 @@
                         `Importo totale: € ${i.totaleManodopera}`;
             } else {
                 // TESTO STANDARD
-                testo = `Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n` +
+                testo = `Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n\n` +
                         `Manodopera aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).\n` +
                         `Quantità: 1 + ${oreOltre60} ore\n\n` +
                         `Importo totale: € ${i.totaleManodopera}`;
@@ -769,6 +769,7 @@
     </script>
 </body>
 </html>
+
 
 
 
