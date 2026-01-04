@@ -586,6 +586,32 @@
             document.getElementById('modalPreventivo').classList.add('hidden');
         }
 
+        function copiaEChiudi() {
+            const areaTesto = document.getElementById('testoPreventivoModal');
+            
+            // Seleziona il testo
+            areaTesto.select();
+            areaTesto.setSelectionRange(0, 99999); // Per dispositivi mobili
+
+            // Esegue la copia
+            try {
+                navigator.clipboard.writeText(areaTesto.value).then(() => {
+                    showMessage('success', 'Riga preventivo copiata negli appunti!');
+                    chiudiModale();
+                }).catch(err => {
+                    // Fallback se navigator.clipboard non è disponibile
+                    document.execCommand('copy');
+                    showMessage('success', 'Riga preventivo copiata!');
+                    chiudiModale();
+                });
+            } catch (err) {
+                // Ulteriore fallback per browser datati
+                document.execCommand('copy');
+                showMessage('success', 'Riga preventivo copiata!');
+                chiudiModale();
+            }
+        }
+        
         function copiaRigaPreventivo(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const i = interventi.find(item => item.id === id);
@@ -781,6 +807,7 @@
     </script>
 </body>
 </html>
+
 
 
 
