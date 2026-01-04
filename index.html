@@ -691,6 +691,10 @@
             listaDiv.innerHTML = ''; 
             interventiFiltrati.forEach(i => {
                 const badgeUrgenza = i.flagUrgenza ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200 rounded">Urgente</span>` : '';
+                
+                // Conversione sicura per i decimali
+                const oreExtra = parseFloat(i.oreOltre60) || 0;
+
                 const itemHtml = `
                     <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
                         <div class="flex-1 min-w-[200px]">
@@ -700,7 +704,11 @@
                             </div>
                             <div class="text-sm font-semibold text-gray-800">${i.nomeScuola || 'N/A'}</div>
                             <div class="text-xs text-gray-500">${i.plessoEdificio || ''} — ${formatDate(i.dataIntervento)}</div>
-                            <div class="text-sm font-bold text-green-600 mt-1">${i.totaleManodopera}</div>
+                            
+                            <div class="flex justify-between items-center mt-1 pr-4">
+                                <div class="text-sm font-bold text-green-600">€ ${i.totaleManodopera}</div>
+                                <div class="text-[10px] text-gray-400 font-medium italic">${oreExtra.toFixed(2)} ore extra (+1ª incl.)</div>
+                            </div>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
                              <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100" title="Copia riga preventivo">
@@ -815,6 +823,7 @@
     </script>
 </body>
 </html>
+
 
 
 
