@@ -448,96 +448,83 @@
         }
 
         async function salvaIntervento() { 
-            calcolaManodopera(); 
-            const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
+    calcolaManodopera(); 
+    const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
+    const nInterventoParts = nInterventoCompleto.split('/');
+    
+    // CORREZIONE: Verifichiamo solo che ci sia un numero e un anno (formato NNN/AA)
+    // senza obbligare che l'anno sia per forza quello corrente.
+    if (nInterventoParts.length !== 2 || nInterventoParts[0] === "" || nInterventoParts[1] === "") {
+         showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/AA.`); 
+         return;
+    }
+    
+    const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
+    const annoInserito = nInterventoParts[1]; // Recuperiamo l'anno scritto dall'utente
+    
+    let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
+    
+    const interventoObj = {
+        id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
+        nIntervento: nInterventoCompleto,
+        dataIntervento: document.getElementById('dataIntervento').value, 
+        nomeScuola: document.getElementById('nomeScuola').value,
+        plessoEdificio: document.getElementById('plessoEdificio').value,
+        oraInizio: document.getElementById('oraInizio').value,
+        oraFine: document.getElementById('oraFine').value,
+        numOperai: parseInt(document.getElementById('numOperai').value),
+        costoUscita: document.getElementById('inputCostoUscita').value,
+        tariffaBase: document.getElementById('inputTariffaBase').value,
+        flagUrgenza: document.getElementById('flagUrgenza').checked,
+        tariffaOraria: document.getElementById('tariffaOraria').textContent,
+        totaleManodopera: document.getElementById('totaleManodopera').textContent
+    };
+
+    try {
+        const response = await fetch('/api/saveIntervento', { 
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                numeroIntervento: numeroCorrenteSequenziale,
+                anno: annoInserito, // Usa l'anno inserito nel campo (es. 25)
+                datiIntervento: interventoObj,
+                isUpdate: existingIndex > -1
+            })
+        });
+        
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Errore nel salvataggio remoto.');
+        
+        if (existingIndex > -1) {
+            interventi[existingIndex] = interventoObj;
+            showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
+        } else {
+            interventi.push(interventoObj); 
+            showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
+            
+            // Aggiorna il contatore locale solo se l'intervento è dell'anno corrente
             const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
-            const nInterventoParts = nInterventoCompleto.split('/');
-            
-            if (nInterventoParts.length !== 2 || nInterventoParts[1] !== CURRENT_YEAR) {
-                 showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/${CURRENT_YEAR}.`); 
-                 return;
-            }
-            
-            const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
-            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
-            
-            const interventoObj = {
-                id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
-                nIntervento: nInterventoCompleto,
-                dataIntervento: document.getElementById('dataIntervento').value, 
-                nomeScuola: document.getElementById('nomeScuola').value,
-                plessoEdificio: document.getElementById('plessoEdificio').value,
-                oraInizio: document.getElementById('oraInizio').value,
-                oraFine: document.getElementById('oraFine').value,
-                numOperai: parseInt(document.getElementById('numOperai').value),
-                costoUscita: document.getElementById('inputCostoUscita').value,
-                tariffaBase: document.getElementById('inputTariffaBase').value,
-                flagUrgenza: document.getElementById('flagUrgenza').checked,
-                tariffaOraria: document.getElementById('tariffaOraria').textContent,
-                totaleManodopera: document.getElementById('totaleManodopera').textContent
-            };
-
-            try {
-                const response = await fetch('/api/saveIntervento', { 
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        numeroIntervento: numeroCorrenteSequenziale,
-                        anno: CURRENT_YEAR,
-                        datiIntervento: interventoObj,
-                        isUpdate: existingIndex > -1
-                    })
-                });
-                
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || 'Errore nel salvataggio remoto.');
-                
-                if (existingIndex > -1) {
-                    interventi[existingIndex] = interventoObj;
-                    showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
-                } else {
-                    interventi.push(interventoObj); 
-                    showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
-                    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-                    localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
-                }
-                
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
-                
-                // Pulisci campi scuola e rinfresca il numero intervento
-                document.getElementById('nomeScuola').value = '';
-                document.getElementById('plessoEdificio').value = '';
-                initializeInputs(false); // Qui rinfresca il numero
-                calcolaManodopera(); 
-                renderArchivio();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            } catch (error) {
-                showMessage('error', `Errore Server: ${error.message}`);
-                return; 
+            if (annoInserito === CURRENT_YEAR) {
+                const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+                localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
             }
         }
         
-        function caricaIntervento(id) {
-            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const intervento = interventi.find(i => i.id === id);
-            if (intervento) {
-                document.getElementById('nIntervento').value = intervento.nIntervento; 
-                document.getElementById('dataIntervento').value = intervento.dataIntervento;
-                document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
-                document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
-                document.getElementById('oraInizio').value = intervento.oraInizio;
-                document.getElementById('oraFine').value = intervento.oraFine;
-                document.getElementById('numOperai').value = intervento.numOperai;
-                document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
-                document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
-                document.getElementById('flagUrgenza').checked = intervento.flagUrgenza;
-                calcolaManodopera(); 
-                toggleArchivio(); 
-                showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+        
+        document.getElementById('nomeScuola').value = '';
+        document.getElementById('plessoEdificio').value = '';
+        initializeInputs(false); 
+        calcolaManodopera(); 
+        renderArchivio();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (error) {
+        showMessage('error', `Errore Server: ${error.message}`);
+        return; 
+    }
+}
         }
 
         function cancellaIntervento(id) {
@@ -762,6 +749,7 @@
     </script>
 </body>
 </html>
+
 
 
 
