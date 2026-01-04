@@ -367,13 +367,25 @@
             const oraInizioInput = document.getElementById('oraInizio').value;
             const oraFineInput = document.getElementById('oraFine').value;
             const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
-            const costoUscitaInput = parseFloat(document.getElementById('inputCostoUscita').value) || 0;
+            const campoCostoUscita = document.getElementById('inputCostoUscita');
             const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
             const flagUrgenza = document.getElementById('flagUrgenza').checked;
             const nIntervento = document.getElementById('nIntervento').value; 
             const dataIntervento = document.getElementById('dataIntervento').value;
             const nomeScuola = document.getElementById('nomeScuola').value;
             const plessoEdificio = document.getElementById('plessoEdificio').value;
+
+            // LOGICA AGGIORNAMENTO AUTOMATICO COSTO USCITA
+            // Se attivi l'urgenza e il costo è quello base (75), lo porta a 85
+            if (flagUrgenza && campoCostoUscita.value == "75") {
+                campoCostoUscita.value = "85";
+            } 
+            // Se togli l'urgenza e il costo è 85, lo riporta a 75
+            else if (!flagUrgenza && campoCostoUscita.value == "85") {
+                campoCostoUscita.value = "75";
+            }
+
+            const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
 
             function resetResults() {
                 document.getElementById('totaleManodopera').textContent = '---';
@@ -769,6 +781,7 @@
     </script>
 </body>
 </html>
+
 
 
 
