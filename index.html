@@ -106,7 +106,7 @@
     <div id="modalPreventivo" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg mx-4">
             <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Controlla Riga Preventivo</h3>
-            <textarea id="testoPreventivoModal" class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm mb-4" spellcheck="false"></textarea>
+            <div id="testoPreventivoModal" class="w-full p-4 border border-gray-300 rounded-lg bg-gray-50 text-sm mb-4 min-h-[256px] overflow-y-auto whitespace-pre-wrap"></div>
             <div class="flex space-x-3">
                 <button onclick="chiudiModale()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-lg transition duration-150">
                     Annulla
@@ -617,42 +617,40 @@
         }
         
         function copiaRigaPreventivo(id) {
-            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const i = interventi.find(item => item.id === id);
-            if (!i) return;
-            const dataFormattata = formatDate(i.dataIntervento);
-            const scuolaPlesso = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
-            
-            // Recupero dei tempi per il calcolo della manodopera aggiuntiva
-            const oraInizioMin = parseTime(i.oraInizio);
-            const oraFineMin = parseTime(i.oraFine);
-            const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * i.numOperai;
-            const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
-            const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
-            
-            // Portato a 2 decimali per coerenza di calcolo (es. 0,75 invece di 0,8)
-            const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const i = interventi.find(item => item.id === id);
+    if (!i) return;
+    const dataFormattata = formatDate(i.dataIntervento);
+    const scuolaPlesso = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
+    
+    const oraInizioMin = parseTime(i.oraInizio);
+    const oraFineMin = parseTime(i.oraFine);
+    const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * i.numOperai;
+    const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
+    const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
+    const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            let testo = "";
-            if (i.flagUrgenza) {
-                // TESTO URGENTE
-                testo = `- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n\n` +
-                        `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
-                        `- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).\n\n` +
-                        `Quantità ore oltre la prima: ${oreOltre60} ore x ${i.tariffaOraria} \n\n` +
-                        `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
-            } else {
-                // TESTO STANDARD
-                testo = `- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n\n` +
-                        `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
-                        `- Manodopera aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).\n\n` +
-                        `Quantità: ${oreOltre60} ore x ${i.tariffaOraria} \n\n` +
-                        `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
-            }
-            
-            document.getElementById('testoPreventivoModal').value = testo;
-            document.getElementById('modalPreventivo').classList.remove('hidden');
-        }
+    let testoHtml = "";
+    if (i.flagUrgenza) {
+        // TESTO URGENTE CON NERETTO VISIVO
+        testoHtml = `<b>- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
+                    `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
+                    `<b>- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
+                    `Quantità ore oltre la prima: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
+                    `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
+    } else {
+        // TESTO STANDARD CON NERETTO VISIVO
+        testoHtml = `<b>- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
+                    `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
+                    `<b>- Manodopera aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
+                    `Quantità: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
+                    `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
+    }
+    
+    // Mostra il testo con il neretto nel MODAL
+    document.getElementById('testoPreventivoModal').innerHTML = testoHtml;
+    document.getElementById('modalPreventivo').classList.remove('hidden');
+}
         
         function renderArchivio() {
             const listaDiv = document.getElementById('listaInterventi');
@@ -829,6 +827,7 @@
     </script>
 </body>
 </html>
+
 
 
 
