@@ -625,21 +625,24 @@
             const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * i.numOperai;
             const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
             const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
-            const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            
+            // Portato a 2 decimali per coerenza di calcolo (es. 0,75 invece di 0,8)
+            const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             let testo = "";
             if (i.flagUrgenza) {
-                // TESTO URGENTE MODIFICATO
+                // TESTO URGENTE
                 testo = `- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n\n` +
                         `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
                         `- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).\n\n` +
-                        `Quantità ore oltre la prima: ${oreOltre60} ore x ${i.tariffaOraria}\n\n` +
+                        `Quantità ore oltre la prima: ${oreOltre60} ore x ${i.tariffaOraria} €/ora\n\n` +
                         `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
             } else {
-                // TESTO STANDARD (INVARIATO)
+                // TESTO STANDARD
                 testo = `- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.\n\n` +
+                        `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
                         `- Manodopera aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).\n\n` +
-                        `Quantità: ${oreOltre60} ore\n\n` +
+                        `Quantità: ${oreOltre60} ore x ${i.tariffaOraria} €/ora\n\n` +
                         `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
             }
             
@@ -808,6 +811,7 @@
     </script>
 </body>
 </html>
+
 
 
 
