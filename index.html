@@ -692,8 +692,14 @@
             interventiFiltrati.forEach(i => {
                 const badgeUrgenza = i.flagUrgenza ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200 rounded">Urgente</span>` : '';
                 
-                // Conversione sicura per i decimali
-                const oreExtra = parseFloat(i.oreOltre60) || 0;
+                // --- CALCOLO ORE EXTRA IN TEMPO REALE ---
+                const oraInizioMin = parseTime(i.oraInizio);
+                const oraFineMin = parseTime(i.oraFine);
+                const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * (i.numOperai || 1);
+                const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
+                const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
+                const oreExtraCalculated = minutiOltre60 / 60;
+                // ----------------------------------------
 
                 const itemHtml = `
                     <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
@@ -707,7 +713,7 @@
                             
                             <div class="flex justify-between items-center mt-1 pr-4">
                                 <div class="text-sm font-bold text-green-600">€ ${i.totaleManodopera}</div>
-                                <div class="text-[10px] text-gray-400 font-medium italic">${oreExtra.toFixed(2)} ore extra (+1ª incl.)</div>
+                                <div class="text-[10px] text-gray-400 font-medium italic">${oreExtraCalculated.toFixed(2).replace('.', ',')} ore extra (+1ª incl.)</div>
                             </div>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
@@ -823,6 +829,7 @@
     </script>
 </body>
 </html>
+
 
 
 
