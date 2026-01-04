@@ -591,30 +591,31 @@
         }
 
         function copiaEChiudi() {
-            const areaTesto = document.getElementById('testoPreventivoModal');
-            
-            // Seleziona il testo
-            areaTesto.select();
-            areaTesto.setSelectionRange(0, 99999); // Per dispositivi mobili
+    const areaTesto = document.getElementById('testoPreventivoModal');
+    
+    // Usiamo innerText per prendere solo il testo visibile senza tag <b>
+    const testoDaCopiare = areaTesto.innerText;
 
-            // Esegue la copia
-            try {
-                navigator.clipboard.writeText(areaTesto.value).then(() => {
-                    showMessage('success', 'Riga preventivo copiata negli appunti!');
-                    chiudiModale();
-                }).catch(err => {
-                    // Fallback se navigator.clipboard non è disponibile
-                    document.execCommand('copy');
-                    showMessage('success', 'Riga preventivo copiata!');
-                    chiudiModale();
-                });
-            } catch (err) {
-                // Ulteriore fallback per browser datati
-                document.execCommand('copy');
-                showMessage('success', 'Riga preventivo copiata!');
-                chiudiModale();
-            }
-        }
+    if (!testoDaCopiare) {
+        showMessage('error', 'Nessun testo da copiare.');
+        return;
+    }
+
+    navigator.clipboard.writeText(testoDaCopiare).then(() => {
+        showMessage('success', 'Riga preventivo copiata negli appunti!');
+        chiudiModale();
+    }).catch(err => {
+        // Fallback per browser che non supportano navigator.clipboard
+        const el = document.createElement('textarea');
+        el.value = testoDaCopiare;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        showMessage('success', 'Riga preventivo copiata!');
+        chiudiModale();
+    });
+}
         
         function copiaRigaPreventivo(id) {
     const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
@@ -632,14 +633,12 @@
 
     let testoHtml = "";
     if (i.flagUrgenza) {
-        // TESTO URGENTE CON NERETTO VISIVO
         testoHtml = `<b>- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
                     `<b>- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
                     `Quantità ore oltre la prima: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
                     `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
     } else {
-        // TESTO STANDARD CON NERETTO VISIVO
         testoHtml = `<b>- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
                     `<b>- Manodopera aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
@@ -647,7 +646,6 @@
                     `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
     }
     
-    // Mostra il testo con il neretto nel MODAL
     document.getElementById('testoPreventivoModal').innerHTML = testoHtml;
     document.getElementById('modalPreventivo').classList.remove('hidden');
 }
@@ -827,6 +825,7 @@
     </script>
 </body>
 </html>
+
 
 
 
