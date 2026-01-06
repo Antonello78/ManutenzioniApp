@@ -590,7 +590,6 @@ function nuovoIntervento() {
     }
 }
         function toggleSolaLettura(readonly) {
-            // Elenco completo di TUTTI i campi da bloccare
             const fields = [
                 'nIntervento', 
                 'dataIntervento', 
@@ -607,36 +606,33 @@ function nuovoIntervento() {
             fields.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
+                    // Applichiamo sia disabled che readOnly per sicurezza massima
                     el.disabled = readonly;
-                    // Aggiungiamo un effetto visivo (leggermente sbiadito) quando è bloccato
+                    el.readOnly = readonly;
+                    
                     if (readonly) {
-                        el.style.opacity = "0.7";
-                        el.style.cursor = "not-allowed";
+                        el.style.backgroundColor = "#f3f4f6"; // Grigio chiaro (Tailwind gray-100)
+                        el.style.pointerEvents = "none";     // Impedisce il click/focus
+                        el.style.opacity = "0.8";
                     } else {
+                        el.style.backgroundColor = "#ffffff"; // Bianco
+                        el.style.pointerEvents = "auto";      // Rabilita il click
                         el.style.opacity = "1";
-                        el.style.cursor = "default";
                     }
                 }
             });
 
             const btnSalva = document.getElementById('btnSalva');
             if (readonly) {
-                // Modalità sola lettura: tasto ARANCIONE "Modifica"
                 btnSalva.textContent = 'Modifica';
                 btnSalva.classList.remove('bg-green-600', 'hover:bg-green-700');
                 btnSalva.classList.add('bg-orange-500', 'hover:bg-orange-600');
                 btnSalva.onclick = () => toggleSolaLettura(false);
             } else {
-                // Modalità modifica: tasto VERDE "Salva"
                 btnSalva.textContent = 'Salva';
                 btnSalva.classList.remove('bg-orange-500', 'hover:bg-orange-600');
                 btnSalva.classList.add('bg-green-600', 'hover:bg-green-700');
                 btnSalva.onclick = salvaIntervento;
-                
-                // Evita di mostrare il messaggio al caricamento pagina
-                if (document.activeElement !== document.body) {
-                    showMessage('info', 'Ora puoi modificare i dati');
-                }
             }
         }
         
@@ -969,6 +965,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
