@@ -477,7 +477,26 @@
              localStorage.setItem(EMAIL_KEY, email);
              showMessage('success', 'Email di destinazione salvata.');
         }
+function nuovoIntervento() {
+            // Reset dei campi descrittivi
+            document.getElementById('nomeScuola').value = '';
+            document.getElementById('plessoEdificio').value = '';
+            
+            // Reset orari e operai ai valori di default
+            document.getElementById('oraInizio').value = '09:00';
+            document.getElementById('oraFine').value = '10:15';
+            document.getElementById('numOperai').value = '1';
+            document.getElementById('flagUrgenza').checked = false;
 
+            // Ricarica il numero progressivo corretto dal server e resetta la data
+            initializeInputs();
+            
+            // Ricalcola i costi (riporterà tutto al valore base dell'uscita)
+            calcolaManodopera();
+            
+            showMessage('success', 'Nuova scheda pronta');
+        }
+        
         async function salvaIntervento() { 
     calcolaManodopera(); 
     const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
@@ -840,6 +859,7 @@
     </script>
 </body>
 </html>
+
 
 
 
