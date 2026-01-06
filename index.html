@@ -367,40 +367,61 @@
        function calcolaManodopera() {
             const oraInizioInput = document.getElementById('oraInizio').value;
             const oraFineInput = document.getElementById('oraFine').value;
-            const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
-            const campoCostoUscita = document.getElementById('inputCostoUscita');
-            const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
+            const numOperai = parseInt(document.getElementById('numOperai').value);
             const flagUrgenza = document.getElementById('flagUrgenza').checked;
-            const nIntervento = document.getElementById('nIntervento').value; 
-            const dataIntervento = document.getElementById('dataIntervento').value;
-            const nomeScuola = document.getElementById('nomeScuola').value;
-            const plessoEdificio = document.getElementById('plessoEdificio').value;
+            const costoUscitaInput = parseFloat(document.getElementById('costoUscitaInput').value) || 0;
+            const tariffaBaseInput = parseFloat(document.getElementById('tariffaBaseInput').value) || 0;
 
-            // LOGICA AGGIORNAMENTO AUTOMATICO COSTO USCITA
-            if (flagUrgenza && campoCostoUscita.value == "75") {
-                campoCostoUscita.value = "85";
-            } 
-            else if (!flagUrgenza && campoCostoUscita.value == "85") {
-                campoCostoUscita.value = "75";
+            if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) { 
+                resetResults(); 
+                return; 
             }
 
-            const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
+            const oraInizioMinuti = parseTime(oraInizioInput);
+            const oraFineMinuti = parseTime(oraFineInput);
 
-            function resetResults() {
-                document.getElementById('totaleManodopera').textContent = '---';
-                document.getElementById('tariffaOraria').textContent = '---';
-                document.getElementById('minutiEffettivi').textContent = '---';
-                document.getElementById('minutiFatturabili').textContent = '---';
-                document.getElementById('costoAggiuntivo').textContent = '---';
-                document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €'; 
-                document.getElementById('resNIntervento').textContent = nIntervento || '---';
-                document.getElementById('resData').textContent = formatDate(dataIntervento) || '---';
-                document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
-                document.getElementById('resOrario').textContent = (oraInizioInput && oraFineInput) ? oraInizioInput + ' - ' + oraFineInput : '---';
-                document.getElementById('resOperai').textContent = numOperai;
-                // Aggiunto reset per oreOltre60
-                if(document.getElementById('oreOltre60')) document.getElementById('oreOltre60').textContent = '---';
+            if (oraFineMinuti <= oraInizioMinuti) { 
+                resetResults(); 
+                return; 
             }
+
+            const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
+            const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
+            
+            // Arrotondamento ai 15 minuti superiori
+            const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
+
+            let tariffaOraria = tariffaBaseInput; 
+            const ORARIO_INIZIO_ORD = 8 * 60; // 08:00
+            const ORARIO_FINE_ORD = 17 * 60;  // 17:00
+
+            if (flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD) {
+                tariffaOraria = tariffaBaseInput + 10;
+            }
+
+            const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
+            const oreAggiuntiveDecimali = minutiOltre60 / 60;
+            const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
+            const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
+
+            // --- NUOVA LOGICA FORMATAZIONE ORE (1 + RESTO) ---
+            const oreTotaliDecimali = minutiFatturabili / 60;
+            let testoOreDettaglio = "";
+
+            if (oreTotaliDecimali > 1) {
+                const restoOre = oreTotaliDecimali - 1;
+                // .toFixed(2) garantisce due decimali, .replace('.', ',') mette la virgola italiana
+                testoOreDettaglio = `(1 + ${restoOre.toFixed(2).replace('.', ',')} ore)`;
+            } else {
+                testoOreDettaglio = `(${oreTotaliDecimali.toFixed(2).replace('.', ',')} ore)`;
+            }
+
+            // Aggiornamento dei campi a video e per la stampa
+            document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min ${testoOreDettaglio}`;
+            document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + " €";
+            document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + " €";
+            document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + " €";
+        }
 
             if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) { resetResults(); return; }
             const oraInizioMinuti = parseTime(oraInizioInput);
@@ -826,6 +847,7 @@
     </script>
 </body>
 </html>
+
 
 
 
