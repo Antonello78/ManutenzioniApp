@@ -12,7 +12,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Calcolo Manodopera">
     <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="ICONA.png">
 <style>
     body {
         font-family: 'Inter', sans-serif;
@@ -367,63 +366,41 @@
        function calcolaManodopera() {
             const oraInizioInput = document.getElementById('oraInizio').value;
             const oraFineInput = document.getElementById('oraFine').value;
-            const numOperai = parseInt(document.getElementById('numOperai').value);
+            const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
+            const campoCostoUscita = document.getElementById('inputCostoUscita');
+            const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
             const flagUrgenza = document.getElementById('flagUrgenza').checked;
-            const costoUscitaInput = parseFloat(document.getElementById('costoUscitaInput').value) || 0;
-            const tariffaBaseInput = parseFloat(document.getElementById('tariffaBaseInput').value) || 0;
+            const nIntervento = document.getElementById('nIntervento').value; 
+            const dataIntervento = document.getElementById('dataIntervento').value;
+            const nomeScuola = document.getElementById('nomeScuola').value;
+            const plessoEdificio = document.getElementById('plessoEdificio').value;
 
-            if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) { 
-                resetResults(); 
-                return; 
+            // LOGICA AGGIORNAMENTO AUTOMATICO COSTO USCITA
+            if (flagUrgenza && campoCostoUscita.value == "75") {
+                campoCostoUscita.value = "85";
+            } 
+            else if (!flagUrgenza && campoCostoUscita.value == "85") {
+                campoCostoUscita.value = "75";
             }
 
-            const oraInizioMinuti = parseTime(oraInizioInput);
-            const oraFineMinuti = parseTime(oraFineInput);
+            const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
 
-            if (oraFineMinuti <= oraInizioMinuti) { 
-                resetResults(); 
-                return; 
+            function resetResults() {
+                document.getElementById('totaleManodopera').textContent = '---';
+                document.getElementById('tariffaOraria').textContent = '---';
+                document.getElementById('minutiEffettivi').textContent = '---';
+                document.getElementById('minutiFatturabili').textContent = '---';
+                document.getElementById('costoAggiuntivo').textContent = '---';
+                document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2) + ' €'; 
+                document.getElementById('resNIntervento').textContent = nIntervento || '---';
+                document.getElementById('resData').textContent = formatDate(dataIntervento) || '---';
+                document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
+                document.getElementById('resOrario').textContent = (oraInizioInput && oraFineInput) ? oraInizioInput + ' - ' + oraFineInput : '---';
+                document.getElementById('resOperai').textContent = numOperai;
+                // Aggiunto reset per oreOltre60
+                if(document.getElementById('oreOltre60')) document.getElementById('oreOltre60').textContent = '---';
             }
 
-            const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
-            const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
-            
-            // Arrotondamento ai 15 minuti superiori
-            const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
-
-            let tariffaOraria = tariffaBaseInput; 
-            const ORARIO_INIZIO_ORD = 8 * 60; // 08:00
-            const ORARIO_FINE_ORD = 17 * 60;  // 17:00
-
-            if (flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD) {
-                tariffaOraria = tariffaBaseInput + 10;
-            }
-
-            // Calcolo effettivo delle ore oltre la prima
-            const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
-            const oreAggiuntiveDecimali = minutiOltre60 / 60;
-            const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
-            const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
-
-            // Formattazione della stringa "Tempo Fatturabile"
-            const oreTotaliDecimali = minutiFatturabili / 60;
-            let testoOreDettaglio = "";
-
-            if (minutiFatturabili > 60) {
-                // Se sono più di 60 min, mostriamo (1 + resto)
-                // Usiamo oreAggiuntiveDecimali per essere sicuri che coincida con il costo calcolato
-                testoOreDettaglio = `(1 + ${oreAggiuntiveDecimali.toFixed(2).replace('.', ',')} ore)`;
-            } else {
-                // Se è un'ora o meno, mostriamo solo il totale ore (es. 0,25 o 1,00)
-                testoOreDettaglio = `(${oreTotaliDecimali.toFixed(2).replace('.', ',')} ore)`;
-            }
-
-            // Aggiornamento dei campi a video e per la stampa
-            document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min ${testoOreDettaglio}`;
-            document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + " €";
-            document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + " €";
-            document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + " €";
-        }
             if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) { resetResults(); return; }
             const oraInizioMinuti = parseTime(oraInizioInput);
             const oraFineMinuti = parseTime(oraFineInput);
@@ -848,9 +825,6 @@
     </script>
 </body>
 </html>
-
-
-
 
 
 
