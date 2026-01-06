@@ -399,20 +399,22 @@
                 tariffaOraria = tariffaBaseInput + 10;
             }
 
+            // Calcolo effettivo delle ore oltre la prima
             const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
             const oreAggiuntiveDecimali = minutiOltre60 / 60;
             const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
             const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
 
-            // --- NUOVA LOGICA FORMATAZIONE ORE (1 + RESTO) ---
+            // Formattazione della stringa "Tempo Fatturabile"
             const oreTotaliDecimali = minutiFatturabili / 60;
             let testoOreDettaglio = "";
 
-            if (oreTotaliDecimali > 1) {
-                const restoOre = oreTotaliDecimali - 1;
-                // .toFixed(2) garantisce due decimali, .replace('.', ',') mette la virgola italiana
-                testoOreDettaglio = `(1 + ${restoOre.toFixed(2).replace('.', ',')} ore)`;
+            if (minutiFatturabili > 60) {
+                // Se sono più di 60 min, mostriamo (1 + resto)
+                // Usiamo oreAggiuntiveDecimali per essere sicuri che coincida con il costo calcolato
+                testoOreDettaglio = `(1 + ${oreAggiuntiveDecimali.toFixed(2).replace('.', ',')} ore)`;
             } else {
+                // Se è un'ora o meno, mostriamo solo il totale ore (es. 0,25 o 1,00)
                 testoOreDettaglio = `(${oreTotaliDecimali.toFixed(2).replace('.', ',')} ore)`;
             }
 
@@ -422,7 +424,6 @@
             document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + " €";
             document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + " €";
         }
-
             if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) { resetResults(); return; }
             const oraInizioMinuti = parseTime(oraInizioInput);
             const oraFineMinuti = parseTime(oraFineInput);
@@ -847,6 +848,7 @@
     </script>
 </body>
 </html>
+
 
 
 
