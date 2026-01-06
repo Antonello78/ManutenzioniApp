@@ -478,6 +478,11 @@
              showMessage('success', 'Email di destinazione salvata.');
         }
 function nuovoIntervento() {
+            // Sblocca i campi se erano in sola lettura
+            if (typeof toggleSolaLettura === "function") {
+                toggleSolaLettura(false);
+            }
+            
             // Reset dei campi descrittivi
             document.getElementById('nomeScuola').value = '';
             document.getElementById('plessoEdificio').value = '';
@@ -488,13 +493,22 @@ function nuovoIntervento() {
             document.getElementById('numOperai').value = '1';
             document.getElementById('flagUrgenza').checked = false;
 
+            // Ripristina i costi ai valori predefiniti (Uscita 75, Tariffa 38)
+            if (document.getElementById('inputCostoUscita')) document.getElementById('inputCostoUscita').value = 75;
+            if (document.getElementById('inputTariffaBase')) document.getElementById('inputTariffaBase').value = 38;
+
             // Ricarica il numero progressivo corretto dal server e resetta la data
-            initializeInputs();
+            if (typeof initializeInputs === "function") {
+                initializeInputs();
+            }
             
-            // Ricalcola i costi (riporterà tutto al valore base dell'uscita)
-            calcolaManodopera();
+            // Ricalcola i costi per azzerare i totali della scheda precedente
+            if (typeof calcolaManodopera === "function") {
+                calcolaManodopera();
+            }
             
             showMessage('success', 'Nuova scheda pronta');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
         async function salvaIntervento() { 
@@ -575,11 +589,33 @@ function nuovoIntervento() {
         return; 
     }
 }
+        function toggleSolaLettura(readonly) {
+            const fields = ['nomeScuola', 'plessoEdificio', 'oraInizio', 'oraFine', 'numOperai', 'flagUrgenza'];
+            fields.forEach(id => {
+                document.getElementById(id).disabled = readonly;
+            });
+
+            const btnSalva = document.getElementById('btnSalva');
+            if (readonly) {
+                btnSalva.textContent = 'Modifica';
+                btnSalva.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btnSalva.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                // Cambiamo temporaneamente l'azione del tasto
+                btnSalva.onclick = () => toggleSolaLettura(false);
+            } else {
+                btnSalva.textContent = 'Salva';
+                btnSalva.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                btnSalva.classList.add('bg-green-600', 'hover:bg-green-700');
+                // Ripristiniamo l'azione di salvataggio
+                btnSalva.onclick = salvaIntervento;
+                showMessage('info', 'Modalità modifica attivata');
+            }
+        }
         
         function caricaIntervento(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
-            if (intervento) {
+            if (intervention) {
                 document.getElementById('nIntervento').value = intervento.nIntervento; 
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
@@ -590,10 +626,14 @@ function nuovoIntervento() {
                 document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
                 document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
                 document.getElementById('flagUrgenza').checked = intervento.flagUrgenza;
+                
                 calcolaManodopera(); 
                 toggleArchivio(); 
                 showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // AGGIUNTA: Attiva il blocco in sola lettura dopo il caricamento
+                toggleSolaLettura(true);
             }
         }
 
@@ -859,6 +899,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
