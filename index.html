@@ -590,9 +590,33 @@ function nuovoIntervento() {
     }
 }
         function toggleSolaLettura(readonly) {
-            const fields = ['nomeScuola', 'plessoEdificio', 'oraInizio', 'oraFine', 'numOperai', 'flagUrgenza'];
+            // Elenco completo di TUTTI i campi da bloccare, inclusi Numero e Data
+            const fields = [
+                'nIntervento', 
+                'dataIntervento', 
+                'nomeScuola', 
+                'plessoEdificio', 
+                'oraInizio', 
+                'oraFine', 
+                'numOperai', 
+                'flagUrgenza',
+                'inputCostoUscita',
+                'inputTariffaBase'
+            ];
+
             fields.forEach(id => {
-                document.getElementById(id).disabled = readonly;
+                const el = document.getElementById(id);
+                if (el) {
+                    el.disabled = readonly;
+                    // Opzionale: aggiunge un effetto visivo per far capire che è bloccato
+                    if (readonly) {
+                        el.style.opacity = "0.7";
+                        el.style.cursor = "not-allowed";
+                    } else {
+                        el.style.opacity = "1";
+                        el.style.cursor = "default";
+                    }
+                }
             });
 
             const btnSalva = document.getElementById('btnSalva');
@@ -600,15 +624,16 @@ function nuovoIntervento() {
                 btnSalva.textContent = 'Modifica';
                 btnSalva.classList.remove('bg-green-600', 'hover:bg-green-700');
                 btnSalva.classList.add('bg-orange-500', 'hover:bg-orange-600');
-                // Cambiamo temporaneamente l'azione del tasto
                 btnSalva.onclick = () => toggleSolaLettura(false);
             } else {
                 btnSalva.textContent = 'Salva';
                 btnSalva.classList.remove('bg-orange-500', 'hover:bg-orange-600');
                 btnSalva.classList.add('bg-green-600', 'hover:bg-green-700');
-                // Ripristiniamo l'azione di salvataggio
                 btnSalva.onclick = salvaIntervento;
-                showMessage('info', 'Modalità modifica attivata');
+                // Mostriamo il messaggio solo se lo sblocco è intenzionale (non all'avvio)
+                if (document.activeElement !== document.body) {
+                   showMessage('info', 'Modalità modifica attivata');
+                }
             }
         }
         
@@ -941,6 +966,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
