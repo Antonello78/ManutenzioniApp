@@ -284,6 +284,9 @@
                 Gestione Archivio
             </button>
             <div id="action-buttons" class="flex flex-row space-x-2">
+                <button onclick="nuovoIntervento()" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
+                    Nuovo
+                </button>
                 <button onclick="salvaIntervento()" id="btnSalva" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
                     Salva
                 </button>
@@ -291,7 +294,7 @@
                     Stampa
                 </button>
                 <button id="btnInviaReport" onclick="inviaReport()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Invia Email
+                    Email
                 </button>
             </div>
         </div>
@@ -837,6 +840,7 @@
     </script>
 </body>
 </html>
+
 
 
 
