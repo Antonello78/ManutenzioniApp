@@ -615,7 +615,7 @@ function nuovoIntervento() {
         function caricaIntervento(id) {
             const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
-            if (intervention) {
+            if (intervento) {
                 document.getElementById('nIntervento').value = intervento.nIntervento; 
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
@@ -632,9 +632,51 @@ function nuovoIntervento() {
                 showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                // AGGIUNTA: Attiva il blocco in sola lettura dopo il caricamento
+                // BLOCCO DI SICUREZZA: attiva la sola lettura
                 toggleSolaLettura(true);
             }
+        }
+        function toggleSolaLettura(readonly) {
+            const fields = ['nomeScuola', 'plessoEdificio', 'oraInizio', 'oraFine', 'numOperai', 'flagUrgenza', 'inputCostoUscita', 'inputTariffaBase'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = readonly;
+            });
+
+            const btnSalva = document.getElementById('btnSalva');
+            if (readonly) {
+                btnSalva.textContent = 'Modifica';
+                btnSalva.classList.remove('bg-green-600', 'hover:bg-green-700');
+                btnSalva.classList.add('bg-orange-500', 'hover:bg-orange-600');
+                btnSalva.onclick = () => toggleSolaLettura(false);
+            } else {
+                btnSalva.textContent = 'Salva';
+                btnSalva.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                btnSalva.classList.add('bg-green-600', 'hover:bg-green-700');
+                btnSalva.onclick = salvaIntervento;
+            }
+        }
+
+        function nuovoIntervento() {
+            // Sblocca i campi e ripristina il tasto Salva verde
+            toggleSolaLettura(false);
+            
+            // Pulizia campi
+            document.getElementById('nomeScuola').value = '';
+            document.getElementById('plessoEdificio').value = '';
+            document.getElementById('oraInizio').value = '09:00';
+            document.getElementById('oraFine').value = '10:15';
+            document.getElementById('numOperai').value = '1';
+            document.getElementById('flagUrgenza').checked = false;
+            document.getElementById('inputCostoUscita').value = 75;
+            document.getElementById('inputTariffaBase').value = 38;
+
+            // Rigenera data e numero intervento
+            initializeInputs();
+            calcolaManodopera();
+            
+            showMessage('success', 'Nuova scheda pronta');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function cancellaIntervento(id) {
@@ -899,6 +941,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
