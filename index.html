@@ -966,6 +966,97 @@ function nuovoIntervento() {
                 btn.textContent = 'Invia Email';
             }
         }
+        // --- FUNZIONI REGISTRO INTERVENTI ---
+        function toggleRegistro() {
+            const d = document.getElementById('registroDrawer');
+            d.classList.toggle('drawer-hidden');
+            d.classList.toggle('drawer-visible');
+            if(d.classList.contains('drawer-visible')) caricaRegistro();
+        }
+
+        async function addChiamata(priorita) {
+            const scuola = document.getElementById('regScuola').value;
+            const problema = document.getElementById('regProblema').value;
+            
+            if(!scuola) {
+                alert("Inserisci il nome della scuola!");
+                return;
+            }
+
+            const chiamata = {
+                id: Date.now(),
+                scuola: scuola,
+                problema: problema,
+                priorita: priorita,
+                data: new Date().toLocaleDateString('it-IT')
+            };
+
+            try {
+                const response = await fetch('/api/saveChiamata', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(chiamata)
+                });
+                if (response.ok) {
+                    document.getElementById('regScuola').value = '';
+                    document.getElementById('regProblema').value = '';
+                    caricaRegistro();
+                }
+            } catch (error) {
+                console.error("Errore salvataggio chiamata:", error);
+            }
+        }
+
+        async function caricaRegistro() {
+            const container = document.getElementById('listaChiamate');
+            container.innerHTML = '<div class="text-center p-4">Caricamento...</div>';
+            
+            try {
+                const res = await fetch('/api/getChiamate');
+                const chiamate = await res.json();
+                
+                if (!chiamate || chiamate.length === 0) {
+                    container.innerHTML = '<div class="text-center text-gray-500 p-4">Nessun intervento in attesa</div>';
+                    return;
+                }
+
+                container.innerHTML = chiamate.map(c => `
+                    <div class="bg-white p-3 rounded-lg shadow-sm border priority-${c.priorita}">
+                        <div class="font-bold text-blue-900 uppercase text-sm">${c.scuola}</div>
+                        <div class="text-xs text-gray-600 mb-2">${c.problema || 'Nessuna specifica'}</div>
+                        <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                            <span class="text-[10px] text-gray-400">${c.data}</span>
+                            <button onclick="convertiInCantiere('${btoa(JSON.stringify(c))}')" class="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-bold hover:bg-blue-700 transition-colors uppercase">
+                                Lavora ora
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<div class="text-center text-red-500 p-4 font-bold">Errore connessione</div>';
+            }
+        }
+
+        function convertiInCantiere(encodedData) {
+            const c = JSON.parse(atob(encodedData));
+            
+            // Compilazione automatica campi esistenti nel tuo index.html
+            document.getElementById('nomeScuola').value = c.scuola;
+            
+            // Gestione Urgenza (nel tuo codice l'id è 'flagUrgenza')
+            const checkUrgenza = document.getElementById('flagUrgenza');
+            if(checkUrgenza) {
+                checkUrgenza.checked = (c.priorita === 'alta');
+            }
+
+            toggleRegistro();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Feedback visivo
+            const scuolaInput = document.getElementById('nomeScuola');
+            scuolaInput.classList.add('bg-yellow-100');
+            setTimeout(() => scuolaInput.classList.remove('bg-yellow-100'), 2000);
+        }
 
         window.onload = () => {
             const dataOggi = new Date().toLocaleDateString('it-IT');
@@ -1000,6 +1091,7 @@ function nuovoIntervento() {
 </div>
 </body>
 </html>
+
 
 
 
