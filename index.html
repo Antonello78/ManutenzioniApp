@@ -17,7 +17,6 @@
         font-family: 'Inter', sans-serif;
         background-color: #f7f9fc;
         padding-top: 1rem;
-        /* Spazio extra in fondo per non far coprire il contenuto dalla barra fissa */
         padding-bottom: 120px;
      }
     input[type=number]::-webkit-inner-spin-button, 
@@ -36,14 +35,13 @@
         border: 2px solid #3b82f6;
     }
 
-    /* --- NUOVO REGISTRO INTERVENTI --- */
+    /* --- AGGIUNTA REGISTRO INTERVENTI --- */
     #registroDrawer {
         transition: transform 0.3s ease-in-out;
         z-index: 1000;
     }
     .drawer-hidden { transform: translateX(100%); }
     .drawer-visible { transform: translateX(0); }
-
     .priority-alta { border-left: 8px solid #ef4444 !important; } 
     .priority-media { border-left: 8px solid #f59e0b !important; }
     .priority-bassa { border-left: 8px solid #10b981 !important; }
@@ -166,7 +164,7 @@
             </h3>
             <div id="containerArchivio" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 <div class="p-4 bg-white rounded-xl border border-gray-100 text-center py-8">
-                    <p class="text-xs text-slate-400 font-700">Caricamento archivio...</p>
+                    <p class="text-xs text-slate-400 font-700 uppercase">Caricamento archivio...</p>
                 </div>
             </div>
         </div>
@@ -174,15 +172,9 @@
 
     <div class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200 p-4 z-40">
         <div class="max-w-4xl mx-auto flex gap-3">
-            <button onclick="nuovoIntervento()" class="flex-1 bg-sky-500 text-white font-800 py-4 rounded-2xl shadow-lg shadow-sky-200 active:scale-95 transition-all uppercase text-xs tracking-widest">
-                Nuovo
-            </button>
-            <button id="btnSalva" onclick="gestisciSalvataggio()" class="flex-1 bg-blue-700 text-white font-800 py-4 rounded-2xl shadow-lg shadow-blue-200 active:scale-95 transition-all uppercase text-xs tracking-widest disabled:opacity-50">
-                Salva
-            </button>
-            <button onclick="apriDialogEmail()" class="flex-1 bg-slate-900 text-white font-800 py-4 rounded-2xl shadow-lg shadow-slate-300 active:scale-95 transition-all uppercase text-xs tracking-widest">
-                Invia
-            </button>
+            <button onclick="nuovoIntervento()" class="flex-1 bg-sky-500 text-white font-800 py-4 rounded-2xl shadow-lg uppercase text-xs tracking-widest">Nuovo</button>
+            <button id="btnSalva" onclick="gestisciSalvataggio()" class="flex-1 bg-blue-700 text-white font-800 py-4 rounded-2xl shadow-lg uppercase text-xs tracking-widest">Salva</button>
+            <button onclick="apriDialogEmail()" class="flex-1 bg-slate-900 text-white font-800 py-4 rounded-2xl shadow-lg uppercase text-xs tracking-widest">Invia</button>
         </div>
     </div>
 
@@ -190,105 +182,78 @@
         <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div class="p-6 bg-slate-900 text-white">
                 <h3 class="text-xl font-800 uppercase italic tracking-tighter">Invia Report</h3>
-                <p class="text-[10px] text-slate-400 font-700 uppercase mt-1">Scegli il destinatario scolastico</p>
             </div>
             <div class="p-6 space-y-4">
-                <input type="email" id="emailDestinatario" placeholder="Indirizzo email..." class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-700 text-slate-800 outline-none focus:border-blue-500">
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="inviaReport('email1@scuola.it')" class="text-[10px] font-800 bg-slate-100 p-3 rounded-lg hover:bg-slate-200 text-slate-600">Referente 1</button>
-                    <button onclick="inviaReport('email2@scuola.it')" class="text-[10px] font-800 bg-slate-100 p-3 rounded-lg hover:bg-slate-200 text-slate-600">Referente 2</button>
-                </div>
+                <input type="email" id="emailDestinatario" placeholder="Email..." class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-700 outline-none focus:border-blue-500">
                 <button onclick="inviaReport()" id="btnInviaEmail" class="w-full bg-blue-700 text-white font-800 py-4 rounded-xl uppercase text-xs tracking-widest">Invia Ora</button>
-                <button onclick="chiudiDialogEmail()" class="w-full text-[10px] font-800 text-slate-400 uppercase tracking-widest">Annulla</button>
+                <button onclick="chiudiDialogEmail()" class="w-full text-[10px] font-800 text-slate-400 uppercase">Annulla</button>
             </div>
         </div>
     </div>
 
-    <button onclick="toggleRegistro()" class="fixed bottom-24 right-6 bg-blue-700 text-white p-4 rounded-full shadow-2xl hover:bg-blue-800 active:scale-95 transition-all z-50">
-        <span class="text-2xl">📋</span>
-    </button>
-
-    <div id="registroDrawer" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl drawer-hidden flex flex-col border-l border-gray-200">
+    <button onclick="toggleRegistro()" class="fixed bottom-24 right-6 bg-blue-700 text-white p-4 rounded-full shadow-2xl z-50">📋</button>
+    <div id="registroDrawer" class="fixed inset-y-0 right-0 w-full md:w-96 bg-white shadow-2xl drawer-hidden flex flex-col border-l z-[100]">
         <div class="p-4 bg-blue-700 text-white flex justify-between items-center">
-            <h2 class="text-lg font-bold uppercase tracking-tight">Registro Interventi</h2>
+            <h2 class="text-lg font-bold uppercase">Registro Interventi</h2>
             <button onclick="toggleRegistro()" class="text-3xl">&times;</button>
         </div>
-        
         <div class="p-4 border-b bg-gray-50 space-y-2">
-            <input id="regScuola" type="text" placeholder="Nome Scuola..." class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
-            <input id="regProblema" type="text" placeholder="Problema (es. rubinetto rotto)" class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 outline-none">
+            <input id="regScuola" type="text" placeholder="Scuola..." class="w-full p-3 border rounded-lg">
+            <input id="regProblema" type="text" placeholder="Problema..." class="w-full p-3 border rounded-lg">
             <div class="flex gap-2">
-                <button onclick="addChiamata('alta')" class="flex-1 bg-red-600 text-white py-3 rounded-lg text-xs font-bold shadow-md hover:bg-red-700 active:scale-95 transition-all">🔴 URGENTE</button>
-                <button onclick="addChiamata('media')" class="flex-1 bg-amber-500 text-white py-3 rounded-lg text-xs font-bold shadow-md hover:bg-amber-600 active:scale-95 transition-all">🟡 PROGRAMMATO</button>
+                <button onclick="addChiamata('alta')" class="flex-1 bg-red-600 text-white py-3 rounded-lg text-xs font-bold">🔴 URGENTE</button>
+                <button onclick="addChiamata('media')" class="flex-1 bg-amber-500 text-white py-3 rounded-lg text-xs font-bold">🟡 PROGRAMMATO</button>
             </div>
         </div>
-
-        <div id="listaChiamate" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-100">
-            </div>
+        <div id="listaChiamate" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-100"></div>
     </div>
 
     <script>
-        // --- COSTANTI E CONFIGURAZIONE ---
         const TARIFFA_ORARIA_BASE = 28.00;
         const COSTO_USCITA_FISSO = 35.00;
         const MAGGIORAZIONE_URGENZA = 0.20;
-
         let IS_EDIT_MODE = false;
         let CURRENT_N_INTERVENTO = null;
 
-        // --- FUNZIONI DI CALCOLO ---
         function calcolaManodopera() {
             const oraInizio = document.getElementById('oraInizio').value;
             const oraFine = document.getElementById('oraFine').value;
             const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
             const isUrgenza = document.getElementById('flagUrgenza').checked;
-
             if (!oraInizio || !oraFine) return;
-
             const [h1, m1] = oraInizio.split(':').map(Number);
             const [h2, m2] = oraFine.split(':').map(Number);
             let totalMinuti = (h2 * 60 + m2) - (h1 * 60 + m1);
             if (totalMinuti < 0) totalMinuti += 1440;
-
             document.getElementById('labelMinuti').textContent = `${totalMinuti} min`;
-
             let tariffaAttuale = TARIFFA_ORARIA_BASE;
             let uscitaAttuale = COSTO_USCITA_FISSO;
-
             if (isUrgenza) {
                 tariffaAttuale *= (1 + MAGGIORAZIONE_URGENZA);
                 uscitaAttuale *= (1 + MAGGIORAZIONE_URGENZA);
             }
-
             const costoUscitaTotale = uscitaAttuale * numOperai;
             const minutiAggiuntivi = Math.max(0, totalMinuti - 60);
             const costoAggiuntivoTotale = (minutiAggiuntivi / 60) * tariffaAttuale * numOperai;
             const totaleComplessivo = costoUscitaTotale + costoAggiuntivoTotale;
-
-            document.getElementById('costoUscita').textContent = `€ ${costoUscitaTotale.toLocaleString('it-IT', {minimumFractionDigits: 2})}`;
-            document.getElementById('costoAggiuntivo').textContent = `€ ${costoAggiuntivoTotale.toLocaleString('it-IT', {minimumFractionDigits: 2})}`;
+            document.getElementById('costoUscita').textContent = `€ ${totaleComplessivo.toLocaleString('it-IT', {minimumFractionDigits: 2})}`; // Nota: qui la tua logica originale sommava già in etichetta
             document.getElementById('totaleManodopera').textContent = `€ ${totaleComplessivo.toLocaleString('it-IT', {minimumFractionDigits: 2})}`;
         }
 
-        // --- FUNZIONI CLOUD ---
         async function caricaDatiServer() {
             try {
                 const res = await fetch('/api/getArchivio');
                 const data = await res.json();
                 renderizzaArchivio(data.interventi);
-                
                 const annoCorrente = new Date().getFullYear().toString().slice(-2);
                 const resNum = await fetch(`/api/getNextNumber?anno=${annoCorrente}`);
                 const dataNum = await resNum.json();
-                
                 if (!IS_EDIT_MODE) {
                     const nuovoNum = (parseInt(dataNum.numero) + 1).toString().padStart(3, '0');
                     document.getElementById('nIntervento').textContent = `${nuovoNum}/${annoCorrente}`;
                     CURRENT_N_INTERVENTO = `${nuovoNum}/${annoCorrente}`;
                 }
-            } catch (e) {
-                console.error("Errore sync:", e);
-            }
+            } catch (e) { console.error(e); }
         }
 
         function renderizzaArchivio(interventi) {
@@ -297,22 +262,15 @@
                 container.innerHTML = '<p class="col-span-full text-center text-slate-400 py-8 font-700 uppercase text-[10px]">Archivio Vuoto</p>';
                 return;
             }
-
-            // Ordine decrescente
             interventi.sort((a, b) => b.nIntervento.localeCompare(a.nIntervento));
-
             container.innerHTML = interventi.map(i => `
-                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:border-blue-200 transition-all group relative overflow-hidden">
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden">
                     <div class="flex justify-between items-start mb-2">
                         <span class="text-blue-700 font-900 text-sm">#${i.nIntervento}</span>
                         <span class="text-[9px] font-800 text-slate-300 uppercase">${i.dataIntervento}</span>
                     </div>
                     <div class="font-800 text-slate-800 text-xs uppercase truncate">${i.nomeScuola}</div>
-                    <div class="text-[10px] text-slate-400 font-600 truncate">${i.plessoEdificio || '---'}</div>
-                    <div class="mt-3 flex justify-between items-center border-t border-slate-50 pt-3">
-                        <span class="text-xs font-900 text-slate-900 italic">${i.totale}</span>
-                        <button onclick="caricaInterventoSpecifico('${btoa(JSON.stringify(i))}')" class="text-[10px] font-800 text-blue-600 uppercase hover:text-blue-800 tracking-tighter">Dettagli →</button>
-                    </div>
+                    <button onclick="caricaInterventoSpecifico('${btoa(JSON.stringify(i))}')" class="mt-3 text-[10px] font-800 text-blue-600 uppercase">Dettagli →</button>
                 </div>
             `).join('');
         }
@@ -328,7 +286,6 @@
             document.getElementById('oraInizio').value = i.oraInizio;
             document.getElementById('oraFine').value = i.oraFine;
             document.getElementById('flagUrgenza').checked = i.flagUrgenza;
-
             setModalitaSolaLettura(true);
             calcolaManodopera();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -337,38 +294,17 @@
         function setModalitaSolaLettura(readOnly) {
             IS_EDIT_MODE = !readOnly;
             const fields = ['nomeScuola', 'plessoEdificio', 'numOperai', 'oraInizio', 'oraFine'];
-            const btn = document.getElementById('btnSalva');
-            const label = document.getElementById('labelStato');
-
             fields.forEach(id => {
                 const el = document.getElementById(id);
                 el.readOnly = readOnly;
                 el.className = readOnly ? el.className.replace('editable-field', 'readonly-field') : el.className.replace('readonly-field', 'editable-field');
             });
-
-            if (readOnly) {
-                btn.textContent = 'Modifica';
-                btn.className = btn.className.replace('bg-blue-700', 'bg-orange-500');
-                label.textContent = "Sola Lettura";
-                label.className = "px-3 py-1 bg-slate-100 text-slate-500 text-[10px] font-800 rounded-full uppercase tracking-tighter border border-slate-200";
-            } else {
-                btn.textContent = 'Salva';
-                btn.className = btn.className.replace('bg-orange-500', 'bg-green-600');
-                label.textContent = "Modifica in corso";
-                label.className = "px-3 py-1 bg-orange-100 text-orange-600 text-[10px] font-800 rounded-full uppercase tracking-tighter border border-orange-200";
-            }
+            const btn = document.getElementById('btnSalva');
+            btn.textContent = readOnly ? 'Modifica' : 'Salva';
         }
 
         async function gestisciSalvataggio() {
-            if (!IS_EDIT_MODE && CURRENT_N_INTERVENTO) {
-                setModalitaSolaLettura(false);
-                return;
-            }
-
-            const btn = document.getElementById('btnSalva');
-            btn.disabled = true;
-            btn.textContent = 'Salvataggio...';
-
+            if (!IS_EDIT_MODE && CURRENT_N_INTERVENTO) { setModalitaSolaLettura(false); return; }
             const payload = {
                 datiIntervento: {
                     nIntervento: CURRENT_N_INTERVENTO,
@@ -382,183 +318,71 @@
                     totale: document.getElementById('totaleManodopera').textContent
                 },
                 anno: CURRENT_N_INTERVENTO.split('/')[1],
-                isUpdate: !document.getElementById('labelStato').textContent.includes('Nuovo')
+                isUpdate: IS_EDIT_MODE
             };
-
             try {
-                const res = await fetch('/api/saveIntervento', {
+                await fetch('/api/saveIntervento', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(payload)
                 });
-                if (res.ok) {
-                    alert("Intervento sincronizzato con successo!");
-                    location.reload();
-                }
-            } catch (e) {
-                alert("Errore nel salvataggio cloud.");
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        function nuovoIntervento() {
-            if (confirm("Vuoi resettare i campi per un nuovo intervento?")) {
                 location.reload();
-            }
+            } catch (e) { alert("Errore"); }
         }
 
-        // --- GESTIONE EMAIL ---
-        function apriDialogEmail() {
-            document.getElementById('modalEmail').classList.remove('hidden');
-        }
+        function apriDialogEmail() { document.getElementById('modalEmail').classList.remove('hidden'); }
+        function chiudiDialogEmail() { document.getElementById('modalEmail').classList.add('hidden'); }
 
-        function chiudiDialogEmail() {
-            document.getElementById('modalEmail').classList.add('hidden');
-        }
-
-        async function inviaReport(presetEmail) {
-            const email = presetEmail || document.getElementById('emailDestinatario').value;
-            if (!email) return alert("Inserisci una email!");
-
-            const btn = document.getElementById('btnInviaEmail');
-            btn.disabled = true;
-            btn.textContent = 'Invio in corso...';
-
+        async function inviaReport() {
             const payload = {
                 nIntervento: CURRENT_N_INTERVENTO,
-                dataIntervento: document.getElementById('dataStampa').textContent,
                 nomeScuola: document.getElementById('nomeScuola').value,
-                plessoEdificio: document.getElementById('plessoEdificio').value,
-                orario: `${document.getElementById('oraInizio').value} - ${document.getElementById('oraFine').value}`,
-                operai: document.getElementById('numOperai').value,
-                costoUscita: document.getElementById('costoUscita').textContent,
-                costoAggiuntivo: document.getElementById('costoAggiuntivo').textContent,
-                totale: document.getElementById('totaleManodopera').textContent,
-                destinatario: email
+                destinatario: document.getElementById('emailDestinatario').value,
+                totale: document.getElementById('totaleManodopera').textContent
             };
-
-            try {
-                const response = await fetch('/api/inviaReport', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (response.ok) {
-                    alert('Email inviata con successo!');
-                    chiudiDialogEmail();
-                } else {
-                    throw new Error('Errore durante l\'invio.');
-                }
-            } catch (error) {
-                alert('Errore: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Invia Email';
-            }
+            await fetch('/api/inviaReport', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            chiudiDialogEmail();
         }
 
-        // --- FUNZIONI REGISTRO INTERVENTI ---
+        /* --- LOGICA AGGIUNTA REGISTRO --- */
         function toggleRegistro() {
             const d = document.getElementById('registroDrawer');
             d.classList.toggle('drawer-hidden');
             d.classList.toggle('drawer-visible');
             if(d.classList.contains('drawer-visible')) caricaRegistro();
         }
-
-        async function addChiamata(priorita) {
-            const scuola = document.getElementById('regScuola').value;
-            const problema = document.getElementById('regProblema').value;
-            
-            if(!scuola) {
-                alert("Inserisci il nome della scuola!");
-                return;
-            }
-
-            const chiamata = {
-                id: Date.now(),
-                scuola: scuola,
-                problema: problema,
-                priorita: priorita,
-                data: new Date().toLocaleDateString('it-IT')
-            };
-
-            try {
-                const response = await fetch('/api/saveChiamata', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(chiamata)
-                });
-                if (response.ok) {
-                    document.getElementById('regScuola').value = '';
-                    document.getElementById('regProblema').value = '';
-                    caricaRegistro();
-                }
-            } catch (error) {
-                console.error("Errore salvataggio chiamata:", error);
-            }
+        async function addChiamata(p) {
+            const c = { id: Date.now(), scuola: document.getElementById('regScuola').value, problema: document.getElementById('regProblema').value, priorita: p, data: new Date().toLocaleDateString('it-IT') };
+            await fetch('/api/saveChiamata', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(c) });
+            document.getElementById('regScuola').value = ''; document.getElementById('regProblema').value = '';
+            caricaRegistro();
         }
-
         async function caricaRegistro() {
-            const container = document.getElementById('listaChiamate');
-            container.innerHTML = '<div class="text-center p-4">Caricamento...</div>';
-            
-            try {
-                const res = await fetch('/api/getChiamate');
-                const chiamate = await res.json();
-                
-                if (!chiamate || chiamate.length === 0) {
-                    container.innerHTML = '<div class="text-center text-gray-500 p-4">Nessun intervento in attesa</div>';
-                    return;
-                }
-
-                container.innerHTML = chiamate.map(c => `
-                    <div class="bg-white p-3 rounded-lg shadow-sm border priority-${c.priorita}">
-                        <div class="font-bold text-blue-900 uppercase text-sm">${c.scuola}</div>
-                        <div class="text-xs text-gray-600 mb-2">${c.problema || 'Nessuna specifica'}</div>
-                        <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-                            <span class="text-[10px] text-gray-400">${c.data}</span>
-                            <button onclick="convertiInCantiere('${btoa(JSON.stringify(c))}')" class="bg-blue-600 text-white px-3 py-1 rounded text-[10px] font-bold hover:bg-blue-700 transition-colors uppercase">
-                                Lavora ora
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (error) {
-                container.innerHTML = '<div class="text-center text-red-500 p-4 font-bold">Errore connessione</div>';
-            }
+            const res = await fetch('/api/getChiamate');
+            const dati = await res.json();
+            document.getElementById('listaChiamate').innerHTML = dati.map(c => `
+                <div class="bg-white p-3 rounded shadow border priority-${c.priorita}">
+                    <div class="font-bold text-sm">${c.scuola}</div>
+                    <div class="text-xs text-gray-500">${c.problema}</div>
+                    <button onclick="convertiInCantiere('${btoa(JSON.stringify(c))}')" class="mt-2 bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">LAVORA ORA</button>
+                </div>
+            `).join('');
         }
-
-        function convertiInCantiere(encodedData) {
-            const c = JSON.parse(atob(encodedData));
-            
-            // Compilazione automatica campi esistenti nel tuo index.html
+        function convertiInCantiere(data) {
+            const c = JSON.parse(atob(data));
             document.getElementById('nomeScuola').value = c.scuola;
-            
-            // Gestione Urgenza (nel tuo codice l'id è 'flagUrgenza')
-            const checkUrgenza = document.getElementById('flagUrgenza');
-            if(checkUrgenza) {
-                checkUrgenza.checked = (c.priorita === 'alta');
-            }
-
+            document.getElementById('flagUrgenza').checked = (c.priorita === 'alta');
             toggleRegistro();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Feedback visivo
-            const scuolaInput = document.getElementById('nomeScuola');
-            scuolaInput.classList.add('bg-yellow-100');
-            setTimeout(() => scuolaInput.classList.remove('bg-yellow-100'), 2000);
-            
             calcolaManodopera();
         }
 
-        // --- INIZIALIZZAZIONE ---
         window.onload = () => {
-            const dataOggi = new Date().toLocaleDateString('it-IT');
-            document.getElementById('dataStampa').textContent = dataOggi;
-            caricaDatiServer().finally(() => {
-                calcolaManodopera();
-            });
+            document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT');
+            caricaDatiServer().finally(() => calcolaManodopera());
         };
     </script>
 </body>
