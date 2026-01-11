@@ -99,6 +99,19 @@
             size: A4 portrait; 
             margin: 0.5cm !important; 
         }
+
+        /* Pannello Registro */
+        #registroDrawer {
+            transition: transform 0.3s ease-in-out;
+            z-index: 1000;
+        }
+        .drawer-hidden { transform: translateX(100%); }
+        .drawer-visible { transform: translateX(0); }
+        
+        /* Badge Priorità */
+        .priority-alta { border-left: 8px solid #ef4444; } /* Rosso */
+        .priority-media { border-left: 8px solid #f59e0b; } /* Giallo */
+        .priority-bassa { border-left: 8px solid #10b981; } /* Verde */
     }
 </style>
 </head>
@@ -965,6 +978,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
