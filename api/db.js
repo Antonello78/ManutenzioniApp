@@ -42,3 +42,23 @@ export async function getContatoreKV(anno) {
     // Restituisce il valore, o 0 se non esiste
     return await kv.get(key) || 0; 
 }
+// --- NUOVE FUNZIONI PER IL REGISTRO INTERVENTI ---
+
+// Recupera tutte le chiamate attive
+export async function getRegistroChiamateKV() {
+    const keys = await kv.keys('chiamata:*');
+    if (keys.length === 0) return [];
+    const chiamate = await kv.mget(...keys);
+    return chiamate.filter(c => c != null);
+}
+
+// Salva o aggiorna una chiamata
+export async function saveChiamataKV(chiamata) {
+    const key = `chiamata:${chiamata.id}`;
+    await kv.set(key, chiamata);
+}
+
+// Elimina una chiamata (quando diventa intervento o viene annullata)
+export async function deleteChiamataKV(id) {
+    await kv.del(`chiamata:${id}`);
+}
