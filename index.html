@@ -346,6 +346,40 @@
     </div>
         
     <script>
+        // --- LOGICA DI NAVIGAZIONE SCHEDE ---
+function switchTab(tab) {
+    const sInt = document.getElementById('sezioneIntervento');
+    const sChi = document.getElementById('sezioneChiamate');
+    const bInt = document.getElementById('tabIntervento');
+    const bChi = document.getElementById('tabChiamate');
+
+    // Controllo sicurezza per evitare errori se i div non sono pronti
+    if (!sInt || !sChi) {
+        console.error("Errore: Sezioni non trovate. Verifica gli ID nel codice HTML.");
+        return;
+    }
+
+    if (tab === 'intervento') {
+        // Mostra Intervento, Nasconde Chiamate
+        sInt.classList.remove('hidden');
+        sChi.classList.add('hidden');
+        
+        // Colora il tasto Intervento (Blu) e resetta l'altro
+        bInt.className = 'flex-1 py-4 rounded-2xl font-bold bg-blue-600 text-white shadow-lg border-2 border-blue-600 transition-all';
+        bChi.className = 'flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm border-2 border-transparent transition-all';
+    } else {
+        // Mostra Chiamate, Nasconde Intervento
+        sInt.classList.add('hidden');
+        sChi.classList.remove('hidden');
+        
+        // Colora il tasto Chiamate (Verde) e resetta l'altro
+        bChi.className = 'flex-1 py-4 rounded-2xl font-bold bg-green-600 text-white shadow-lg border-2 border-green-600 transition-all';
+        bInt.className = 'flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm border-2 border-transparent transition-all';
+        
+        // Qui caricheremo le chiamate salvate (Step successivo)
+        if (typeof caricaChiamate === "function") caricaChiamate();
+    }
+}
         const ORARIO_INIZIO_ORD = 8 * 60; 
         const ORARIO_FINE_ORD = 17 * 60; 
         const STORAGE_KEY = 'manodoperaInterventi';
@@ -1010,6 +1044,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
