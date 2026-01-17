@@ -485,6 +485,7 @@ function copiaInRapporto(scuola, oggetto) {
     
     if (inputScuola) {
         inputScuola.value = scuola;
+        // Notifica il cambio valore
         inputScuola.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
@@ -493,10 +494,16 @@ function copiaInRapporto(scuola, oggetto) {
         inputDescrizione.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    // Ti riporta alla scheda Rapporto Lavoro
+    // --- AGGIUNTA FONDAMENTALE PER IL TOTALE ---
+    // Forza il ricalcolo dei prezzi e del totale
+    if (typeof calcolaManodopera === "function") {
+        calcolaManodopera();
+    }
+
+    // Torna alla scheda Intervento
     switchTab('intervento'); 
     
-    // Scorre verso l'alto per farti vedere i dati inseriti
+    // Scorre verso l'alto
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
         const ORARIO_INIZIO_ORD = 8 * 60; 
@@ -1163,6 +1170,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
