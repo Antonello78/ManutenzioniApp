@@ -103,6 +103,18 @@
 </style>
 </head>
 <body class="p-4 sm:p-8">
+    <div class="max-w-4xl mx-auto mb-6">
+        <div class="flex space-x-2">
+            <button onclick="switchTab('intervento')" id="tabIntervento" class="flex-1 py-4 rounded-2xl font-bold bg-blue-600 text-white shadow-lg transition-all border-2 border-blue-600">
+                🔧 Rapporto Lavoro
+            </button>
+            <button onclick="switchTab('chiamate')" id="tabChiamate" class="flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm transition-all border-2 border-transparent">
+                📞 Registro Chiamate
+            </button>
+        </div>
+    </div>
+
+    <div id="sezioneIntervento">
     <div id="modalPreventivo" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg mx-4">
             <h3 class="text-xl font-bold text-gray-800 mb-4 text-center">Controlla Riga Preventivo</h3>
@@ -299,7 +311,40 @@
             </div>
         </div>
     </div>
+        </div> <div id="sezioneChiamate" class="hidden max-w-4xl mx-auto mb-10">
+        <div class="bg-white rounded-3xl shadow-xl p-6 border border-gray-100">
+            <h2 class="text-2xl font-extrabold text-gray-800 mb-6 flex items-center">
+                <span class="bg-green-100 text-green-600 p-2 rounded-lg mr-3">📞</span>
+                Nuova Chiamata
+            </h2>
+            
+            <div class="grid grid-cols-1 gap-4 mb-6">
+                <input type="text" id="chiamataScuola" placeholder="Nome Scuola / Referente" class="p-4 bg-gray-50 rounded-xl border-0 focus:ring-2 focus:ring-green-500 outline-none text-lg">
+                <textarea id="chiamataOggetto" placeholder="Descrizione guasto o richiesta..." rows="3" class="p-4 bg-gray-50 rounded-xl border-0 focus:ring-2 focus:ring-green-500 outline-none text-lg"></textarea>
+                
+                <div class="flex items-center space-x-4">
+                    <span class="font-bold text-gray-600">Urgenza:</span>
+                    <select id="chiamataUrgenza" class="flex-1 p-3 bg-gray-50 rounded-xl border-0 outline-none">
+                        <option value="bassa">Bassa</option>
+                        <option value="media" selected>Media</option>
+                        <option value="alta">Alta / Urgente</option>
+                    </select>
+                </div>
 
+                <button onclick="salvaNuovaChiamata()" class="w-full py-4 bg-green-600 text-white rounded-2xl font-bold text-lg shadow-lg hover:bg-green-700 transition-all">
+                    Registra Chiamata
+                </button>
+            </div>
+
+            <hr class="my-8 border-gray-100">
+
+            <h3 class="font-bold text-gray-400 uppercase text-xs tracking-widest mb-4">Ultime chiamate ricevute</h3>
+            <div id="listaChiamateCorpo" class="space-y-4">
+                <p class="text-center text-gray-400 py-8 italic">Nessuna chiamata nel registro.</p>
+            </div>
+        </div>
+    </div>
+        
     <script>
         const ORARIO_INIZIO_ORD = 8 * 60; 
         const ORARIO_FINE_ORD = 17 * 60; 
@@ -965,6 +1010,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
