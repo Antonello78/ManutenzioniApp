@@ -153,12 +153,12 @@
 
             <div class="mt-4">
                 <label for="nomeScuola" class="block text-sm font-medium text-gray-600">Nome Scuola</label>
-                <input type="text" id="nomeScuola" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Istituto Comprensivo G. Pascoli">
+                <input type="text" id="scuolaOriginale" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Istituto Comprensivo G. Pascoli">
             </div>
 
             <div class="mt-4">
                 <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso/Edificio</label>
-                <input type="text" id="plessoEdificio" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Sede Centrale / Plesso Via Roma">
+                <input type="text" id="plessoOriginale" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Sede Centrale / Plesso Via Roma">
             </div>
 
             <div class="border-t border-gray-200 pt-4 mt-4"></div>
@@ -476,18 +476,26 @@ async function caricaChiamate() {
 
 // 3. Funzione per copiare i dati nel modulo originale
 function copiaInRapporto(scuola, oggetto) {
-    // Riempie i campi del tuo modulo originale (controlla gli ID)
-    const inputScuola = document.querySelector('input[placeholder="Nome della scuola o istituto"]');
-    const inputOggetto = document.querySelector('textarea[placeholder="Descrizione del lavoro svolto..."]');
+    // Cerchiamo i campi usando gli ID esatti che abbiamo appena aggiunto
+    const inputScuola = document.getElementById('scuolaOriginale');
+    const inputOggetto = document.getElementById('plessoOriginale');
     
-    if (inputScuola) inputScuola.value = scuola;
-    if (inputOggetto) inputOggetto.value = oggetto;
+    if (inputScuola) {
+        inputScuola.value = scuola;
+        // Notifica il sistema che il testo è cambiato per aggiornare i calcoli automatici
+        inputScuola.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    
+    if (inputOggetto) {
+        inputOggetto.value = oggetto;
+        inputOggetto.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 
-    // Torna alla scheda Intervento
-    switchTab('intervento');
+    // Torna alla scheda Intervento usando la funzione di navigazione
+    switchTab('intervento'); 
     
-    // Feedback visivo
-    alert("Dati copiati nel rapporto! Ora puoi completarli.");
+    // Scorre la pagina verso l'alto per mostrare i campi compilati
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
         const ORARIO_INIZIO_ORD = 8 * 60; 
         const ORARIO_FINE_ORD = 17 * 60; 
@@ -1153,6 +1161,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
