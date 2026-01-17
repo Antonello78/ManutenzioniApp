@@ -718,69 +718,57 @@ function nuovoIntervento() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
         
-        async function salvaIntervento() { 
-    calcolaManodopera(); 
-    const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
-    const nInterventoParts = nInterventoCompleto.split('/');
-    
-    // CORREZIONE: Verifichiamo solo che ci sia un numero e un anno (formato NNN/AA)
-    // senza obbligare che l'anno sia per forza quello corrente.
-    if (nInterventoParts.length !== 2 || nInterventoParts[0] === "" || nInterventoParts[1] === "") {
-         showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/AA.`); 
-         return;
-    }
-    
-    const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
-    const annoInserito = nInterventoParts[1]; // Recuperiamo l'anno scritto dall'utente
-    
-    let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
-    
-    const interventoObj = {
-        id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
-        nIntervento: nInterventoCompleto,
-        dataIntervento: document.getElementById('dataIntervento').value, 
-        nomeScuola: document.getElementById('nomeScuola').value,
-        plessoEdificio: document.getElementById('plessoEdificio').value,
+        async function salvaIntervento() {
+    const btn = document.querySelector('button[onclick="salvaIntervento()"]');
+    if (btn) btn.disabled = true;
+
+    // Recuperiamo i dati usando i NUOVI ID che abbiamo impostato
+    const payload = {
+        nIntervento: document.getElementById('nIntervento').value,
+        dataIntervento: document.getElementById('dataIntervento').value,
+        nomeScuola: document.getElementById('scuolaOriginale').value, // ID AGGIORNATO
+        plessoEdificio: document.getElementById('plessoOriginale').value, // ID AGGIORNATO
+        // Se hai aggiunto il campo descrizione lavoro:
+        descrizioneLavoro: document.getElementById('descrizioneLavoroOriginale') ? document.getElementById('descrizioneLavoroOriginale').value : '',
         oraInizio: document.getElementById('oraInizio').value,
         oraFine: document.getElementById('oraFine').value,
-        numOperai: parseInt(document.getElementById('numOperai').value),
+        numOperai: document.getElementById('numOperai').value,
         costoUscita: document.getElementById('inputCostoUscita').value,
         tariffaBase: document.getElementById('inputTariffaBase').value,
         flagUrgenza: document.getElementById('flagUrgenza').checked,
-        tariffaOraria: document.getElementById('tariffaOraria').textContent,
-        totaleManodopera: document.getElementById('totaleManodopera').textContent
+        
+        // Dati calcolati dal riepilogo visibile
+        totaleOre: document.getElementById('resOreTotali').textContent,
+        costoManodopera: document.getElementById('resCostoManodopera').textContent,
+        totaleIntervento: document.getElementById('totaleManodopera').textContent
     };
 
+    // Salvataggio Locale (Archivio)
+    const interventi Locali = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    interventiLocali.unshift({ ...payload, id: Date.now().toString(), timestamp: new Date().toISOString() });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiLocali));
+
+    // Salvataggio su Server (Database Vercel/KV)
     try {
-        const response = await fetch('/api/saveIntervento', { 
+        const response = await fetch('/api/saveIntervento', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                numeroIntervento: numeroCorrenteSequenziale,
-                anno: annoInserito, // Usa l'anno inserito nel campo (es. 25)
-                datiIntervento: interventoObj,
-                isUpdate: existingIndex > -1
-            })
+            body: JSON.stringify(payload)
         });
-        
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'Errore nel salvataggio remoto.');
-        
-        if (existingIndex > -1) {
-            interventi[existingIndex] = interventoObj;
-            showMessage('success', `Intervento N° ${nInterventoCompleto} aggiornato correttamente!`);
+
+        if (response.ok) {
+            showMessage('success', 'Intervento salvato con successo sia in locale che sul database!');
+            if (typeof aggiornaListaArchivio === "function") aggiornaListaArchivio();
         } else {
-            interventi.push(interventoObj); 
-            showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
-            
-            // Aggiorna il contatore locale solo se l'intervento è dell'anno corrente
-            const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
-            if (annoInserito === CURRENT_YEAR) {
-                const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-                localStorage.setItem(COUNTER_KEY_YEARLY, numeroCorrenteSequenziale.toString());
-            }
+            showMessage('warning', 'Salvato in locale, ma errore nell\'invio al server.');
         }
+    } catch (error) {
+        console.error("Errore server:", error);
+        showMessage('warning', 'Salvato localmente. Server non raggiungibile.');
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
         
         localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
         
@@ -895,27 +883,27 @@ function nuovoIntervento() {
         }
 
         function nuovoIntervento() {
-            // Sblocca i campi e ripristina il tasto Salva verde
-            toggleSolaLettura(false);
-            
-            // Pulizia campi
-            document.getElementById('nomeScuola').value = '';
-            document.getElementById('plessoEdificio').value = '';
-            document.getElementById('oraInizio').value = '09:00';
-            document.getElementById('oraFine').value = '10:15';
-            document.getElementById('numOperai').value = '1';
-            document.getElementById('flagUrgenza').checked = false;
-            document.getElementById('inputCostoUscita').value = 75;
-            document.getElementById('inputTariffaBase').value = 38;
-
-            // Rigenera data e numero intervento
-            initializeInputs();
-            calcolaManodopera();
-            
-            showMessage('success', 'Nuova scheda pronta');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
+    // Svuota i campi usando i nuovi ID
+    document.getElementById('scuolaOriginale').value = '';
+    document.getElementById('plessoOriginale').value = '';
+    if (document.getElementById('descrizioneLavoroOriginale')) {
+        document.getElementById('descrizioneLavoroOriginale').value = '';
+    }
+    
+    // Reset orari e operai
+    document.getElementById('oraInizio').value = '08:00';
+    document.getElementById('oraFine').value = '10:00';
+    document.getElementById('numOperai').value = '1';
+    
+    // Sblocca i campi se erano in sola lettura
+    toggleSolaLettura(false);
+    
+    // Ricalcola tutto (azzera i totali nel riepilogo)
+    calcolaManodopera();
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showMessage('info', 'Modulo resettato. Pronto per un nuovo inserimento.');
+}
         function cancellaIntervento(id) {
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
@@ -1178,6 +1166,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
