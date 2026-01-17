@@ -156,11 +156,15 @@
                 <input type="text" id="scuolaOriginale" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Istituto Comprensivo G. Pascoli">
             </div>
 
-            <div class="mt-4">
+           <div class="mt-4">
                 <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso/Edificio</label>
                 <input type="text" id="plessoOriginale" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Sede Centrale / Plesso Via Roma">
             </div>
 
+            <div class="mt-4">
+                <label for="descrizioneLavoro" class="block text-sm font-medium text-gray-600">Descrizione Intervento</label>
+                <textarea id="descrizioneLavoroOriginale" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" rows="3" placeholder="Descrizione del lavoro svolto o richiesto..."></textarea>
+            </div>
             <div class="border-t border-gray-200 pt-4 mt-4"></div>
 
             <div>
@@ -476,25 +480,23 @@ async function caricaChiamate() {
 
 // 3. Funzione per copiare i dati nel modulo originale
 function copiaInRapporto(scuola, oggetto) {
-    // Cerchiamo i campi usando gli ID esatti che abbiamo appena aggiunto
     const inputScuola = document.getElementById('scuolaOriginale');
-    const inputOggetto = document.getElementById('plessoOriginale');
+    const inputDescrizione = document.getElementById('descrizioneLavoroOriginale');
     
     if (inputScuola) {
         inputScuola.value = scuola;
-        // Notifica il sistema che il testo è cambiato per aggiornare i calcoli automatici
         inputScuola.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
-    if (inputOggetto) {
-        inputOggetto.value = oggetto;
-        inputOggetto.dispatchEvent(new Event('input', { bubbles: true }));
+    if (inputDescrizione) {
+        inputDescrizione.value = oggetto;
+        inputDescrizione.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    // Torna alla scheda Intervento usando la funzione di navigazione
+    // Ti riporta alla scheda Rapporto Lavoro
     switchTab('intervento'); 
     
-    // Scorre la pagina verso l'alto per mostrare i campi compilati
+    // Scorre verso l'alto per farti vedere i dati inseriti
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
         const ORARIO_INIZIO_ORD = 8 * 60; 
@@ -1161,6 +1163,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
