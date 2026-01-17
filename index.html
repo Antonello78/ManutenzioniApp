@@ -582,8 +582,8 @@ function copiaInRapporto(scuola, oggetto) {
     const flagUrgenza = document.getElementById('flagUrgenza').checked;
     const nIntervento = document.getElementById('nIntervento').value; 
     const dataIntervento = document.getElementById('dataIntervento').value;
-    const nomeScuola = document.getElementById('nomeScuola').value;
-    const plessoEdificio = document.getElementById('plessoEdificio').value;
+    const nomeScuola = document.getElementById('scuolaOriginale').value;
+    const plessoEdificio = document.getElementById('plessoOriginale').value;
 
     // LOGICA AGGIORNAMENTO AUTOMATICO COSTO USCITA
     if (flagUrgenza && campoCostoUscita.value == "75") {
@@ -1172,6 +1172,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
