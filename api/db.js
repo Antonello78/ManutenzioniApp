@@ -42,3 +42,36 @@ export async function getContatoreKV(anno) {
     // Restituisce il valore, o 0 se non esiste
     return await kv.get(key) || 0; 
 }
+
+// --- GESTIONE CHIAMATE (Nuovo Modulo) ---
+
+/**
+ * Recupera tutte le chiamate salvate su KV
+ */
+export async function getChiamateComplete() {
+    const keys = await kv.keys('chiamata:*');
+    if (keys.length === 0) return [];
+    
+    const chiamate = await kv.mget(...keys);
+    
+    // Ordina per data (dalla più recente)
+    return chiamate
+        .filter(c => c != null)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+}
+
+/**
+ * Salva o aggiorna una chiamata
+ */
+export async function saveChiamataKV(chiamata) {
+    const key = `chiamata:${chiamata.id}`;
+    await kv.set(key, chiamata);
+}
+
+/**
+ * Elimina una chiamata
+ */
+export async function deleteChiamataKV(id) {
+    const key = `chiamata:${id}`;
+    await kv.del(key);
+}
