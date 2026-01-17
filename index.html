@@ -480,12 +480,14 @@ async function caricaChiamate() {
 
 // 3. Funzione per copiare i dati nel modulo originale
 function copiaInRapporto(scuola, oggetto) {
+    // 1. Identifichiamo i campi corretti
     const inputScuola = document.getElementById('scuolaOriginale');
     const inputDescrizione = document.getElementById('descrizioneLavoroOriginale');
     
+    // 2. Inseriamo i dati con protezione (se i campi esistono)
     if (inputScuola) {
         inputScuola.value = scuola;
-        // Notifica il cambio valore
+        // Simula il fatto che l'utente stia scrivendo per attivare eventuali listener
         inputScuola.dispatchEvent(new Event('input', { bubbles: true }));
     }
     
@@ -494,16 +496,18 @@ function copiaInRapporto(scuola, oggetto) {
         inputDescrizione.dispatchEvent(new Event('input', { bubbles: true }));
     }
 
-    // --- AGGIUNTA FONDAMENTALE PER IL TOTALE ---
-    // Forza il ricalcolo dei prezzi e del totale
-    if (typeof calcolaManodopera === "function") {
-        calcolaManodopera();
-    }
-
-    // Torna alla scheda Intervento
+    // 3. Cambiamo scheda (uso l'ID corretto della funzione switchTab)
     switchTab('intervento'); 
-    
-    // Scorre verso l'alto
+
+    // 4. FORZIAMO IL RICALCOLO
+    // Usiamo un piccolo ritardo (setTimeout) per dare tempo al modulo di "accorgersi" dei nuovi dati
+    setTimeout(() => {
+        if (typeof calcolaManodopera === "function") {
+            calcolaManodopera();
+        }
+    }, 100);
+
+    // 5. Torniamo in cima alla pagina
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
         const ORARIO_INIZIO_ORD = 8 * 60; 
@@ -1170,6 +1174,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
