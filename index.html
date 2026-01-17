@@ -380,6 +380,111 @@ function switchTab(tab) {
         if (typeof caricaChiamate === "function") caricaChiamate();
     }
 }
+        // --- LOGICA GESTIONE CHIAMATE ---
+
+// 1. Funzione per salvare una nuova chiamata
+async function salvaNuovaChiamata() {
+    const scuola = document.getElementById('chiamataScuola').value;
+    const oggetto = document.getElementById('chiamataOggetto').value;
+    const urgenza = document.getElementById('chiamataUrgenza').value;
+
+    if (!scuola || !oggetto) {
+        alert("Per favore, inserisci almeno il nome della scuola e l'oggetto.");
+        return;
+    }
+
+    const nuovaChiamata = {
+        id: 'CH-' + Date.now(),
+        timestamp: new Date().toISOString(),
+        scuola: scuola,
+        oggetto: oggetto,
+        urgenza: urgenza,
+        stato: 'aperta'
+    };
+
+    try {
+        const response = await fetch('/api/saveChiamata', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chiamata: nuovaChiamata })
+        });
+
+        if (response.ok) {
+            // Pulisce i campi
+            document.getElementById('chiamataScuola').value = '';
+            document.getElementById('chiamataOggetto').value = '';
+            // Ricarica la lista per vedere la nuova chiamata
+            caricaChiamate();
+        } else {
+            alert("Errore durante il salvataggio.");
+        }
+    } catch (error) {
+        console.error("Errore:", error);
+    }
+}
+
+// 2. Funzione per caricare la lista dal database
+async function caricaChiamate() {
+    const listaCorpo = document.getElementById('listaChiamateCorpo');
+    listaCorpo.innerHTML = '<p class="text-center text-gray-400 py-8 italic">Caricamento in corso...</p>';
+
+    try {
+        const response = await fetch('/api/getChiamate');
+        const data = await response.json();
+        
+        if (data.chiamate && data.chiamate.length > 0) {
+            listaCorpo.innerHTML = ''; // Svuota il caricamento
+            data.chiamate.forEach(c => {
+                const dataFormattata = new Date(c.timestamp).toLocaleString('it-IT', { 
+                    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' 
+                });
+                
+                // Colore urgenza
+                const badgeColor = c.urgenza === 'alta' ? 'bg-red-100 text-red-600' : 
+                                 c.urgenza === 'media' ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 text-blue-600';
+
+                const html = `
+                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold text-gray-400 uppercase">${dataFormattata}</span>
+                            <span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase ${badgeColor}">${c.urgenza}</span>
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-lg">${c.scuola}</h4>
+                        <p class="text-gray-600 mb-4">${c.oggetto}</p>
+                        <div class="flex space-x-2">
+                            <button onclick="copiaInRapporto('${c.scuola.replace(/'/g, "\\'")}', '${c.oggetto.replace(/'/g, "\\'")}')" 
+                                    class="flex-1 py-2 bg-white border border-blue-200 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-50">
+                                🔧 Crea Rapporto
+                            </button>
+                        </div>
+                    </div>
+                `;
+                listaCorpo.insertAdjacentHTML('beforeend', html);
+            });
+        } else {
+            listaCorpo.innerHTML = '<p class="text-center text-gray-400 py-8 italic">Nessuna chiamata registrata.</p>';
+        }
+    } catch (error) {
+        console.error("Errore nel caricamento:", error);
+        listaCorpo.innerHTML = '<p class="text-center text-red-400 py-8 italic">Errore nel caricamento dei dati.</p>';
+    }
+}
+
+// 3. Funzione per copiare i dati nel modulo originale
+function copiaInRapporto(scuola, oggetto) {
+    // Riempie i campi del tuo modulo originale (controlla gli ID)
+    const inputScuola = document.querySelector('input[placeholder="Nome della scuola o istituto"]');
+    const inputOggetto = document.querySelector('textarea[placeholder="Descrizione del lavoro svolto..."]');
+    
+    if (inputScuola) inputScuola.value = scuola;
+    if (inputOggetto) inputOggetto.value = oggetto;
+
+    // Torna alla scheda Intervento
+    switchTab('intervento');
+    
+    // Feedback visivo
+    alert("Dati copiati nel rapporto! Ora puoi completarli.");
+}
         const ORARIO_INIZIO_ORD = 8 * 60; 
         const ORARIO_FINE_ORD = 17 * 60; 
         const STORAGE_KEY = 'manodoperaInterventi';
@@ -1044,6 +1149,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
