@@ -844,29 +844,35 @@ function nuovoIntervento() {
         }
         
         function caricaIntervento(id) {
-            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const intervento = interventi.find(i => i.id === id);
-            if (intervento) {
-                document.getElementById('nIntervento').value = intervento.nIntervento; 
-                document.getElementById('dataIntervento').value = intervento.dataIntervento;
-                document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
-                document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
-                document.getElementById('oraInizio').value = intervento.oraInizio;
-                document.getElementById('oraFine').value = intervento.oraFine;
-                document.getElementById('numOperai').value = intervento.numOperai;
-                document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
-                document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
-                document.getElementById('flagUrgenza').checked = intervento.flagUrgenza;
-                
-                calcolaManodopera(); 
-                toggleArchivio(); 
-                showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+    const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const intervento = interventi.find(i => i.id === id);
+    if (intervento) {
+        // Compiliamo i campi usando i nuovi ID corretti
+        document.getElementById('nIntervento').value = intervento.nIntervento; 
+        document.getElementById('dataIntervento').value = intervento.dataIntervento;
+        document.getElementById('scuolaOriginale').value = intervento.nomeScuola || '';
+        document.getElementById('plessoOriginale').value = intervento.plessoEdificio || '';
+        document.getElementById('descrizioneLavoroOriginale').value = intervento.descrizioneLavoro || ''; // Se salvato
+        document.getElementById('oraInizio').value = intervento.oraInizio;
+        document.getElementById('oraFine').value = intervento.oraFine;
+        document.getElementById('numOperai').value = intervento.numOperai;
+        document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
+        document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
+        document.getElementById('flagUrgenza').checked = intervento.flagUrgenza;
+        
+        // Forza il ricalcolo dei totali
+        calcolaManodopera(); 
+        
+        // Chiude l'archivio e torna al modulo
+        toggleArchivio(); 
+        
+        showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                // BLOCCO DI SICUREZZA: attiva la sola lettura
-                toggleSolaLettura(true);
-            }
-        }
+        // Attiva la sola lettura per sicurezza
+        toggleSolaLettura(true);
+    }
+}
         function toggleSolaLettura(readonly) {
             const fields = ['nomeScuola', 'plessoEdificio', 'oraInizio', 'oraFine', 'numOperai', 'flagUrgenza', 'inputCostoUscita', 'inputTariffaBase'];
             fields.forEach(id => {
@@ -1172,6 +1178,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
