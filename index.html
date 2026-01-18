@@ -622,31 +622,37 @@ async function salvaIntervento() {
         }
         
         function caricaIntervento(id) {
-            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const intervento = interventi.find(i => i.id === id);
-            if (intervento) {
-                document.getElementById('nIntervento').value = intervento.nIntervento; 
-                document.getElementById('dataIntervento').value = intervento.dataIntervento;
-                document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
-                document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
-                document.getElementById('descrizioneLavori').value = intervento.descrizioneLavori || '';
-                document.getElementById('descrizioneLavori').readOnly = true;
-                document.getElementById('oraInizio').value = intervento.oraInizio;
-                document.getElementById('oraFine').value = intervento.oraFine;
-                document.getElementById('numOperai').value = intervento.numOperai;
-                document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
-                document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
-                document.getElementById('flagUrgenza').checked = intervento.flagUrgenza;
-                
-                calcolaManodopera(); 
-                toggleArchivio(); 
-                showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+    const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const intervento = interventi.find(i => i.id === id);
+    if (intervento) {
+        document.getElementById('nIntervento').value = intervento.nIntervento; 
+        document.getElementById('dataIntervento').value = intervento.dataIntervento;
+        document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
+        document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
+        
+        // CARICA IL VALORE (senza bloccarlo qui manualmente)
+        document.getElementById('descrizioneLavori').value = intervento.descrizioneLavori || '';
+        
+        document.getElementById('oraInizio').value = intervento.oraInizio;
+        document.getElementById('oraFine').value = intervento.oraFine;
+        document.getElementById('numOperai').value = intervento.numOperai;
+        document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
+        document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
+        document.getElementById('flagUrgenza').checked = !intervento.flagUrgenza ? false : intervento.flagUrgenza;
+        
+        calcolaManodopera(); 
+        
+        // Questa funzione chiude l'archivio e ti riporta al calcolo
+        toggleArchivio(); 
+        
+        showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                // BLOCCO DI SICUREZZA: attiva la sola lettura
-                toggleSolaLettura(true);
-            }
-        }
+        // BLOCCO DI SICUREZZA: Questa funzione blocca TUTTI i campi inclusi nell'elenco,
+        // compresa la descrizione (se l'hai aggiunta all'array fields come abbiamo detto prima)
+        toggleSolaLettura(true);
+    }
+}
         function toggleSolaLettura(readonly) {
             const fields = ['nomeScuola', 'plessoEdificio', 'oraInizio', 'oraFine', 'numOperai', 'flagUrgenza', 'inputCostoUscita', 'inputTariffaBase'];
             fields.forEach(id => {
@@ -954,6 +960,7 @@ async function salvaIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
