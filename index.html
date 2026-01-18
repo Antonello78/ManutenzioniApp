@@ -494,6 +494,7 @@ function nuovoIntervento() {
             document.getElementById('nomeScuola').value = '';
             document.getElementById('plessoEdificio').value = '';
             document.getElementById('descrizioneLavori').value = dati.descrizioneLavori || '';
+            document.getElementById('descrizioneLavori').readOnly = false;
             
             // Reset orari e operai ai valori di default
             document.getElementById('oraInizio').value = '09:00';
@@ -978,6 +979,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
