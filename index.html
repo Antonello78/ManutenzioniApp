@@ -485,83 +485,49 @@
              showMessage('success', 'Email di destinazione salvata.');
         }
 function nuovoIntervento() {
-            // Sblocca i campi se erano in sola lettura
-            if (typeof toggleSolaLettura === "function") {
-                toggleSolaLettura(false);
-            }
-            
-            // Reset dei campi descrittivi
-            document.getElementById('nomeScuola').value = '';
-            document.getElementById('plessoEdificio').value = '';
-            document.getElementById('descrizioneLavori').value = ''; // Svuota la box
-            document.getElementById('descrizioneLavori').readOnly = false; // La sblocca
-            
-            // Reset orari e operai ai valori di default
-            document.getElementById('oraInizio').value = '09:00';
-            document.getElementById('oraFine').value = '10:15';
-            document.getElementById('numOperai').value = '1';
-            document.getElementById('flagUrgenza').checked = false;
-
-            // Ripristina i costi ai valori predefiniti (Uscita 75, Tariffa 38)
-            if (document.getElementById('inputCostoUscita')) document.getElementById('inputCostoUscita').value = 75;
-            if (document.getElementById('inputTariffaBase')) document.getElementById('inputTariffaBase').value = 38;
-
-            // Ricarica il numero progressivo corretto dal server e resetta la data
-            if (typeof initializeInputs === "function") {
-                initializeInputs();
-            }
-            
-            // Ricalcola i costi per azzerare i totali della scheda precedente
-            if (typeof calcolaManodopera === "function") {
-                calcolaManodopera();
-            }
-            
-            showMessage('success', 'Nuova scheda pronta');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-        
-        async function salvaIntervento() { 
-    calcolaManodopera(); 
-    const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
-    const nInterventoParts = nInterventoCompleto.split('/');
-    
-    // CORREZIONE: Verifichiamo solo che ci sia un numero e un anno (formato NNN/AA)
-    // senza obbligare che l'anno sia per forza quello corrente.
-    if (nInterventoParts.length !== 2 || nInterventoParts[0] === "" || nInterventoParts[1] === "") {
-         showMessage('error', `Il 'N° Intervento' non è nel formato corretto NNN/AA.`); 
-         return;
+    // Sblocca i campi se erano in sola lettura
+    if (typeof toggleSolaLettura === "function") {
+        toggleSolaLettura(false);
     }
     
-    const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
-    const annoInserito = nInterventoParts[1]; // Recuperiamo l'anno scritto dall'utente
+    // Reset dei campi descrittivi
+    document.getElementById('nomeScuola').value = '';
+    document.getElementById('plessoEdificio').value = '';
     
-    let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
+    // CORRETTO: Svuota e sblocca
+    const desc = document.getElementById('descrizioneLavori');
+    if (desc) {
+        desc.value = '';
+        desc.readOnly = false;
+        desc.disabled = false;
+        desc.style.backgroundColor = "#ffffff"; // Forza il bianco
+    }
     
-    const interventoObj = {
-        id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
-        nIntervento: nInterventoCompleto,
-        dataIntervento: document.getElementById('dataIntervento').value, 
-        nomeScuola: document.getElementById('nomeScuola').value,
-        plessoEdificio: document.getElementById('plessoEdificio').value,
-        descrizioneLavori: document.getElementById('descrizioneLavori').value,
-        oraInizio: document.getElementById('oraInizio').value,
-        oraFine: document.getElementById('oraFine').value,
-        numOperai: parseInt(document.getElementById('numOperai').value),
-        costoUscita: document.getElementById('inputCostoUscita').value,
-        tariffaBase: document.getElementById('inputTariffaBase').value,
-        flagUrgenza: document.getElementById('flagUrgenza').checked,
-        tariffaOraria: document.getElementById('tariffaOraria').textContent,
-        totaleManodopera: document.getElementById('totaleManodopera').textContent
-    };
+    // ... resto del codice (orari, operai, ecc.) rimane uguale ...
+    document.getElementById('oraInizio').value = '09:00';
+    document.getElementById('oraFine').value = '10:15';
+    document.getElementById('numOperai').value = '1';
+    document.getElementById('flagUrgenza').checked = false;
 
+    if (document.getElementById('inputCostoUscita')) document.getElementById('inputCostoUscita').value = 75;
+    if (document.getElementById('inputTariffaBase')) document.getElementById('inputTariffaBase').value = 38;
+
+    if (typeof initializeInputs === "function") initializeInputs();
+    if (typeof calcolaManodopera === "function") calcolaManodopera();
+    
+    showMessage('success', 'Nuova scheda pronta');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function salvaIntervento() { 
+    // ... (tutta la parte iniziale rimane invariata fino al blocco try) ...
     try {
         const response = await fetch('/api/saveIntervento', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 numeroIntervento: numeroCorrenteSequenziale,
-                anno: annoInserito, // Usa l'anno inserito nel campo (es. 25)
+                anno: annoInserito,
                 datiIntervento: interventoObj,
                 isUpdate: existingIndex > -1
             })
@@ -577,7 +543,6 @@ function nuovoIntervento() {
             interventi.push(interventoObj); 
             showMessage('success', `Intervento N° ${nInterventoCompleto} salvato e sincronizzato!`);
             
-            // Aggiorna il contatore locale solo se l'intervento è dell'anno corrente
             const CURRENT_YEAR = new Date().getFullYear().toString().substring(2);
             if (annoInserito === CURRENT_YEAR) {
                 const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
@@ -587,8 +552,17 @@ function nuovoIntervento() {
         
         localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
         
+        // --- PARTE DA AGGIORNARE DOPO IL SALVATAGGIO ---
         document.getElementById('nomeScuola').value = '';
         document.getElementById('plessoEdificio').value = '';
+        
+        // AGGIUNGI QUESTE RIGHE PER LA DESCRIZIONE:
+        const desc = document.getElementById('descrizioneLavori');
+        if (desc) {
+            desc.value = '';
+            desc.readOnly = false; // Lo sblocca per il prossimo intervento
+        }
+
         initializeInputs(false); 
         calcolaManodopera(); 
         renderArchivio();
@@ -980,6 +954,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
