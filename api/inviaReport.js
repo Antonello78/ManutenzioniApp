@@ -10,7 +10,7 @@ export default async function handler(req, res) {
         const reportData = req.body;
         
         const { 
-            nIntervento, dataIntervento, nomeScuola, plessoEdificio, 
+            nIntervento, dataIntervento, nomeScuola, plessoEdificio, descrizioneLavori, 
             orario, operai, tariffa, minutiFatturabili, 
             costoUscita, costoAggiuntivo, totale, destinatario 
         } = reportData;
@@ -58,6 +58,10 @@ export default async function handler(req, res) {
                         <div class="detail-row"><span>Data:</span><strong>${dataIntervento}</strong></div>
                         <div class="detail-row"><span>Scuola:</span><strong>${nomeScuola}</strong></div>
                         <div class="detail-row"><span>Plesso/Edificio:</span><strong>${plessoEdificio || 'N/A'}</strong></div>
+                        <div style="margin-top: 10px; padding: 10px; background-color: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
+    <span style="font-size: 0.8em; color: #1e40af; font-weight: bold; text-transform: uppercase;">Descrizione Lavori:</span><br>
+    <div style="margin-top: 5px; white-space: pre-wrap; font-size: 0.95em;">${descrizioneLavori || 'Nessun dettaglio inserito.'}</div>
+</div>
                         <div class="detail-row"><span>Orario Lavorato:</span><strong>${orario}</strong></div>
                         <div class="detail-row"><span>Operai:</span><strong>${operai}</strong></div>
                     </div>
@@ -100,6 +104,7 @@ export default async function handler(req, res) {
         });
     }
 }
+
 
 
 
