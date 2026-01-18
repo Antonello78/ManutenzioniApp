@@ -407,6 +407,13 @@
         document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
         document.getElementById('resOrario').textContent = (oraInizioInput && oraFineInput) ? oraInizioInput + ' - ' + oraFineInput : '---';
         document.getElementById('resOperai').textContent = numOperai;
+
+        // AGGIORNAMENTO PER STAMPA DESCRIZIONE:
+        // Prende il testo dalla box e lo inserisce nel campo anteprima/stampa
+        if(document.getElementById('resDescrizione')) {
+            document.getElementById('resDescrizione').textContent = document.getElementById('descrizioneLavori').value || '---';
+        }
+
         if(document.getElementById('oreOltre60')) document.getElementById('oreOltre60').textContent = '---';
     }
 
@@ -952,6 +959,7 @@ async function salvaIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
