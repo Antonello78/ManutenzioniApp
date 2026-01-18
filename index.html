@@ -493,6 +493,7 @@ function nuovoIntervento() {
             // Reset dei campi descrittivi
             document.getElementById('nomeScuola').value = '';
             document.getElementById('plessoEdificio').value = '';
+            document.getElementById('descrizioneLavori').value = dati.descrizioneLavori || '';
             
             // Reset orari e operai ai valori di default
             document.getElementById('oraInizio').value = '09:00';
@@ -542,6 +543,7 @@ function nuovoIntervento() {
         dataIntervento: document.getElementById('dataIntervento').value, 
         nomeScuola: document.getElementById('nomeScuola').value,
         plessoEdificio: document.getElementById('plessoEdificio').value,
+        descrizioneLavori: document.getElementById('descrizioneLavori').value,
         oraInizio: document.getElementById('oraInizio').value,
         oraFine: document.getElementById('oraFine').value,
         numOperai: parseInt(document.getElementById('numOperai').value),
@@ -651,6 +653,8 @@ function nuovoIntervento() {
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
                 document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
+                document.getElementById('descrizioneLavori').value = dati.descrizioneLavori || '';
+                document.getElementById('descrizioneLavori').readOnly = true;
                 document.getElementById('oraInizio').value = intervento.oraInizio;
                 document.getElementById('oraFine').value = intervento.oraFine;
                 document.getElementById('numOperai').value = intervento.numOperai;
@@ -695,6 +699,8 @@ function nuovoIntervento() {
             // Pulizia campi
             document.getElementById('nomeScuola').value = '';
             document.getElementById('plessoEdificio').value = '';
+            document.getElementById('descrizioneLavori').value = '';
+            document.getElementById('descrizioneLavori').readOnly = false;
             document.getElementById('oraInizio').value = '09:00';
             document.getElementById('oraFine').value = '10:15';
             document.getElementById('numOperai').value = '1';
@@ -972,6 +978,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
