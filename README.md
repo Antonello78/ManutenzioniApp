@@ -1,4 +1,4 @@
-# 🏗️ Gestione Manodopera Scuole - v1.2.0
+# 🏗️ Gestione Manodopera Scuole - v1.3.0
 
 **Proprietà:** Ditta D'Angelo Antonello  
 **Release:** 2026  
@@ -8,7 +8,15 @@
 
 ## 📝 Descrizione
 Questa applicazione è uno strumento professionale per la gestione dei preventivi e dei rapporti di manutenzione presso le scuole statali. Grazie alla sincronizzazione cloud, i dati sono salvati su un **server centralizzato**, permettendo la consultazione e la modifica degli interventi da qualsiasi dispositivo (PC, smartphone o tablet) in tempo reale.
+## 🚀 Novità Versione 1.3.0
+### Aggiunto
+- **Campo Descrizione Lavori**: Nuova sezione nel modulo per specificare i dettagli dell'intervento.
+- **Report di Stampa**: La descrizione viene ora inclusa automaticamente nel PDF finale per la scuola.
+- **Live Preview**: Il testo della descrizione appare nel riepilogo mentre si scrive.
 
+### Corretto
+- **Layout Archivio**: Risolto il problema che causava la visualizzazione a tutto schermo su PC.
+- **Bug Fix**: Sistemata la chiusura dei contenitori (DIV) nel codice HTML.
 ## 🚀 Novità Versione 1.2.0
 * **Protezione Sola Lettura**: Caricando un intervento dall'archivio, i campi vengono bloccati automaticamente per prevenire modifiche accidentali.
 * **Tasto Modifica (Arancione)**: Permette di sbloccare i dati esistenti per aggiornamenti rapidi.
