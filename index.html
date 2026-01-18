@@ -350,286 +350,278 @@
     </div>
         
     <script>
-    // --- LOGICA DI NAVIGAZIONE SCHEDE ---
-    function switchTab(tab) {
-        const sInt = document.getElementById('sezioneIntervento');
-        const sChi = document.getElementById('sezioneChiamate');
-        const bInt = document.getElementById('tabIntervento');
-        const bChi = document.getElementById('tabChiamate');
-
-        if (!sInt || !sChi) return;
-
-        if (tab === 'intervento') {
-            sInt.classList.remove('hidden');
-            sChi.classList.add('hidden');
-            bInt.className = 'flex-1 py-4 rounded-2xl font-bold bg-blue-600 text-white shadow-lg border-2 border-blue-600 transition-all';
-            bChi.className = 'flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm border-2 border-transparent transition-all';
-        } else {
-            sInt.classList.add('hidden');
-            sChi.classList.remove('hidden');
-            bChi.className = 'flex-1 py-4 rounded-2xl font-bold bg-green-600 text-white shadow-lg border-2 border-green-600 transition-all';
-            bInt.className = 'flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm border-2 border-transparent transition-all';
-            if (typeof caricaChiamate === "function") caricaChiamate();
-        }
-    }
-
-    // --- COSTANTI E UTILITY ---
-    const ORARIO_INIZIO_ORD = 8 * 60; 
-    const ORARIO_FINE_ORD = 17 * 60; 
-    const STORAGE_KEY = 'manodoperaInterventi';
-    const EMAIL_KEY = 'reportEmailDestinatario'; 
-    const INIZIO_2025 = 74; 
-    let annoSelezionato = new Date().getFullYear().toString().substring(2);
-
-    function parseTime(timeString) {
-        const [hours, minutes] = timeString.split(':').map(Number);
-        return (hours * 60) + minutes;
-    }
-
-    function formatDate(dateString) {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString + 'T00:00:00'); 
-        if (isNaN(date.getTime())) return 'N/A';
-        const giornoSett = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
-        return `${giornoSett} ${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getFullYear()).substring(2)}`;
-    }
-
-    function showMessage(type, message) {
-        const errEl = document.getElementById('errorMsg');
-        const succEl = document.getElementById('successMsg');
-        errEl.classList.add('hidden');
-        succEl.classList.add('hidden');
-        const msgElement = type === 'error' ? errEl : succEl;
-        if (msgElement) {
-            msgElement.textContent = message;
-            msgElement.classList.remove('hidden');
-            setTimeout(() => msgElement.classList.add('hidden'), 5000); 
-        }
-    }
-
-    function getYearCounterKey(year) { return 'numeroIntervento_' + year; }
-
-    function initializeInputs(keepNIntervento = false) {
-        const dataInput = document.getElementById('dataIntervento');
-        if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
-        document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
+        // --- COSTANTI E CONFIGURAZIONE ---
+        const ORARIO_INIZIO_ORD = 8 * 60; 
+        const ORARIO_FINE_ORD = 17 * 60; 
+        const STORAGE_KEY = 'manodoperaInterventi';
+        const EMAIL_KEY = 'reportEmailDestinatario'; 
+        const INIZIO_2025 = 74; 
         
-        const nInterventoInput = document.getElementById('nIntervento');
-        const CURRENT_YEAR = new Date().getFullYear().toString().substring(2); 
-        const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+        let annoSelezionato = new Date().getFullYear().toString().substring(2);
 
-        if (!keepNIntervento) {
-            let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY));
-            if (isNaN(ultimoNumero)) {
-                ultimoNumero = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0;
+        // --- UTILITY ---
+        function parseTime(timeString) {
+            if (!timeString) return 0;
+            const [hours, minutes] = timeString.split(':').map(Number);
+            return (hours * 60) + minutes;
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString + 'T00:00:00'); 
+            if (isNaN(date.getTime())) return 'N/A';
+            const giornoSett = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
+            return `${giornoSett} ${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getFullYear()).substring(2)}`;
+        }
+
+        function showMessage(type, message) {
+            const errEl = document.getElementById('errorMsg');
+            const succEl = document.getElementById('successMsg');
+            errEl.classList.add('hidden');
+            succEl.classList.add('hidden');
+            const msgElement = type === 'error' ? errEl : succEl;
+            if (msgElement) {
+                msgElement.textContent = message;
+                msgElement.classList.remove('hidden');
+                setTimeout(() => msgElement.classList.add('hidden'), 5000); 
             }
-            nInterventoInput.value = (ultimoNumero + 1).toString().padStart(3, '0') + '/' + CURRENT_YEAR;
         }
-    }
 
-    // --- LOGICA CALCOLO ---
-    function calcolaManodopera() {
-        const oraInizioInput = document.getElementById('oraInizio').value;
-        const oraFineInput = document.getElementById('oraFine').value;
-        const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
-        const campoCostoUscita = document.getElementById('inputCostoUscita');
-        const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
-        const flagUrgenza = document.getElementById('flagUrgenza').checked;
-        
-        const nomeScuola = document.getElementById('scuolaOriginale').value;
-        const plessoEdificio = document.getElementById('plessoOriginale').value;
-        const nIntervento = document.getElementById('nIntervento').value;
-        const dataIntervento = document.getElementById('dataIntervento').value;
+        function generateId() { return Date.now().toString(); }
+        function getYearCounterKey(year) { return 'numeroIntervento_' + year; }
 
-        if (flagUrgenza && campoCostoUscita.value == "75") campoCostoUscita.value = "85";
-        else if (!flagUrgenza && campoCostoUscita.value == "85") campoCostoUscita.value = "75";
+        // --- INIZIALIZZAZIONE (NUMERO E DATA) ---
+        function initializeInputs(keepNIntervento = false) {
+            const dataInput = document.getElementById('dataIntervento');
+            if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
+            
+            document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
+            
+            const nInterventoInput = document.getElementById('nIntervento');
+            const CURRENT_YEAR = new Date().getFullYear().toString().substring(2); 
+            const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
 
-        const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
-        if (!oraInizioInput || !oraFineInput) return;
-        
-        const oraInizioMinuti = parseTime(oraInizioInput);
-        const oraFineMinuti = parseTime(oraFineInput);
-        if (oraFineMinuti <= oraInizioMinuti) return;
-        
-        const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
-        const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
-        const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
-        
-        let tariffaOraria = flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD ? tariffaBaseInput + 10 : tariffaBaseInput;
-        
-        const costoManodoperaAggiuntiva = (Math.max(0, minutiFatturabili - 60) / 60) * tariffaOraria;
-        const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
-
-        document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2).replace('.', ',') + ' €/ora';
-        document.getElementById('minutiEffettivi').textContent = `${durataMinutiEffettiva} min x ${numOperai} op = ${minutiManodoperaEffettivi} min/uomo`;
-        document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${(minutiFatturabili/60).toFixed(2).replace('.', ',')} ore)`;
-        document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + ' €';
-        document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + ' €';
-        document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + ' €'; 
-
-        document.getElementById('resNIntervento').textContent = nIntervento || '---';
-        document.getElementById('resData').textContent = dataIntervento ? formatDate(dataIntervento) : '---';
-        document.getElementById('resScuola').textContent = (nomeScuola || '---') + (plessoEdificio ? ' / ' + plessoEdificio : '');
-        document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
-        document.getElementById('resOperai').innerHTML = numOperai + (flagUrgenza ? ' <span class="text-red-600 font-bold">(URG)</span>' : '');
-    }
-
-    // --- GESTIONE AZIONI ---
-    function nuovoIntervento() {
-        toggleSolaLettura(false);
-        document.getElementById('scuolaOriginale').value = '';
-        document.getElementById('plessoOriginale').value = '';
-        document.getElementById('descrizioneLavoroOriginale').value = '';
-        document.getElementById('oraInizio').value = '09:00';
-        document.getElementById('oraFine').value = '10:15';
-        document.getElementById('numOperai').value = '1';
-        document.getElementById('flagUrgenza').checked = false;
-        document.getElementById('inputCostoUscita').value = 75;
-        document.getElementById('inputTariffaBase').value = 38;
-        initializeInputs(); 
-        calcolaManodopera();
-        showMessage('success', 'Modulo resettato.');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    async function salvaIntervento() {
-        const btn = document.getElementById('btnSalva');
-        if (btn) btn.disabled = true;
-
-        const payload = {
-            nIntervento: document.getElementById('nIntervento').value,
-            dataIntervento: document.getElementById('dataIntervento').value,
-            nomeScuola: document.getElementById('scuolaOriginale').value,
-            plessoEdificio: document.getElementById('plessoOriginale').value,
-            descrizioneLavoro: document.getElementById('descrizioneLavoroOriginale').value,
-            oraInizio: document.getElementById('oraInizio').value,
-            oraFine: document.getElementById('oraFine').value,
-            numOperai: document.getElementById('numOperai').value,
-            costoUscita: document.getElementById('inputCostoUscita').value,
-            tariffaBase: document.getElementById('inputTariffaBase').value,
-            flagUrgenza: document.getElementById('flagUrgenza').checked,
-            totaleManodopera: document.getElementById('totaleManodopera').textContent
-        };
-
-        const interventiLocali = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        const index = interventiLocali.findIndex(i => i.nIntervento === payload.nIntervento);
-        if (index > -1) {
-            interventiLocali[index] = { ...payload, id: interventiLocali[index].id, timestamp: new Date().toISOString() };
-        } else {
-            interventiLocali.unshift({ ...payload, id: Date.now().toString(), timestamp: new Date().toISOString() });
-            const [num, anno] = payload.nIntervento.split('/');
-            localStorage.setItem(getYearCounterKey(anno), parseInt(num).toString());
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiLocali));
-
-        try {
-            await fetch('/api/saveIntervento', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            showMessage('success', 'Salvato con successo!');
-            renderArchivio();
-        } catch (e) { showMessage('warning', 'Salvato solo in locale.'); }
-        if (btn) btn.disabled = false;
-    }
-
-    function toggleSolaLettura(status) {
-        const ids = ['nIntervento','dataIntervento','scuolaOriginale','plessoOriginale','descrizioneLavoroOriginale','oraInizio','oraFine','numOperai','inputCostoUscita','inputTariffaBase','flagUrgenza'];
-        ids.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                if (el.type === 'checkbox') el.disabled = status;
-                else el.readOnly = status;
+            if (!keepNIntervento) {
+                let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY));
+                if (isNaN(ultimoNumero)) {
+                    ultimoNumero = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0;
+                }
+                nInterventoInput.value = (ultimoNumero + 1).toString().padStart(3, '0') + '/' + CURRENT_YEAR;
             }
-        });
-        const btnSalva = document.getElementById('btnSalva');
-        if (btnSalva) btnSalva.style.display = status ? 'none' : 'block';
-    }
+        }
+        
+        // --- LOGICA DI CALCOLO ---
+        function calcolaManodopera() {
+            const oraInizioInput = document.getElementById('oraInizio').value;
+            const oraFineInput = document.getElementById('oraFine').value;
+            const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
+            const campoCostoUscita = document.getElementById('inputCostoUscita');
+            const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
+            const flagUrgenza = document.getElementById('flagUrgenza').checked;
+            
+            const nIntervento = document.getElementById('nIntervento').value; 
+            const dataIntervento = document.getElementById('dataIntervento').value;
+            const nomeScuola = document.getElementById('nomeScuola').value;
+            const plessoEdificio = document.getElementById('plessoEdificio').value;
 
-    function caricaIntervento(id) {
-        const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        const i = interventi.find(item => item.id === id);
-        if (i) {
-            document.getElementById('nIntervento').value = i.nIntervento; 
-            document.getElementById('dataIntervento').value = i.dataIntervento;
-            document.getElementById('scuolaOriginale').value = i.nomeScuola || '';
-            document.getElementById('plessoOriginale').value = i.plessoEdificio || '';
-            document.getElementById('descrizioneLavoroOriginale').value = i.descrizioneLavoro || '';
-            document.getElementById('oraInizio').value = i.oraInizio;
-            document.getElementById('oraFine').value = i.oraFine;
-            document.getElementById('numOperai').value = i.numOperai;
-            document.getElementById('inputCostoUscita').value = i.costoUscita || 75;
-            document.getElementById('inputTariffaBase').value = i.tariffaBase || 38;
-            document.getElementById('flagUrgenza').checked = i.flagUrgenza;
-            calcolaManodopera(); toggleArchivio(); toggleSolaLettura(true);
+            // Aggiornamento automatico costo uscita in base a urgenza
+            if (flagUrgenza && campoCostoUscita.value == "75") campoCostoUscita.value = "85";
+            else if (!flagUrgenza && campoCostoUscita.value == "85") campoCostoUscita.value = "75";
+
+            const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
+
+            if (!oraInizioInput || !oraFineInput) return;
+            const oraInizioMinuti = parseTime(oraInizioInput);
+            const oraFineMinuti = parseTime(oraFineInput);
+            
+            if (oraFineMinuti <= oraInizioMinuti) return;
+            
+            const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
+            const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
+            const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
+            
+            let tariffaOraria = (flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD) 
+                                ? tariffaBaseInput + 10 : tariffaBaseInput;
+            
+            const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
+            const oreAggiuntiveDecimali = minutiOltre60 / 60;
+            const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
+            const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
+
+            // Aggiornamento video
+            document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2).replace('.', ',') + ' €/ora';
+            document.getElementById('minutiEffettivi').textContent = `${durataMinutiEffettiva} min x ${numOperai} op = ${minutiManodoperaEffettivi} min/uomo`;
+            document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${(minutiFatturabili/60).toFixed(2).replace('.', ',')} ore)`;
+            document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + ' €'; 
+
+            // Riepilogo testuale
+            document.getElementById('resNIntervento').textContent = nIntervento || '---';
+            document.getElementById('resData').textContent = dataIntervento ? formatDate(dataIntervento) : '---';
+            document.getElementById('resScuola').textContent = (nomeScuola || '---') + (plessoEdificio ? ' / ' + plessoEdificio : '');
+            document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
+            document.getElementById('resOperai').innerHTML = numOperai + (flagUrgenza ? ' <span class="text-red-600 font-bold">(URG)</span>' : '');
+        }
+
+        // --- AZIONI ---
+        function nuovoIntervento() {
+            toggleSolaLettura(false);
+            document.getElementById('nomeScuola').value = '';
+            document.getElementById('plessoEdificio').value = '';
+            document.getElementById('oraInizio').value = '09:00';
+            document.getElementById('oraFine').value = '10:15';
+            document.getElementById('numOperai').value = '1';
+            document.getElementById('flagUrgenza').checked = false;
+            document.getElementById('inputCostoUscita').value = 75;
+            document.getElementById('inputTariffaBase').value = 38;
+            initializeInputs(); 
+            calcolaManodopera();
+            showMessage('success', 'Nuova scheda pronta');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-    }
 
-    // --- ARCHIVIO E UTILS ---
-    function renderArchivio() {
-        const listaDiv = document.getElementById('listaInterventi');
-        const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
-        let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        
-        let filtrati = interventi.filter(i => {
-            return i.nIntervento.split('/')[1] === annoSelezionato &&
-                   (i.nIntervento.toLowerCase().includes(termineRicerca) || 
-                    (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termineRicerca)));
-        });
+        async function salvaIntervento() {
+            const btn = document.getElementById('btnSalva');
+            if (btn && btn.textContent === 'Modifica') { toggleSolaLettura(false); return; }
+            
+            const nIntervento = document.getElementById('nIntervento').value;
+            const payload = {
+                id: generateId(),
+                nIntervento: nIntervento,
+                dataIntervento: document.getElementById('dataIntervento').value,
+                nomeScuola: document.getElementById('nomeScuola').value,
+                plessoEdificio: document.getElementById('plessoEdificio').value,
+                oraInizio: document.getElementById('oraInizio').value,
+                oraFine: document.getElementById('oraFine').value,
+                numOperai: document.getElementById('numOperai').value,
+                costoUscita: document.getElementById('inputCostoUscita').value,
+                tariffaBase: document.getElementById('inputTariffaBase').value,
+                flagUrgenza: document.getElementById('flagUrgenza').checked,
+                totaleManodopera: document.getElementById('totaleManodopera').textContent
+            };
 
-        filtrati.sort((a,b) => parseInt(b.nIntervento) - parseInt(a.nIntervento));
-        listaDiv.innerHTML = filtrati.length ? '' : '<p class="text-gray-500 text-center py-8">Nessun intervento trovato.</p>';
-        
-        filtrati.forEach(i => {
-            listaDiv.innerHTML += `
-                <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center mb-2">
-                    <div>
-                        <span class="font-bold text-blue-700"># ${i.nIntervento}</span>
-                        <div class="text-sm font-semibold">${i.nomeScuola || 'N/A'}</div>
-                        <div class="text-xs text-gray-400">${formatDate(i.dataIntervento)} - € ${i.totaleManodopera || i.totaleIntervento}</div>
-                    </div>
-                    <div class="flex space-x-1">
-                        <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md">📋</button>
-                        <button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md">✏️</button>
-                    </div>
-                </div>`;
-        });
-    }
-
-    function toggleArchivio() {
-        const archivio = document.getElementById('archivioInterventi');
-        const inputSec = document.getElementById('input-section');
-        const btn = document.getElementById('btnToggleArchivio');
-        const actBtns = document.getElementById('action-buttons');
-        const isHidden = archivio.classList.contains('hidden');
-        if (isHidden) {
-            archivio.classList.remove('hidden'); inputSec.classList.add('hidden');
-            btn.textContent = 'Torna al Calcolo'; actBtns.classList.add('hidden'); renderArchivio();
-        } else {
-            archivio.classList.add('hidden'); inputSec.classList.remove('hidden');
-            btn.textContent = 'Gestione Archivio'; actBtns.classList.remove('hidden');
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const index = interventi.findIndex(i => i.nIntervento === nIntervento);
+            
+            if (index > -1) {
+                interventi[index] = { ...payload, id: interventi[index].id };
+            } else {
+                interventi.unshift(payload);
+                const [num, anno] = nIntervento.split('/');
+                localStorage.setItem(getYearCounterKey(anno), parseInt(num).toString());
+            }
+            
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+            
+            try {
+                await fetch('/api/saveIntervento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                showMessage('success', 'Salvato con successo!');
+            } catch (e) {
+                showMessage('warning', 'Salvato solo in locale.');
+            }
+            renderArchivio();
+            toggleSolaLettura(true);
         }
-    }
 
-    window.onload = () => {
-        document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT');
-        initializeInputs();
-        calcolaManodopera();
-    };
-    
-    // Funzioni mancanti per completare la compatibilità
-    function salvaEmail() { localStorage.setItem(EMAIL_KEY, document.getElementById('emailDestinatario').value.trim()); showMessage('success', 'Email salvata.'); }
-    function chiudiModale() { document.getElementById('modalPreventivo').classList.add('hidden'); }
-    function copiaEChiudi() {
-        navigator.clipboard.writeText(document.getElementById('testoPreventivoModal').innerText).then(() => {
-            showMessage('success', 'Copiato!'); chiudiModale();
-        });
-    }
-</script>
+        function toggleSolaLettura(readonly) {
+            const fields = ['nomeScuola', 'plessoEdificio', 'oraInizio', 'oraFine', 'numOperai', 'flagUrgenza', 'inputCostoUscita', 'inputTariffaBase'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.disabled = readonly;
+            });
+            const btn = document.getElementById('btnSalva');
+            if (readonly) {
+                btn.textContent = 'Modifica';
+                btn.className = 'flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-2 rounded-lg shadow-md transition text-sm';
+            } else {
+                btn.textContent = 'Salva';
+                btn.className = 'flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition text-sm';
+            }
+        }
+
+        function caricaIntervento(id) {
+            const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const i = interventi.find(item => item.id === id);
+            if (i) {
+                document.getElementById('nIntervento').value = i.nIntervento;
+                document.getElementById('dataIntervento').value = i.dataIntervento;
+                document.getElementById('nomeScuola').value = i.nomeScuola || '';
+                document.getElementById('plessoEdificio').value = i.plessoEdificio || '';
+                document.getElementById('oraInizio').value = i.oraInizio;
+                document.getElementById('oraFine').value = i.oraFine;
+                document.getElementById('numOperai').value = i.numOperai;
+                document.getElementById('inputCostoUscita').value = i.costoUscita;
+                document.getElementById('inputTariffaBase').value = i.tariffaBase;
+                document.getElementById('flagUrgenza').checked = i.flagUrgenza;
+                calcolaManodopera();
+                toggleArchivio();
+                toggleSolaLettura(true);
+            }
+        }
+
+        function renderArchivio() {
+            const listaDiv = document.getElementById('listaInterventi');
+            const termine = document.getElementById('cercaIntervento').value.toLowerCase();
+            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            
+            let filtrati = interventi.filter(i => 
+                i.nIntervento.toLowerCase().includes(termine) || 
+                (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termine))
+            );
+
+            listaDiv.innerHTML = filtrati.length ? '' : '<p class="text-center py-4">Nessun intervento.</p>';
+            filtrati.forEach(i => {
+                listaDiv.innerHTML += `
+                    <div class="p-3 border rounded-lg bg-white flex justify-between items-center mb-2 shadow-sm">
+                        <div class="flex-1">
+                            <span class="font-bold text-blue-700">#${i.nIntervento}</span>
+                            <div class="text-sm font-semibold">${i.nomeScuola || 'N/A'}</div>
+                            <div class="text-xs text-gray-500">${formatDate(i.dataIntervento)} - € ${i.totaleManodopera}</div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded">📋</button>
+                            <button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded">✏️</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function toggleArchivio() {
+            const arc = document.getElementById('archivioInterventi');
+            const ins = document.getElementById('input-section');
+            const btn = document.getElementById('btnToggleArchivio');
+            const acts = document.getElementById('action-buttons');
+            if (arc.classList.contains('hidden')) {
+                arc.classList.remove('hidden'); ins.classList.add('hidden');
+                btn.textContent = 'Torna al Calcolo'; acts.classList.add('hidden'); renderArchivio();
+            } else {
+                arc.classList.add('hidden'); ins.classList.remove('hidden');
+                btn.textContent = 'Gestione Archivio'; acts.classList.remove('hidden');
+            }
+        }
+
+        function stampaRiepilogo() { window.print(); }
+        function chiudiModale() { document.getElementById('modalPreventivo').classList.add('hidden'); }
+        function copiaEChiudi() {
+            navigator.clipboard.writeText(document.getElementById('testoPreventivoModal').innerText).then(() => {
+                showMessage('success', 'Copiato!'); chiudiModale();
+            });
+        }
+
+        window.onload = () => {
+            document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT');
+            initializeInputs();
+            calcolaManodopera();
+        };
+    </script>
 </body>
 </html>
+
 
 
 
