@@ -907,6 +907,10 @@ async function salvaIntervento() {
                 dataIntervento: document.getElementById('resData').textContent,
                 nomeScuola: document.getElementById('nomeScuola').value || "N/A",
                 plessoEdificio: document.getElementById('plessoEdificio').value || "",
+                
+                // RIGA AGGIUNTA: Recupera il testo della descrizione lavori
+                descrizioneLavori: document.getElementById('descrizioneLavori').value || "Nessun dettaglio inserito",
+                
                 orario: document.getElementById('resOrario').textContent,
                 operai: document.getElementById('numOperai').value,
                 tariffa: document.getElementById('tariffaOraria').textContent,
@@ -948,6 +952,7 @@ async function salvaIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
