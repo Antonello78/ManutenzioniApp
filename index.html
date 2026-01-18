@@ -653,7 +653,7 @@ function nuovoIntervento() {
                 document.getElementById('dataIntervento').value = intervento.dataIntervento;
                 document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
                 document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
-                document.getElementById('descrizioneLavori').value = dati.descrizioneLavori || '';
+                document.getElementById('descrizioneLavori').value = intervento.descrizioneLavori || '';
                 document.getElementById('descrizioneLavori').readOnly = true;
                 document.getElementById('oraInizio').value = intervento.oraInizio;
                 document.getElementById('oraFine').value = intervento.oraFine;
@@ -978,6 +978,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
