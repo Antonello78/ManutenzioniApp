@@ -493,8 +493,8 @@ function nuovoIntervento() {
             // Reset dei campi descrittivi
             document.getElementById('nomeScuola').value = '';
             document.getElementById('plessoEdificio').value = '';
-            document.getElementById('descrizioneLavori').value = dati.descrizioneLavori || '';
-            document.getElementById('descrizioneLavori').readOnly = false;
+            document.getElementById('descrizioneLavori').value = ''; // Svuota la box
+            document.getElementById('descrizioneLavori').readOnly = false; // La sblocca
             
             // Reset orari e operai ai valori di default
             document.getElementById('oraInizio').value = '09:00';
@@ -604,7 +604,8 @@ function nuovoIntervento() {
                 'nIntervento', 
                 'dataIntervento', 
                 'nomeScuola', 
-                'plessoEdificio', 
+                'plessoEdificio',
+                'descrizioneLavori',
                 'oraInizio', 
                 'oraFine', 
                 'numOperai', 
@@ -979,6 +980,7 @@ function nuovoIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
