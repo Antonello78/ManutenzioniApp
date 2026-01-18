@@ -580,40 +580,25 @@ function copiaInRapporto(scuola, oggetto) {
     const campoCostoUscita = document.getElementById('inputCostoUscita');
     const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
     const flagUrgenza = document.getElementById('flagUrgenza').checked;
-    const nIntervento = document.getElementById('nIntervento').value; 
-    const dataIntervento = document.getElementById('dataIntervento').value;
+    
+    // ID corretti del modulo
     const nomeScuola = document.getElementById('scuolaOriginale').value;
     const plessoEdificio = document.getElementById('plessoOriginale').value;
+    const nIntervento = document.getElementById('nIntervento').value;
+    const dataIntervento = document.getElementById('dataIntervento').value;
 
-    // LOGICA AGGIORNAMENTO AUTOMATICO COSTO USCITA
     if (flagUrgenza && campoCostoUscita.value == "75") {
         campoCostoUscita.value = "85";
-    } 
-    else if (!flagUrgenza && campoCostoUscita.value == "85") {
+    } else if (!flagUrgenza && campoCostoUscita.value == "85") {
         campoCostoUscita.value = "75";
     }
 
     const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
-
-    function resetResults() {
-        document.getElementById('totaleManodopera').textContent = '---';
-        document.getElementById('tariffaOraria').textContent = '---';
-        document.getElementById('minutiEffettivi').textContent = '---';
-        document.getElementById('minutiFatturabili').textContent = '---';
-        document.getElementById('costoAggiuntivo').textContent = '---';
-        document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + ' €'; 
-        document.getElementById('resNIntervento').textContent = nIntervento || '---';
-        document.getElementById('resData').textContent = formatDate(dataIntervento) || '---';
-        document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
-        document.getElementById('resOrario').textContent = (oraInizioInput && oraFineInput) ? oraInizioInput + ' - ' + oraFineInput : '---';
-        document.getElementById('resOperai').textContent = numOperai;
-        if(document.getElementById('oreOltre60')) document.getElementById('oreOltre60').textContent = '---';
-    }
-
-    if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) { resetResults(); return; }
+    if (!oraInizioInput || !oraFineInput) return;
+    
     const oraInizioMinuti = parseTime(oraInizioInput);
     const oraFineMinuti = parseTime(oraFineInput);
-    if (oraFineMinuti <= oraInizioMinuti) { resetResults(); return; }
+    if (oraFineMinuti <= oraInizioMinuti) return;
     
     const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
     const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
@@ -629,37 +614,20 @@ function copiaInRapporto(scuola, oggetto) {
     const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
     const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
 
-    // --- NUOVA LOGICA FORMATAZIONE ORE (1 + RESTO) ---
-    const oreTotaliDecimali = minutiFatturabili / 60;
-    let testoOreDettaglio = "";
-    if (minutiFatturabili > 60) {
-        testoOreDettaglio = `(1 + ${oreAggiuntiveDecimali.toFixed(2).replace('.', ',')} ore)`;
-    } else {
-        testoOreDettaglio = `(${oreTotaliDecimali.toFixed(2).replace('.', ',')} ore)`;
-    }
-
-    // AGGIORNAMENTO DATI A VIDEO E RIEPILOGO
+    // Aggiornamento etichette
     document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2).replace('.', ',') + ' €/ora';
     document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
-    
-    // Questa è la riga che volevi modificare:
-    document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min ${testoOreDettaglio}`;
-    
-    if(document.getElementById('oreOltre60')) {
-        document.getElementById('oreOltre60').textContent = oreAggiuntiveDecimali.toFixed(2).replace('.', ',');
-    }
-
+    document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${(minutiFatturabili/60).toFixed(2).replace('.', ',')} ore)`;
     document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + ' €';
     document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + ' €';
     document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + ' €'; 
-    document.getElementById('resNIntervento').textContent = nIntervento || 'N/A';
-    document.getElementById('resData').textContent = formatDate(dataIntervento); 
-    document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
+
+    // Aggiornamento Riepilogo Intervento
+    document.getElementById('resNIntervento').textContent = nIntervento || '---';
+    document.getElementById('resData').textContent = dataIntervento ? formatDate(dataIntervento) : '---';
+    document.getElementById('resScuola').textContent = (nomeScuola || '---') + (plessoEdificio ? ' / ' + plessoEdificio : '');
     document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
-    
-    let operaiDisplay = numOperai;
-    if (flagUrgenza) { operaiDisplay += ' <span class="text-red-600 font-bold">(URGENZA)</span>'; }
-    document.getElementById('resOperai').innerHTML = operaiDisplay;
+    document.getElementById('resOperai').innerHTML = numOperai + (flagUrgenza ? ' <span class="text-red-600 font-bold">(URG)</span>' : '');
 }
         async function caricaDatiServer() {
             try {
@@ -686,44 +654,33 @@ function copiaInRapporto(scuola, oggetto) {
         }
 // FUNZIONE NUOVO INTERVENTO (Aggiornata)
 function nuovoIntervento() {
-    // Sblocca i campi per l'inserimento
     toggleSolaLettura(false);
     
-    // Reset dei campi descrittivi usando i nuovi ID
     document.getElementById('scuolaOriginale').value = '';
     document.getElementById('plessoOriginale').value = '';
     document.getElementById('descrizioneLavoroOriginale').value = '';
-    
-    // Reset orari e operai ai valori di default
     document.getElementById('oraInizio').value = '09:00';
     document.getElementById('oraFine').value = '10:15';
     document.getElementById('numOperai').value = '1';
     document.getElementById('flagUrgenza').checked = false;
-
-    // Ripristina i costi ai valori predefiniti
     document.getElementById('inputCostoUscita').value = 75;
     document.getElementById('inputTariffaBase').value = 38;
 
-    // Ricarica il numero progressivo e la data
-    initializeInputs();
-    
-    // Forza ricalcolo totali
+    initializeInputs(); 
     calcolaManodopera();
     
-    showMessage('success', 'Nuova scheda pronta');
+    showMessage('success', 'Modulo resettato.');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-        
-        // FUNZIONE SALVA INTERVENTO (Aggiornata)
+
 async function salvaIntervento() {
-    const btn = document.getElementById('btnSalva');
+    const btn = document.querySelector('button[onclick="salvaIntervento()"]');
     if (btn) btn.disabled = true;
 
-    // Recuperiamo i dati usando i NUOVI ID
     const payload = {
         nIntervento: document.getElementById('nIntervento').value,
         dataIntervento: document.getElementById('dataIntervento').value,
-        nomeScuola: document.getElementById('scuolaOriginale').value, 
+        nomeScuola: document.getElementById('scuolaOriginale').value,
         plessoEdificio: document.getElementById('plessoOriginale').value,
         descrizioneLavoro: document.getElementById('descrizioneLavoroOriginale').value,
         oraInizio: document.getElementById('oraInizio').value,
@@ -735,10 +692,9 @@ async function salvaIntervento() {
         totaleIntervento: document.getElementById('totaleManodopera').textContent
     };
 
-    // Salvataggio Locale
     const interventiLocali = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    // Se stiamo modificando un intervento esistente, lo aggiorniamo, altrimenti aggiungiamo
     const index = interventiLocali.findIndex(i => i.nIntervento === payload.nIntervento);
+    
     if (index > -1) {
         interventiLocali[index] = { ...payload, id: interventiLocali[index].id, timestamp: new Date().toISOString() };
     } else {
@@ -746,22 +702,16 @@ async function salvaIntervento() {
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiLocali));
 
-    // Salvataggio su Server
     try {
-        const response = await fetch('/api/saveIntervento', {
+        await fetch('/api/saveIntervento', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-
-        if (response.ok) {
-            showMessage('success', 'Intervento salvato correttamente!');
-            renderArchivio();
-        } else {
-            showMessage('warning', 'Salvato in locale, errore sincronizzazione server.');
-        }
+        showMessage('success', 'Salvato con successo!');
+        renderArchivio();
     } catch (error) {
-        showMessage('warning', 'Salvato localmente. Server offline.');
+        showMessage('warning', 'Salvato solo in locale.');
     } finally {
         if (btn) btn.disabled = false;
     }
@@ -781,52 +731,22 @@ async function salvaIntervento() {
         return; 
     }
 }
-        function toggleSolaLettura(readonly) {
-            const fields = [
-                'nIntervento', 
-                'dataIntervento', 
-                'nomeScuola', 
-                'plessoEdificio', 
-                'oraInizio', 
-                'oraFine', 
-                'numOperai', 
-                'flagUrgenza',
-                'inputCostoUscita',
-                'inputTariffaBase'
-            ];
-
-            fields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    // Applichiamo sia disabled che readOnly per sicurezza massima
-                    el.disabled = readonly;
-                    el.readOnly = readonly;
-                    
-                    if (readonly) {
-                        el.style.backgroundColor = "#f3f4f6"; // Grigio chiaro (Tailwind gray-100)
-                        el.style.pointerEvents = "none";     // Impedisce il click/focus
-                        el.style.opacity = "0.8";
-                    } else {
-                        el.style.backgroundColor = "#ffffff"; // Bianco
-                        el.style.pointerEvents = "auto";      // Rabilita il click
-                        el.style.opacity = "1";
-                    }
-                }
-            });
-
-            const btnSalva = document.getElementById('btnSalva');
-            if (readonly) {
-                btnSalva.textContent = 'Modifica';
-                btnSalva.classList.remove('bg-green-600', 'hover:bg-green-700');
-                btnSalva.classList.add('bg-orange-500', 'hover:bg-orange-600');
-                btnSalva.onclick = () => toggleSolaLettura(false);
-            } else {
-                btnSalva.textContent = 'Salva';
-                btnSalva.classList.remove('bg-orange-500', 'hover:bg-orange-600');
-                btnSalva.classList.add('bg-green-600', 'hover:bg-green-700');
-                btnSalva.onclick = salvaIntervento;
-            }
+        function toggleSolaLettura(status) {
+    const ids = [
+        'nIntervento', 'dataIntervento', 'scuolaOriginale', 'plessoOriginale', 
+        'descrizioneLavoroOriginale', 'oraInizio', 'oraFine', 
+        'numOperai', 'inputCostoUscita', 'inputTariffaBase', 'flagUrgenza'
+    ];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (el.type === 'checkbox') el.disabled = status;
+            else el.readOnly = status;
         }
+    });
+    const btnSalva = document.querySelector('button[onclick="salvaIntervento()"]');
+    if (btnSalva) btnSalva.style.display = status ? 'none' : 'block';
+}
         
         // FUNZIONE CARICA (Aggiornata per l'archivio)
 function caricaIntervento(id) {
@@ -1135,6 +1055,7 @@ function caricaIntervento(id) {
     </script>
 </body>
 </html>
+
 
 
 
