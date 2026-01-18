@@ -306,6 +306,59 @@
             </div>
         </div>
     </div>
+    <div id="areaStampa" class="only-print p-8 bg-white text-black">
+        <div class="flex justify-between items-start border-b-2 border-gray-800 pb-4 mb-6">
+            <div>
+                <img src="LOGO ANTONELLO.png" alt="Logo" class="h-16 mb-2">
+                <h1 class="text-xl font-extrabold uppercase tracking-tight">Foglio di Intervento</h1>
+                <p class="text-[10px] text-gray-600">Manutenzione Edile e Piccoli Interventi - Scuole Statali</p>
+            </div>
+            <div class="text-right">
+                <p class="text-lg font-bold text-gray-900">N° <span id="resNInterventoStampa">---</span></p>
+                <p class="text-sm text-gray-600">Data: <span id="resDataStampa">---</span></p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+            <div>
+                <p class="font-bold text-gray-500 uppercase text-[10px]">Scuola / Istituto</p>
+                <p id="resScuolaStampa" class="text-gray-900 font-semibold"></p>
+            </div>
+            <div>
+                <p class="font-bold text-gray-500 uppercase text-[10px]">Plesso / Edificio</p>
+                <p id="resPlessoStampa" class="text-gray-900 font-semibold"></p>
+            </div>
+        </div>
+
+        <div class="mb-6 border-t border-gray-100 pt-4">
+            <p class="font-bold text-gray-500 uppercase text-[10px] mb-1">Descrizione Lavori (Eseguiti / Richiesti)</p>
+            <div id="resDescrizione" class="text-gray-900 text-sm italic whitespace-pre-wrap leading-relaxed bg-gray-50 p-3 rounded border border-gray-100"></div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4 mb-8 bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div>
+                <p class="font-bold text-gray-500 uppercase text-[10px]">Orario</p>
+                <p id="resOrarioStampa" class="text-gray-900 font-bold"></p>
+            </div>
+            <div>
+                <p class="font-bold text-gray-500 uppercase text-[10px]">Operai</p>
+                <p id="resOperaiStampa" class="text-gray-900 font-bold"></p>
+            </div>
+            <div>
+                <p class="font-bold text-gray-500 uppercase text-[10px]">Tempo Fatturato</p>
+                <p id="resMinutiStampa" class="text-blue-700 font-bold"></p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-12 mt-20">
+            <div class="border-t border-black pt-2 text-center">
+                <p class="text-[10px] uppercase font-bold">Firma Incaricato Ditta</p>
+            </div>
+            <div class="border-t border-black pt-2 text-center">
+                <p class="text-[10px] uppercase font-bold">Timbro e Firma Scuola</p>
+            </div>
+        </div>
+    </div>
 
     <script>
         const ORARIO_INIZIO_ORD = 8 * 60; 
@@ -959,6 +1012,7 @@ async function salvaIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
