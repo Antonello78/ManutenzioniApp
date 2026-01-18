@@ -350,711 +350,287 @@
     </div>
         
     <script>
-        // --- LOGICA DI NAVIGAZIONE SCHEDE ---
-function switchTab(tab) {
-    const sInt = document.getElementById('sezioneIntervento');
-    const sChi = document.getElementById('sezioneChiamate');
-    const bInt = document.getElementById('tabIntervento');
-    const bChi = document.getElementById('tabChiamate');
+    // --- LOGICA DI NAVIGAZIONE SCHEDE ---
+    function switchTab(tab) {
+        const sInt = document.getElementById('sezioneIntervento');
+        const sChi = document.getElementById('sezioneChiamate');
+        const bInt = document.getElementById('tabIntervento');
+        const bChi = document.getElementById('tabChiamate');
 
-    // Controllo sicurezza per evitare errori se i div non sono pronti
-    if (!sInt || !sChi) {
-        console.error("Errore: Sezioni non trovate. Verifica gli ID nel codice HTML.");
-        return;
-    }
+        if (!sInt || !sChi) return;
 
-    if (tab === 'intervento') {
-        // Mostra Intervento, Nasconde Chiamate
-        sInt.classList.remove('hidden');
-        sChi.classList.add('hidden');
-        
-        // Colora il tasto Intervento (Blu) e resetta l'altro
-        bInt.className = 'flex-1 py-4 rounded-2xl font-bold bg-blue-600 text-white shadow-lg border-2 border-blue-600 transition-all';
-        bChi.className = 'flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm border-2 border-transparent transition-all';
-    } else {
-        // Mostra Chiamate, Nasconde Intervento
-        sInt.classList.add('hidden');
-        sChi.classList.remove('hidden');
-        
-        // Colora il tasto Chiamate (Verde) e resetta l'altro
-        bChi.className = 'flex-1 py-4 rounded-2xl font-bold bg-green-600 text-white shadow-lg border-2 border-green-600 transition-all';
-        bInt.className = 'flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm border-2 border-transparent transition-all';
-        
-        // Qui caricheremo le chiamate salvate (Step successivo)
-        if (typeof caricaChiamate === "function") caricaChiamate();
-    }
-}
-        // --- LOGICA GESTIONE CHIAMATE ---
-
-// 1. Funzione per salvare una nuova chiamata
-async function salvaNuovaChiamata() {
-    const scuola = document.getElementById('chiamataScuola').value;
-    const oggetto = document.getElementById('chiamataOggetto').value;
-    const urgenza = document.getElementById('chiamataUrgenza').value;
-
-    if (!scuola || !oggetto) {
-        alert("Per favore, inserisci almeno il nome della scuola e l'oggetto.");
-        return;
-    }
-
-    const nuovaChiamata = {
-        id: 'CH-' + Date.now(),
-        timestamp: new Date().toISOString(),
-        scuola: scuola,
-        oggetto: oggetto,
-        urgenza: urgenza,
-        stato: 'aperta'
-    };
-
-    try {
-        const response = await fetch('/api/saveChiamata', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chiamata: nuovaChiamata })
-        });
-
-        if (response.ok) {
-            // Pulisce i campi
-            document.getElementById('chiamataScuola').value = '';
-            document.getElementById('chiamataOggetto').value = '';
-            // Ricarica la lista per vedere la nuova chiamata
-            caricaChiamate();
+        if (tab === 'intervento') {
+            sInt.classList.remove('hidden');
+            sChi.classList.add('hidden');
+            bInt.className = 'flex-1 py-4 rounded-2xl font-bold bg-blue-600 text-white shadow-lg border-2 border-blue-600 transition-all';
+            bChi.className = 'flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm border-2 border-transparent transition-all';
         } else {
-            alert("Errore durante il salvataggio.");
+            sInt.classList.add('hidden');
+            sChi.classList.remove('hidden');
+            bChi.className = 'flex-1 py-4 rounded-2xl font-bold bg-green-600 text-white shadow-lg border-2 border-green-600 transition-all';
+            bInt.className = 'flex-1 py-4 rounded-2xl font-bold bg-white text-gray-500 shadow-sm border-2 border-transparent transition-all';
+            if (typeof caricaChiamate === "function") caricaChiamate();
         }
-    } catch (error) {
-        console.error("Errore:", error);
     }
-}
 
-// 2. Funzione per caricare la lista dal database
-async function caricaChiamate() {
-    const listaCorpo = document.getElementById('listaChiamateCorpo');
-    listaCorpo.innerHTML = '<p class="text-center text-gray-400 py-8 italic">Caricamento in corso...</p>';
+    // --- COSTANTI E UTILITY ---
+    const ORARIO_INIZIO_ORD = 8 * 60; 
+    const ORARIO_FINE_ORD = 17 * 60; 
+    const STORAGE_KEY = 'manodoperaInterventi';
+    const EMAIL_KEY = 'reportEmailDestinatario'; 
+    const INIZIO_2025 = 74; 
+    let annoSelezionato = new Date().getFullYear().toString().substring(2);
 
-    try {
-        const response = await fetch('/api/getChiamate');
-        const data = await response.json();
+    function parseTime(timeString) {
+        const [hours, minutes] = timeString.split(':').map(Number);
+        return (hours * 60) + minutes;
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString + 'T00:00:00'); 
+        if (isNaN(date.getTime())) return 'N/A';
+        const giornoSett = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
+        return `${giornoSett} ${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getFullYear()).substring(2)}`;
+    }
+
+    function showMessage(type, message) {
+        const errEl = document.getElementById('errorMsg');
+        const succEl = document.getElementById('successMsg');
+        errEl.classList.add('hidden');
+        succEl.classList.add('hidden');
+        const msgElement = type === 'error' ? errEl : succEl;
+        if (msgElement) {
+            msgElement.textContent = message;
+            msgElement.classList.remove('hidden');
+            setTimeout(() => msgElement.classList.add('hidden'), 5000); 
+        }
+    }
+
+    function getYearCounterKey(year) { return 'numeroIntervento_' + year; }
+
+    function initializeInputs(keepNIntervento = false) {
+        const dataInput = document.getElementById('dataIntervento');
+        if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
+        document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
         
-        if (data.chiamate && data.chiamate.length > 0) {
-            listaCorpo.innerHTML = ''; 
-            data.chiamate.forEach(c => {
-                // Sicurezza: se mancano i campi, mettiamo un testo vuoto per non far crashare replace
-                const scuolaPulita = (c.scuola || "").replace(/'/g, "\\'");
-                const oggettoPulito = (c.oggetto || "").replace(/'/g, "\\'");
-                const urgenza = c.urgenza || "media";
+        const nInterventoInput = document.getElementById('nIntervento');
+        const CURRENT_YEAR = new Date().getFullYear().toString().substring(2); 
+        const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
 
-                const dataFormattata = new Date(c.timestamp).toLocaleString('it-IT', { 
-                    day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' 
-                });
-                
-                const badgeColor = urgenza === 'alta' ? 'bg-red-100 text-red-600' : 
-                                 urgenza === 'media' ? 'bg-yellow-100 text-yellow-600' : 'bg-blue-100 text-blue-600';
+        if (!keepNIntervento) {
+            let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY));
+            if (isNaN(ultimoNumero)) {
+                ultimoNumero = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0;
+            }
+            nInterventoInput.value = (ultimoNumero + 1).toString().padStart(3, '0') + '/' + CURRENT_YEAR;
+        }
+    }
 
-                const html = `
-                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 shadow-sm transition-all hover:shadow-md">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-xs font-bold text-gray-400 uppercase">${dataFormattata}</span>
-                            <span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase ${badgeColor}">${urgenza}</span>
-                        </div>
-                        <h4 class="font-bold text-gray-800 text-lg">${c.scuola || 'Senza Nome'}</h4>
-                        <p class="text-gray-600 mb-4">${c.oggetto || 'Nessun dettaglio'}</p>
-                        <div class="flex space-x-2">
-                            <button onclick="copiaInRapporto('${scuolaPulita}', '${oggettoPulito}')" 
-                                    class="flex-1 py-2 bg-white border border-blue-200 text-blue-600 rounded-xl text-sm font-bold hover:bg-blue-50">
-                                🔧 Crea Rapporto
-                            </button>
-                        </div>
-                    </div>
-                `;
-                listaCorpo.insertAdjacentHTML('beforeend', html);
+    // --- LOGICA CALCOLO ---
+    function calcolaManodopera() {
+        const oraInizioInput = document.getElementById('oraInizio').value;
+        const oraFineInput = document.getElementById('oraFine').value;
+        const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
+        const campoCostoUscita = document.getElementById('inputCostoUscita');
+        const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
+        const flagUrgenza = document.getElementById('flagUrgenza').checked;
+        
+        const nomeScuola = document.getElementById('scuolaOriginale').value;
+        const plessoEdificio = document.getElementById('plessoOriginale').value;
+        const nIntervento = document.getElementById('nIntervento').value;
+        const dataIntervento = document.getElementById('dataIntervento').value;
+
+        if (flagUrgenza && campoCostoUscita.value == "75") campoCostoUscita.value = "85";
+        else if (!flagUrgenza && campoCostoUscita.value == "85") campoCostoUscita.value = "75";
+
+        const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
+        if (!oraInizioInput || !oraFineInput) return;
+        
+        const oraInizioMinuti = parseTime(oraInizioInput);
+        const oraFineMinuti = parseTime(oraFineInput);
+        if (oraFineMinuti <= oraInizioMinuti) return;
+        
+        const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
+        const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
+        const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
+        
+        let tariffaOraria = flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD ? tariffaBaseInput + 10 : tariffaBaseInput;
+        
+        const costoManodoperaAggiuntiva = (Math.max(0, minutiFatturabili - 60) / 60) * tariffaOraria;
+        const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
+
+        document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2).replace('.', ',') + ' €/ora';
+        document.getElementById('minutiEffettivi').textContent = `${durataMinutiEffettiva} min x ${numOperai} op = ${minutiManodoperaEffettivi} min/uomo`;
+        document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${(minutiFatturabili/60).toFixed(2).replace('.', ',')} ore)`;
+        document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + ' €';
+        document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + ' €';
+        document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + ' €'; 
+
+        document.getElementById('resNIntervento').textContent = nIntervento || '---';
+        document.getElementById('resData').textContent = dataIntervento ? formatDate(dataIntervento) : '---';
+        document.getElementById('resScuola').textContent = (nomeScuola || '---') + (plessoEdificio ? ' / ' + plessoEdificio : '');
+        document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
+        document.getElementById('resOperai').innerHTML = numOperai + (flagUrgenza ? ' <span class="text-red-600 font-bold">(URG)</span>' : '');
+    }
+
+    // --- GESTIONE AZIONI ---
+    function nuovoIntervento() {
+        toggleSolaLettura(false);
+        document.getElementById('scuolaOriginale').value = '';
+        document.getElementById('plessoOriginale').value = '';
+        document.getElementById('descrizioneLavoroOriginale').value = '';
+        document.getElementById('oraInizio').value = '09:00';
+        document.getElementById('oraFine').value = '10:15';
+        document.getElementById('numOperai').value = '1';
+        document.getElementById('flagUrgenza').checked = false;
+        document.getElementById('inputCostoUscita').value = 75;
+        document.getElementById('inputTariffaBase').value = 38;
+        initializeInputs(); 
+        calcolaManodopera();
+        showMessage('success', 'Modulo resettato.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function salvaIntervento() {
+        const btn = document.getElementById('btnSalva');
+        if (btn) btn.disabled = true;
+
+        const payload = {
+            nIntervento: document.getElementById('nIntervento').value,
+            dataIntervento: document.getElementById('dataIntervento').value,
+            nomeScuola: document.getElementById('scuolaOriginale').value,
+            plessoEdificio: document.getElementById('plessoOriginale').value,
+            descrizioneLavoro: document.getElementById('descrizioneLavoroOriginale').value,
+            oraInizio: document.getElementById('oraInizio').value,
+            oraFine: document.getElementById('oraFine').value,
+            numOperai: document.getElementById('numOperai').value,
+            costoUscita: document.getElementById('inputCostoUscita').value,
+            tariffaBase: document.getElementById('inputTariffaBase').value,
+            flagUrgenza: document.getElementById('flagUrgenza').checked,
+            totaleManodopera: document.getElementById('totaleManodopera').textContent
+        };
+
+        const interventiLocali = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const index = interventiLocali.findIndex(i => i.nIntervento === payload.nIntervento);
+        if (index > -1) {
+            interventiLocali[index] = { ...payload, id: interventiLocali[index].id, timestamp: new Date().toISOString() };
+        } else {
+            interventiLocali.unshift({ ...payload, id: Date.now().toString(), timestamp: new Date().toISOString() });
+            const [num, anno] = payload.nIntervento.split('/');
+            localStorage.setItem(getYearCounterKey(anno), parseInt(num).toString());
+        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiLocali));
+
+        try {
+            await fetch('/api/saveIntervento', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-        } else {
-            listaCorpo.innerHTML = '<p class="text-center text-gray-400 py-8 italic">Nessuna chiamata nel registro.</p>';
-        }
-    } catch (error) {
-        console.error("Errore nel caricamento:", error);
-        listaCorpo.innerHTML = '<p class="text-center text-red-400 py-8 italic">Errore nel caricamento dei dati.</p>';
-    }
-}
-
-// 3. Funzione per copiare i dati nel modulo originale
-function copiaInRapporto(scuola, oggetto) {
-    // 1. Identifichiamo i campi corretti nel modulo
-    const inputScuola = document.getElementById('scuolaOriginale');
-    const inputDescrizione = document.getElementById('descrizioneLavoroOriginale');
-    
-    // 2. Inseriamo i dati e scateniamo l'evento 'input' per attivare i calcoli
-    if (inputScuola) {
-        inputScuola.value = scuola;
-        inputScuola.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    
-    if (inputDescrizione) {
-        inputDescrizione.value = oggetto;
-        inputDescrizione.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
-    // 3. Cambiamo scheda verso il Rapporto Lavoro
-    switchTab('intervento'); 
-
-    // 4. Forza il ricalcolo immediato del totale e dei testi
-    setTimeout(() => {
-        if (typeof calcolaManodopera === "function") {
-            calcolaManodopera();
-        }
-    }, 100);
-
-    // 5. Torna in cima alla pagina per vedere il risultato
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-        const ORARIO_INIZIO_ORD = 8 * 60; 
-        const ORARIO_FINE_ORD = 17 * 60; 
-        const STORAGE_KEY = 'manodoperaInterventi';
-        const EMAIL_KEY = 'reportEmailDestinatario'; 
-        const INIZIO_2025 = 74; 
-        
-        let annoSelezionato = new Date().getFullYear().toString().substring(2);
-
-        function parseTime(timeString) {
-            const [hours, minutes] = timeString.split(':').map(Number);
-            return (hours * 60) + minutes;
-        }
-
-        function formatDate(dateString) {
-            if (!dateString) return 'N/A';
-            const date = new Date(dateString + 'T00:00:00'); 
-            if (isNaN(date.getTime())) return 'N/A';
-            const giornoSett = date.toLocaleDateString('it-IT', { weekday: 'short' }).toUpperCase().replace('.', '');
-            const giorno = String(date.getDate()).padStart(2, '0');
-            const mese = String(date.getMonth() + 1).padStart(2, '0');
-            const anno = String(date.getFullYear()).substring(2);
-            return `${giornoSett} ${giorno}/${mese}/${anno}`;
-        }
-
-        function showMessage(type, message) {
-            document.getElementById('errorMsg').classList.add('hidden');
-            document.getElementById('successMsg').classList.add('hidden');
-            const msgElement = document.getElementById(type === 'error' ? 'errorMsg' : 'successMsg');
-            if (msgElement) {
-                msgElement.textContent = message;
-                msgElement.classList.remove('hidden');
-                setTimeout(() => msgElement.classList.add('hidden'), 5000); 
-            }
-        }
-
-        function generateId() { return Date.now().toString(); }
-        function getYearCounterKey(year) { return 'numeroIntervento_' + year; }
-
-        function initializeInputs(keepNIntervento = false) {
-            const dataInput = document.getElementById('dataIntervento');
-            if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
-            
-            const numOperaiInput = document.getElementById('numOperai');
-            if (parseInt(numOperaiInput.value) < 1 || isNaN(parseInt(numOperaiInput.value))) { numOperaiInput.value = '1'; }
-            
-            document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
-            
-            const nInterventoInput = document.getElementById('nIntervento');
-            const dataCorrente = new Date();
-            const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
-            const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-
-            if (!keepNIntervento) {
-                let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY));
-                
-                if (isNaN(ultimoNumero)) {
-                    ultimoNumero = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0;
-                    localStorage.setItem(COUNTER_KEY_YEARLY, ultimoNumero.toString());
-                }
-                
-                let prossimoNumero = ultimoNumero + 1;
-                nInterventoInput.value = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
-            }
-        }
-        
-       function calcolaManodopera() {
-    const oraInizioInput = document.getElementById('oraInizio').value;
-    const oraFineInput = document.getElementById('oraFine').value;
-    const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
-    const campoCostoUscita = document.getElementById('inputCostoUscita');
-    const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
-    const flagUrgenza = document.getElementById('flagUrgenza').checked;
-    
-    // ID corretti del modulo
-    const nomeScuola = document.getElementById('scuolaOriginale').value;
-    const plessoEdificio = document.getElementById('plessoOriginale').value;
-    const nIntervento = document.getElementById('nIntervento').value;
-    const dataIntervento = document.getElementById('dataIntervento').value;
-
-    if (flagUrgenza && campoCostoUscita.value == "75") {
-        campoCostoUscita.value = "85";
-    } else if (!flagUrgenza && campoCostoUscita.value == "85") {
-        campoCostoUscita.value = "75";
-    }
-
-    const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
-    if (!oraInizioInput || !oraFineInput) return;
-    
-    const oraInizioMinuti = parseTime(oraInizioInput);
-    const oraFineMinuti = parseTime(oraFineInput);
-    if (oraFineMinuti <= oraInizioMinuti) return;
-    
-    const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
-    const minutiManodoperaEffettivi = durataMinutiEffettiva * numOperai;
-    const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
-    
-    let tariffaOraria = tariffaBaseInput; 
-    if (flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD) {
-        tariffaOraria = tariffaBaseInput + 10;
-    }
-    
-    const minutiOltre60 = Math.max(0, minutiFatturabili - 60); 
-    const oreAggiuntiveDecimali = minutiOltre60 / 60;
-    const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
-    const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
-
-    // Aggiornamento etichette
-    document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2).replace('.', ',') + ' €/ora';
-    document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
-    document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min (${(minutiFatturabili/60).toFixed(2).replace('.', ',')} ore)`;
-    document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + ' €';
-    document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + ' €';
-    document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + ' €'; 
-
-    // Aggiornamento Riepilogo Intervento
-    document.getElementById('resNIntervento').textContent = nIntervento || '---';
-    document.getElementById('resData').textContent = dataIntervento ? formatDate(dataIntervento) : '---';
-    document.getElementById('resScuola').textContent = (nomeScuola || '---') + (plessoEdificio ? ' / ' + plessoEdificio : '');
-    document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
-    document.getElementById('resOperai').innerHTML = numOperai + (flagUrgenza ? ' <span class="text-red-600 font-bold">(URG)</span>' : '');
-}
-        async function caricaDatiServer() {
-            try {
-                const dataCorrente = new Date();
-                const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
-                const interventiResponse = await fetch('/api/getArchivio'); 
-                const interventiData = await interventiResponse.json();
-                if (interventiResponse.ok && interventiData.interventi) {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiData.interventi));
-                }
-                const contatoreResponse = await fetch(`/api/getNextNumber?anno=${CURRENT_YEAR}`); 
-                const contatoreData = await contatoreResponse.json();
-                if (contatoreResponse.ok && contatoreData.numero) {
-                    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
-                    localStorage.setItem(COUNTER_KEY_YEARLY, contatoreData.numero.toString());
-                }
-            } catch (error) { console.error('Errore sincronizzazione:', error); }
-        }
-        
-        function salvaEmail() {
-             const email = document.getElementById('emailDestinatario').value.trim();
-             localStorage.setItem(EMAIL_KEY, email);
-             showMessage('success', 'Email di destinazione salvata.');
-        }
-// FUNZIONE NUOVO INTERVENTO (Aggiornata)
-function nuovoIntervento() {
-    toggleSolaLettura(false);
-    
-    document.getElementById('scuolaOriginale').value = '';
-    document.getElementById('plessoOriginale').value = '';
-    document.getElementById('descrizioneLavoroOriginale').value = '';
-    document.getElementById('oraInizio').value = '09:00';
-    document.getElementById('oraFine').value = '10:15';
-    document.getElementById('numOperai').value = '1';
-    document.getElementById('flagUrgenza').checked = false;
-    document.getElementById('inputCostoUscita').value = 75;
-    document.getElementById('inputTariffaBase').value = 38;
-
-    initializeInputs(); 
-    calcolaManodopera();
-    
-    showMessage('success', 'Modulo resettato.');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-async function salvaIntervento() {
-    const btn = document.querySelector('button[onclick="salvaIntervento()"]');
-    if (btn) btn.disabled = true;
-
-    const payload = {
-        nIntervento: document.getElementById('nIntervento').value,
-        dataIntervento: document.getElementById('dataIntervento').value,
-        nomeScuola: document.getElementById('scuolaOriginale').value,
-        plessoEdificio: document.getElementById('plessoOriginale').value,
-        descrizioneLavoro: document.getElementById('descrizioneLavoroOriginale').value,
-        oraInizio: document.getElementById('oraInizio').value,
-        oraFine: document.getElementById('oraFine').value,
-        numOperai: document.getElementById('numOperai').value,
-        costoUscita: document.getElementById('inputCostoUscita').value,
-        tariffaBase: document.getElementById('inputTariffaBase').value,
-        flagUrgenza: document.getElementById('flagUrgenza').checked,
-        totaleIntervento: document.getElementById('totaleManodopera').textContent
-    };
-
-    const interventiLocali = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const index = interventiLocali.findIndex(i => i.nIntervento === payload.nIntervento);
-    
-    if (index > -1) {
-        interventiLocali[index] = { ...payload, id: interventiLocali[index].id, timestamp: new Date().toISOString() };
-    } else {
-        interventiLocali.unshift({ ...payload, id: Date.now().toString(), timestamp: new Date().toISOString() });
-    }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventiLocali));
-
-    try {
-        await fetch('/api/saveIntervento', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        showMessage('success', 'Salvato con successo!');
-        renderArchivio();
-    } catch (error) {
-        showMessage('warning', 'Salvato solo in locale.');
-    } finally {
+            showMessage('success', 'Salvato con successo!');
+            renderArchivio();
+        } catch (e) { showMessage('warning', 'Salvato solo in locale.'); }
         if (btn) btn.disabled = false;
     }
-}
-        
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
-        
-        document.getElementById('nomeScuola').value = '';
-        document.getElementById('plessoEdificio').value = '';
-        initializeInputs(false); 
-        calcolaManodopera(); 
-        renderArchivio();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    } catch (error) {
-        showMessage('error', `Errore Server: ${error.message}`);
-        return; 
-    }
-}
-        function toggleSolaLettura(status) {
-    const ids = [
-        'nIntervento', 'dataIntervento', 'scuolaOriginale', 'plessoOriginale', 
-        'descrizioneLavoroOriginale', 'oraInizio', 'oraFine', 
-        'numOperai', 'inputCostoUscita', 'inputTariffaBase', 'flagUrgenza'
-    ];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            if (el.type === 'checkbox') el.disabled = status;
-            else el.readOnly = status;
-        }
-    });
-    const btnSalva = document.querySelector('button[onclick="salvaIntervento()"]');
-    if (btnSalva) btnSalva.style.display = status ? 'none' : 'block';
-}
-        
-        // FUNZIONE CARICA (Aggiornata per l'archivio)
-function caricaIntervento(id) {
-    const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const i = interventi.find(item => item.id === id);
-    if (i) {
-        document.getElementById('nIntervento').value = i.nIntervento; 
-        document.getElementById('dataIntervento').value = i.dataIntervento;
-        document.getElementById('scuolaOriginale').value = i.nomeScuola || '';
-        document.getElementById('plessoOriginale').value = i.plessoEdificio || '';
-        document.getElementById('descrizioneLavoroOriginale').value = i.descrizioneLavoro || '';
-        document.getElementById('oraInizio').value = i.oraInizio;
-        document.getElementById('oraFine').value = i.oraFine;
-        document.getElementById('numOperai').value = i.numOperai;
-        document.getElementById('inputCostoUscita').value = i.costoUscita || 75;
-        document.getElementById('inputTariffaBase').value = i.tariffaBase || 38;
-        document.getElementById('flagUrgenza').checked = i.flagUrgenza;
-        
-        calcolaManodopera(); 
-        toggleArchivio(); 
-        toggleSolaLettura(true);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        showMessage('success', `Intervento ${i.nIntervento} caricato.`);
-    }
-}
-        function toggleSolaLettura(readonly) {
-            const fields = ['nomeScuola', 'plessoEdificio', 'oraInizio', 'oraFine', 'numOperai', 'flagUrgenza', 'inputCostoUscita', 'inputTariffaBase'];
-            fields.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.disabled = readonly;
-            });
-
-            const btnSalva = document.getElementById('btnSalva');
-            if (readonly) {
-                btnSalva.textContent = 'Modifica';
-                btnSalva.classList.remove('bg-green-600', 'hover:bg-green-700');
-                btnSalva.classList.add('bg-orange-500', 'hover:bg-orange-600');
-                btnSalva.onclick = () => toggleSolaLettura(false);
-            } else {
-                btnSalva.textContent = 'Salva';
-                btnSalva.classList.remove('bg-orange-500', 'hover:bg-orange-600');
-                btnSalva.classList.add('bg-green-600', 'hover:bg-green-700');
-                btnSalva.onclick = salvaIntervento;
+    function toggleSolaLettura(status) {
+        const ids = ['nIntervento','dataIntervento','scuolaOriginale','plessoOriginale','descrizioneLavoroOriginale','oraInizio','oraFine','numOperai','inputCostoUscita','inputTariffaBase','flagUrgenza'];
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (el.type === 'checkbox') el.disabled = status;
+                else el.readOnly = status;
             }
-        }
-
-        function cancellaIntervento(id) {
-            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            const intervento = interventi.find(i => i.id === id);
-            if (!intervento) return;
-            const nInterventoCancellato = intervento.nIntervento;
-            if (confirm(`Sei sicuro di voler cancellare l'intervento N° ${nInterventoCancellato}?`)) {
-                fetch(`/api/deleteIntervento?nIntervento=${nInterventoCancellato}`, { method: 'DELETE' })
-                .then(response => {
-                    if (!response.ok) throw new Error(`Eliminazione remota fallita.`);
-                    return response.json();
-                })
-                .then(() => {
-                    interventi = interventi.filter(i => i.id !== id);
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
-                    showMessage('success', `Intervento N° ${nInterventoCancellato} cancellato.`);
-                    renderArchivio();
-                    initializeInputs();
-                    calcolaManodopera();
-                })
-                .catch(error => { showMessage('error', `Errore: ${error.message}`); });
-            }
-        }
-
-        function chiudiModale() {
-            document.getElementById('modalPreventivo').classList.add('hidden');
-        }
-
-        function copiaEChiudi() {
-    const areaTesto = document.getElementById('testoPreventivoModal');
-    
-    // Usiamo innerText per prendere solo il testo visibile senza tag <b>
-    const testoDaCopiare = areaTesto.innerText;
-
-    if (!testoDaCopiare) {
-        showMessage('error', 'Nessun testo da copiare.');
-        return;
+        });
+        const btnSalva = document.getElementById('btnSalva');
+        if (btnSalva) btnSalva.style.display = status ? 'none' : 'block';
     }
 
-    navigator.clipboard.writeText(testoDaCopiare).then(() => {
-        showMessage('success', 'Riga preventivo copiata negli appunti!');
-        chiudiModale();
-    }).catch(err => {
-        // Fallback per browser che non supportano navigator.clipboard
-        const el = document.createElement('textarea');
-        el.value = testoDaCopiare;
-        document.body.appendChild(el);
-        el.select();
-        document.execCommand('copy');
-        document.body.removeChild(el);
-        showMessage('success', 'Riga preventivo copiata!');
-        chiudiModale();
-    });
-}
-        
-        function copiaRigaPreventivo(id) {
-    const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    const i = interventi.find(item => item.id === id);
-    if (!i) return;
-    const dataFormattata = formatDate(i.dataIntervento);
-    const scuolaPlesso = (i.nomeScuola || 'N/A') + (i.plessoEdificio ? ' / ' + i.plessoEdificio : '');
-    
-    const oraInizioMin = parseTime(i.oraInizio);
-    const oraFineMin = parseTime(i.oraFine);
-    const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * i.numOperai;
-    const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
-    const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
-    const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-    let testoHtml = "";
-    if (i.flagUrgenza) {
-        testoHtml = `<b>- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
-                    `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
-                    `<b>- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
-                    `Quantità ore oltre la prima: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
-                    `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
-    } else {
-        testoHtml = `<b>- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
-                    `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
-                    `<b>- Manodopera aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
-                    `Quantità: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
-                    `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
-    }
-    
-    document.getElementById('testoPreventivoModal').innerHTML = testoHtml;
-    document.getElementById('modalPreventivo').classList.remove('hidden');
-}
-        
-        function renderArchivio() {
-            const listaDiv = document.getElementById('listaInterventi');
-            const filtroAnniDiv = document.getElementById('filtroAnni');
-            const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
-            let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-            
-            const anniPresenti = [...new Set(interventi.map(i => i.nIntervento.split('/')[1]))].sort((a, b) => b - a);
-            
-            filtroAnniDiv.innerHTML = '';
-            anniPresenti.forEach(anno => {
-                const isActive = anno === annoSelezionato;
-                const btnClass = isActive ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300';
-                filtroAnniDiv.innerHTML += `
-                    <button onclick="cambiaAnno('${anno}')" class="px-4 py-1 rounded-full font-bold text-sm transition ${btnClass}">
-                        20${anno}
-                    </button>`;
-            });
-
-            let interventiFiltrati = interventi.filter(i => {
-                const annoIntervento = i.nIntervento.split('/')[1];
-                const matchAnno = annoIntervento === annoSelezionato;
-                const matchRicerca = i.nIntervento.toLowerCase().includes(termineRicerca) ||
-                                    (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termineRicerca)) ||
-                                    (i.plessoEdificio && i.plessoEdificio.toLowerCase().includes(termineRicerca));
-                return matchAnno && matchRicerca;
-            });
-
-            interventiFiltrati.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
-            
-            if (interventiFiltrati.length === 0) {
-                listaDiv.innerHTML = `<p class="text-gray-500 text-center py-8 border-2 border-dashed rounded-lg">Nessun intervento per l'anno 20${annoSelezionato}.</p>`;
-                return;
-            }
-            
-            listaDiv.innerHTML = ''; 
-            interventiFiltrati.forEach(i => {
-                const badgeUrgenza = i.flagUrgenza ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200 rounded">Urgente</span>` : '';
-                
-                // --- CALCOLO ORE EXTRA IN TEMPO REALE ---
-                const oraInizioMin = parseTime(i.oraInizio);
-                const oraFineMin = parseTime(i.oraFine);
-                const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * (i.numOperai || 1);
-                const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
-                const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
-                const oreExtraCalculated = minutiOltre60 / 60;
-                // ----------------------------------------
-
-                const itemHtml = `
-                    <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
-                        <div class="flex-1 min-w-[200px]">
-                            <div class="flex items-center">
-                                <span class="font-bold text-blue-700 text-lg"># ${i.nIntervento}</span>
-                                ${badgeUrgenza}
-                            </div>
-                            <div class="text-sm font-semibold text-gray-800">${i.nomeScuola || 'N/A'}</div>
-                            <div class="text-xs text-gray-500">${i.plessoEdificio || ''} — ${formatDate(i.dataIntervento)}</div>
-                            
-                            <div class="flex justify-between items-center mt-1 pr-4">
-                                <div class="text-sm font-bold text-green-600">€ ${i.totaleManodopera}</div>
-                                <div class="text-[10px] text-gray-400 font-medium italic">${oreExtraCalculated.toFixed(2).replace('.', ',')} ore extra (+1ª incl.)</div>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2 mt-2 sm:mt-0">
-                             <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100" title="Copia riga preventivo">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-                            </button>
-                            <button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200" title="Carica/Modifica">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            </button>
-                            <button onclick="cancellaIntervento('${i.id}')" class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100" title="Elimina">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
-                        </div>
-                    </div>`;
-                listaDiv.innerHTML += itemHtml;
-            });
-        }
-
-        function cambiaAnno(anno) {
-            annoSelezionato = anno;
-            renderArchivio();
-        }
-
-        function toggleArchivio() {
-            const archivio = document.getElementById('archivioInterventi');
-            const inputSection = document.getElementById('input-section');
-            const btn = document.getElementById('btnToggleArchivio');
-            const actionButtons = document.getElementById('action-buttons');
-            const isHidden = archivio.classList.contains('hidden');
-            
+    function caricaIntervento(id) {
+        const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const i = interventi.find(item => item.id === id);
+        if (i) {
+            document.getElementById('nIntervento').value = i.nIntervento; 
+            document.getElementById('dataIntervento').value = i.dataIntervento;
+            document.getElementById('scuolaOriginale').value = i.nomeScuola || '';
+            document.getElementById('plessoOriginale').value = i.plessoEdificio || '';
+            document.getElementById('descrizioneLavoroOriginale').value = i.descrizioneLavoro || '';
+            document.getElementById('oraInizio').value = i.oraInizio;
+            document.getElementById('oraFine').value = i.oraFine;
+            document.getElementById('numOperai').value = i.numOperai;
+            document.getElementById('inputCostoUscita').value = i.costoUscita || 75;
+            document.getElementById('inputTariffaBase').value = i.tariffaBase || 38;
+            document.getElementById('flagUrgenza').checked = i.flagUrgenza;
+            calcolaManodopera(); toggleArchivio(); toggleSolaLettura(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            if (isHidden) {
-                archivio.classList.remove('hidden');
-                inputSection.classList.add('hidden');
-                btn.textContent = 'Torna al Calcolo';
-                actionButtons.classList.add('hidden'); // Nasconde pulsanti salva/stampa in archivio
-                renderArchivio();
-            } else {
-                archivio.classList.add('hidden');
-                inputSection.classList.remove('hidden');
-                btn.textContent = 'Gestione Archivio';
-                actionButtons.classList.remove('hidden'); // Mostra pulsanti salva/stampa in calcolo
-            }
         }
+    }
 
-        function stampaRiepilogo() {
-            const nIntervento = document.getElementById('nIntervento').value.replace(/\//g, '-');
-            const nomeScuola = document.getElementById('nomeScuola').value.trim() || 'SenzaNome';
-            const titoloOriginale = document.title;
-            
-            document.title = `Intervento_${nIntervento}_${nomeScuola}`;
-            window.print();
-            
-            setTimeout(() => { document.title = titoloOriginale; }, 1000);
+    // --- ARCHIVIO E UTILS ---
+    function renderArchivio() {
+        const listaDiv = document.getElementById('listaInterventi');
+        const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
+        let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        
+        let filtrati = interventi.filter(i => {
+            return i.nIntervento.split('/')[1] === annoSelezionato &&
+                   (i.nIntervento.toLowerCase().includes(termineRicerca) || 
+                    (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termineRicerca)));
+        });
+
+        filtrati.sort((a,b) => parseInt(b.nIntervento) - parseInt(a.nIntervento));
+        listaDiv.innerHTML = filtrati.length ? '' : '<p class="text-gray-500 text-center py-8">Nessun intervento trovato.</p>';
+        
+        filtrati.forEach(i => {
+            listaDiv.innerHTML += `
+                <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center mb-2">
+                    <div>
+                        <span class="font-bold text-blue-700"># ${i.nIntervento}</span>
+                        <div class="text-sm font-semibold">${i.nomeScuola || 'N/A'}</div>
+                        <div class="text-xs text-gray-400">${formatDate(i.dataIntervento)} - € ${i.totaleManodopera || i.totaleIntervento}</div>
+                    </div>
+                    <div class="flex space-x-1">
+                        <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md">📋</button>
+                        <button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md">✏️</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function toggleArchivio() {
+        const archivio = document.getElementById('archivioInterventi');
+        const inputSec = document.getElementById('input-section');
+        const btn = document.getElementById('btnToggleArchivio');
+        const actBtns = document.getElementById('action-buttons');
+        const isHidden = archivio.classList.contains('hidden');
+        if (isHidden) {
+            archivio.classList.remove('hidden'); inputSec.classList.add('hidden');
+            btn.textContent = 'Torna al Calcolo'; actBtns.classList.add('hidden'); renderArchivio();
+        } else {
+            archivio.classList.add('hidden'); inputSec.classList.remove('hidden');
+            btn.textContent = 'Gestione Archivio'; actBtns.classList.remove('hidden');
         }
+    }
 
-        async function inviaReport() {
-            calcolaManodopera();
-            const email = localStorage.getItem(EMAIL_KEY);
-            if (!email) { 
-                showMessage('error', 'Configura prima l\'email di destinazione nelle opzioni.'); 
-                return; 
-            }
-
-            const btn = document.getElementById('btnInviaReport');
-            btn.disabled = true;
-            btn.textContent = 'Invio...';
-
-            const payload = {
-                nIntervento: document.getElementById('resNIntervento').textContent,
-                dataIntervento: document.getElementById('resData').textContent,
-                nomeScuola: document.getElementById('nomeScuola').value || "N/A",
-                plessoEdificio: document.getElementById('plessoEdificio').value || "",
-                orario: document.getElementById('resOrario').textContent,
-                operai: document.getElementById('numOperai').value,
-                tariffa: document.getElementById('tariffaOraria').textContent,
-                minutiFatturabili: document.getElementById('minutiFatturabili').textContent,
-                costoUscita: document.getElementById('costoUscita').textContent,
-                costoAggiuntivo: document.getElementById('costoAggiuntivo').textContent,
-                totale: document.getElementById('totaleManodopera').textContent,
-                destinatario: email
-            };
-
-            try {
-                const response = await fetch('/api/inviaReport', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await response.json();
-                if (response.ok) {
-                    showMessage('success', 'Email inviata con successo!');
-                } else {
-                    throw new Error(result.message || 'Errore durante l\'invio.');
-                }
-            } catch (error) {
-                showMessage('error', 'Errore: ' + error.message);
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Invia Email';
-            }
-        }
-
-        window.onload = () => {
-            const dataOggi = new Date().toLocaleDateString('it-IT');
-            document.getElementById('dataStampa').textContent = dataOggi;
-            caricaDatiServer().finally(() => {
-                initializeInputs();
-                calcolaManodopera();
-            });
-        };
-    </script>
+    window.onload = () => {
+        document.getElementById('dataStampa').textContent = new Date().toLocaleDateString('it-IT');
+        initializeInputs();
+        calcolaManodopera();
+    };
+    
+    // Funzioni mancanti per completare la compatibilità
+    function salvaEmail() { localStorage.setItem(EMAIL_KEY, document.getElementById('emailDestinatario').value.trim()); showMessage('success', 'Email salvata.'); }
+    function chiudiModale() { document.getElementById('modalPreventivo').classList.add('hidden'); }
+    function copiaEChiudi() {
+        navigator.clipboard.writeText(document.getElementById('testoPreventivoModal').innerText).then(() => {
+            showMessage('success', 'Copiato!'); chiudiModale();
+        });
+    }
+</script>
 </body>
 </html>
+
 
 
 
