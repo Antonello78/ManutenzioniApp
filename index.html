@@ -141,12 +141,18 @@
 
             <div class="mt-4">
                 <label for="nomeScuola" class="block text-sm font-medium text-gray-600">Nome Scuola</label>
-                <input type="text" id="nomeScuola" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Istituto Comprensivo G. Pascoli">
+                <input type="text" id="nomeScuola" 
+                       oninput="this.value = this.value.toUpperCase(); calcolaManodopera()" 
+                       class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg uppercase" 
+                       placeholder="ISTITUTO COMPRENSIVO G. PASCOLI">
             </div>
 
             <div class="mt-4">
-                <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso/Edificio</label>
-                <input type="text" id="plessoEdificio" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Sede Centrale / Plesso Via Roma">
+                <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso / Edificio</label>
+                <input type="text" id="plessoEdificio" 
+                       oninput="this.value = this.value.toUpperCase(); calcolaManodopera()" 
+                       class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg uppercase" 
+                       placeholder="ES. SEDE CENTRALE">
             </div>
 
             <div class="mt-4">
@@ -1166,6 +1172,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
