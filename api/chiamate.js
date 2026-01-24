@@ -17,8 +17,8 @@ export default async function handler(req, res) {
 
             case 'POST':
                 const nuovaChiamata = req.body;
-                // Usiamo un timestamp come ID univoco
-                const id = Date.now();
+                // Se la chiamata ha già un ID, usa quello, altrimenti creane uno nuovo
+                const id = nuovaChiamata.id || Date.now();
                 nuovaChiamata.id = id;
                 await kv.set(`chiamata:${id}`, nuovaChiamata);
                 return res.status(201).json(nuovaChiamata);
