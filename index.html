@@ -903,7 +903,7 @@ async function salvaIntervento() {
             calcolaManodopera();
             const email = localStorage.getItem(EMAIL_KEY);
             if (!email) { 
-                showMessage('error', 'Configura prima l\'email di destinazione nelle opzioni.'); 
+                showMessage('error', 'Configura l\'email nelle opzioni.'); 
                 return; 
             }
 
@@ -916,7 +916,7 @@ async function salvaIntervento() {
                 dataIntervento: document.getElementById('resData').textContent,
                 nomeScuola: document.getElementById('nomeScuola').value || "N/A",
                 plessoEdificio: document.getElementById('plessoEdificio').value || "",
-                descrizioneLavori: document.getElementById('descrizioneLavori').value || "Nessun dettaglio inserito",
+                descrizioneLavori: document.getElementById('descrizioneLavori').value || "Nessun dettaglio",
                 orario: document.getElementById('resOrario').textContent,
                 operai: document.getElementById('numOperai').value,
                 tariffa: document.getElementById('tariffaOraria').textContent,
@@ -933,14 +933,13 @@ async function salvaIntervento() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                const result = await response.json();
                 if (response.ok) {
-                    showMessage('success', 'Email inviata con successo!');
+                    showMessage('success', 'Email inviata!');
                 } else {
-                    throw new Error(result.message || 'Errore durante l\'invio.');
+                    throw new Error('Errore invio.');
                 }
             } catch (error) {
-                showMessage('error', 'Errore: ' + error.message);
+                showMessage('error', error.message);
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Invia Email';
@@ -950,50 +949,47 @@ async function salvaIntervento() {
         // --- GESTIONE REGISTRO CHIAMATE ---
         function toggleRegistroChiamate() {
             const modal = document.getElementById('modalChiamate');
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                caricaChiamate();
+            if (modal) {
+                modal.classList.toggle('hidden');
+                if (!modal.classList.contains('hidden')) caricaChiamate();
             }
         }
 
         async function caricaChiamate() {
             const container = document.getElementById('listaChiamate');
+            if (!container) return;
             try {
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
                 if (!chiamate || chiamate.length === 0) {
-                    container.innerHTML = '<p class="text-center text-gray-500 py-10">Nessuna chiamata in sospeso.</p>';
+                    container.innerHTML = '<p class="text-center text-gray-500 py-4">Nessuna chiamata.</p>';
                     return;
                 }
-                const ordinePriorita = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
-                chiamate.sort((a, b) => ordinePriorita[a.priorita] - ordinePriorita[b.priorita]);
+                const ordine = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
+                chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
                 container.innerHTML = chiamate.map(c => `
-                    <div class="border-l-8 p-4 rounded-xl shadow-sm border bg-white ${getColorePriorita(c.priorita)}">
-                        <div class="flex flex-col">
-                            <div class="flex justify-between items-start">
-                                <span class="font-bold text-blue-900 uppercase">${c.scuola}</span>
-                                <span class="text-[10px] px-2 py-1 rounded font-bold ${getBadgePriorita(c.priorita)}">${c.priorita}</span>
-                            </div>
-                            <p class="text-gray-700 text-sm mt-1 italic">"${c.note}"</p>
-                            <div class="flex justify-end gap-2 mt-3">
-                                <button onclick="eliminaChiamata('${c.id}')" class="text-xs bg-green-600 text-white px-3 py-1 rounded-lg">COMPLETA</button>
-                            </div>
+                    <div class="border-l-4 p-3 rounded shadow-sm border ${c.priorita==='Alta'?'border-red-500 bg-red-50':'border-blue-400 bg-blue-50'}">
+                        <div class="flex justify-between">
+                            <span class="font-bold">${c.scuola}</span>
+                            <span class="text-[10px] font-bold uppercase">${c.priorita}</span>
                         </div>
+                        <p class="text-sm italic">${c.note}</p>
+                        <button onclick="eliminaChiamata('${c.id}')" class="mt-2 text-[10px] bg-red-600 text-white px-2 py-1 rounded">ELIMINA</button>
                     </div>
                 `).join('');
-            } catch (e) { container.innerHTML = 'Errore caricamento.'; }
+            } catch (e) { container.innerHTML = 'Errore.'; }
         }
 
         async function nuovaChiamata() {
             const scuola = document.getElementById('chiamataScuola').value;
             const priorita = document.getElementById('chiamataPriorita').value;
             const note = document.getElementById('chiamataNote').value;
-            if (!scuola || !note) return alert("Inserisci dati!");
+            if (!scuola || !note) return alert("Compila i campi.");
             try {
                 await fetch('/api/chiamate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ scuola: scuola.toUpperCase(), priorita, note, id: Date.now() })
+                    body: JSON.stringify({ scuola: scuola.toUpperCase(), priorita, note, id: Date.now().toString() })
                 });
                 document.getElementById('chiamataScuola').value = '';
                 document.getElementById('chiamataNote').value = '';
@@ -1002,18 +998,18 @@ async function salvaIntervento() {
         }
 
         async function eliminaChiamata(id) {
-            if (!confirm("Rimuovere chiamata?")) return;
-            await fetch(\`/api/chiamate?id=\${id}\`, { method: 'DELETE' });
+            if (!confirm("Rimuovere?")) return;
+            await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
             caricaChiamate();
         }
 
-        function getColorePriorita(p) { return p==='Alta'?'border-red-600 bg-red-50':p==='Media'?'border-orange-400 bg-orange-50':'border-blue-400 bg-blue-50'; }
-        function getBadgePriorita(p) { return p==='Alta'?'bg-red-600 text-white':p==='Media'?'bg-orange-400 text-white':'bg-blue-500 text-white'; }
+        function getColorePriorita(p) { return p==='Alta'?'border-red-600':'border-blue-400'; }
+        function getBadgePriorita(p) { return p==='Alta'?'bg-red-600':'bg-blue-500'; }
 
         window.onload = () => {
             const dataOggi = new Date().toLocaleDateString('it-IT');
-            const campoData = document.getElementById('dataStampa');
-            if (campoData) campoData.textContent = dataOggi;
+            const elData = document.getElementById('dataStampa');
+            if (elData) elData.textContent = dataOggi;
 
             if (typeof caricaDatiServer === 'function') {
                 caricaDatiServer().finally(() => {
@@ -1024,36 +1020,32 @@ async function salvaIntervento() {
         };
     </script>
 
-    <button onclick="toggleRegistroChiamate()" class="fixed bottom-24 left-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-50 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-        </svg>
-        <span class="ml-2 font-bold hidden md:inline">Chiamate</span>
+    <button onclick="toggleRegistroChiamate()" class="fixed bottom-24 left-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-50">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
     </button>
 
     <div id="modalChiamate" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div class="p-6 border-b flex justify-between items-center bg-blue-50">
-                <h2 class="text-xl font-bold text-blue-900 uppercase">Registro Chiamate</h2>
-                <button onclick="toggleRegistroChiamate()" class="text-gray-500 text-2xl font-bold">&times;</button>
+        <div class="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center bg-blue-50">
+                <h2 class="font-bold text-blue-900 uppercase">Registro Chiamate</h2>
+                <button onclick="toggleRegistroChiamate()" class="text-2xl">&times;</button>
             </div>
-            <div class="p-6 bg-gray-50 border-b">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input type="text" id="chiamataScuola" placeholder="Scuola" class="p-2 border rounded">
-                    <select id="chiamataPriorita" class="p-2 border rounded">
-                        <option value="Bassa">Bassa</option>
-                        <option value="Media">Media</option>
-                        <option value="Alta">Alta (Urgenza)</option>
-                    </select>
-                    <input type="text" id="chiamataNote" placeholder="Note" class="md:col-span-2 p-2 border rounded">
-                    <button onclick="nuovaChiamata()" class="md:col-span-2 bg-blue-600 text-white p-2 rounded font-bold">Aggiungi</button>
-                </div>
+            <div class="p-4 bg-gray-50 border-b space-y-2">
+                <input type="text" id="chiamataScuola" placeholder="Scuola" class="w-full p-2 border rounded">
+                <select id="chiamataPriorita" class="w-full p-2 border rounded">
+                    <option value="Bassa">Bassa</option>
+                    <option value="Media">Media</option>
+                    <option value="Alta">Alta</option>
+                </select>
+                <input type="text" id="chiamataNote" placeholder="Note" class="w-full p-2 border rounded">
+                <button onclick="nuovaChiamata()" class="w-full bg-blue-600 text-white p-2 rounded font-bold">Aggiungi</button>
             </div>
-            <div id="listaChiamate" class="flex-1 overflow-y-auto p-6 space-y-4 bg-white"></div>
+            <div id="listaChiamate" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white"></div>
         </div>
     </div>
 </body>
 </html>
+
 
 
 
