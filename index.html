@@ -1040,19 +1040,37 @@ async function salvaIntervento() {
 
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
+                // 1. Recupera i dati
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
-                const chiamata = chiamate.find(c => c.id === id);
-                if (chiamata) {
-                    chiamata.stato = nuovoStato;
-                    await fetch('/api/chiamate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(chiamata)
-                    });
-                    caricaChiamate();
+                
+                // 2. Cerca la chiamata (usiamo == invece di === per essere meno rigidi con gli ID)
+                const chiamata = chiamate.find(c => c.id == id);
+                
+                if (!chiamata) {
+                    alert("Attenzione: Chiamata non trovata con ID: " + id);
+                    return;
                 }
-            } catch (e) { console.error("Errore stato:", e); }
+
+                // 3. Aggiorna lo stato
+                chiamata.stato = nuovoStato;
+
+                // 4. Salva sul server
+                const response = await fetch('/api/chiamate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(chiamata)
+                });
+
+                if (response.ok) {
+                    caricaChiamate(); // Aggiorna la grafica
+                } else {
+                    alert("Il server non ha accettato l'aggiornamento.");
+                }
+            } catch (e) { 
+                console.error("Errore stato:", e); 
+                alert("Errore tecnico: " + e.message);
+            }
         }
 
         async function eliminaChiamata(id, isCompletato = false) {
@@ -1106,6 +1124,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
