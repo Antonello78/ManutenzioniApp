@@ -908,14 +908,31 @@ async function salvaIntervento() {
         // --- GESTIONE REGISTRO CHIAMATE E INVIO REPORT API ---
         
         function toggleRegistroChiamate() {
-            const modal = document.getElementById('modalChiamate');
-            if (modal) {
-                modal.classList.toggle('hidden');
-                if (!modal.classList.contains('hidden')) {
-                    caricaChiamate();
-                }
-            }
+    const modal = document.getElementById('modalChiamate');
+    if (modal) {
+        modal.classList.toggle('hidden');
+        if (!modal.classList.contains('hidden')) {
+            // --- NUOVA LOGICA: Imposta data e ora attuali ---
+            const adesso = new Date();
+            
+            // Formato Data locale corretto (YYYY-MM-DD)
+            const anno = adesso.getFullYear();
+            const mese = String(adesso.getMonth() + 1).padStart(2, '0');
+            const giorno = String(adesso.getDate()).padStart(2, '0');
+            const dataOggi = `${anno}-${mese}-${giorno}`;
+            
+            // Formato Ora (HH:MM)
+            const oraAdesso = adesso.toTimeString().slice(0, 5);
+            
+            // Inserimento nei campi
+            document.getElementById('chiamataDataManuale').value = dataOggi;
+            document.getElementById('chiamataOraManuale').value = oraAdesso;
+            // ------------------------------------------------
+            
+            caricaChiamate();
         }
+    }
+}
 
         async function caricaChiamate() {
             const container = document.getElementById('listaChiamate');
@@ -1172,6 +1189,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
