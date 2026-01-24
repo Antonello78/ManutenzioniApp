@@ -1058,6 +1058,7 @@ async function salvaIntervento() {
 
         // QUESTA FUNZIONE ORA INVIA IL REPORT PROFESSIONALE TRAMITE API
         async function inviaReport() {
+            // Recupero i dati dai nuovi ID corretti presenti nel tuo HTML
             const reportData = {
                 nIntervento: document.getElementById('nIntervento').value,
                 dataIntervento: document.getElementById('dataIntervento').value,
@@ -1065,16 +1066,19 @@ async function salvaIntervento() {
                 plessoEdificio: document.getElementById('plessoEdificio').value,
                 descrizioneLavori: document.getElementById('descrizioneLavori').value,
                 orario: `${document.getElementById('oraInizio').value} - ${document.getElementById('oraFine').value}`,
-                operai: document.getElementById('numeroOperai').value,
-                tariffa: document.getElementById('tariffaOraria').value,
-                minutiFatturabili: document.getElementById('minutiTotali').innerText,
+                operai: document.getElementById('numOperai').value, // Corretto da numeroOperai
+                tariffa: document.getElementById('tariffaOraria').innerText, // Corretto .innerText
+                minutiFatturabili: document.getElementById('minutiFatturabili').innerText, // Corretto ID
                 costoUscita: document.getElementById('costoUscita').innerText,
                 costoAggiuntivo: document.getElementById('costoAggiuntivo').innerText,
-                totale: document.getElementById('totaleFinale').innerText,
-                destinatario: prompt("A quale email vuoi inviare il report?", "manutenzione@scuola.it")
+                totale: document.getElementById('totaleManodopera').innerText, // Corretto ID
+                destinatario: document.getElementById('emailDestinatario').value || prompt("A quale email vuoi inviare il report?", "manutenzione@scuola.it")
             };
 
-            if (!reportData.destinatario) return;
+            if (!reportData.destinatario) {
+                showMessage('error', 'Inserire un indirizzo email valido.');
+                return;
+            }
 
             try {
                 showMessage('info', 'Invio report in corso...');
@@ -1087,7 +1091,8 @@ async function salvaIntervento() {
                 if (response.ok) {
                     showMessage('success', 'Report inviato con successo alla scuola!');
                 } else {
-                    alert("Errore nell'invio del report via server.");
+                    const errorData = await response.json();
+                    alert("Errore nell'invio: " + (errorData.message || 'Errore server'));
                 }
             } catch (error) {
                 console.error("Errore:", error);
@@ -1138,3 +1143,4 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
