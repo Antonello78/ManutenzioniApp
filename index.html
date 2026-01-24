@@ -901,7 +901,8 @@ async function salvaIntervento() {
 
         // --- GESTIONE REGISTRO CHIAMATE ---
         
-        // Questa è la funzione che fa funzionare il pulsante blu!
+        // --- GESTIONE REGISTRO CHIAMATE AGGIORNATA ---
+        
         function toggleRegistroChiamate() {
             const modal = document.getElementById('modalChiamate');
             if (modal) {
@@ -928,7 +929,6 @@ async function salvaIntervento() {
                 chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
 
                 container.innerHTML = chiamate.map(c => {
-                    // Scegliamo il colore del bordo e dello sfondo in base allo stato
                     let stileCard = "border-blue-400 bg-blue-50"; 
                     if (c.stato === 'In Lavorazione') stileCard = "border-orange-500 bg-orange-100";
                     if (c.priorita === 'Alta' && c.stato !== 'In Lavorazione') stileCard = "border-red-500 bg-red-50";
@@ -954,7 +954,7 @@ async function salvaIntervento() {
                             <div class="flex gap-2">
                                 ${c.stato !== 'In Lavorazione' ? 
                                     `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
-                                    `<button onclick="eliminaChiamata('${c.id}', true)" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>`
+                                    `<button onclick="cambiaStatoChiamata('${c.id}', 'Completata')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>`
                                 }
                                 <button onclick="eliminaChiamata('${c.id}')" class="text-[10px] bg-gray-200 text-gray-500 px-2 py-1.5 rounded font-bold">ELIMINA</button>
                             </div>
@@ -970,7 +970,6 @@ async function salvaIntervento() {
             const scuola = document.getElementById('chiamataScuola').value;
             const priorita = document.getElementById('chiamataPriorita').value;
             const note = document.getElementById('chiamataNote').value;
-            // Recupero data e ora manuale
             const dataManuale = document.getElementById('chiamataDataManuale').value;
             const oraManuale = document.getElementById('chiamataOraManuale').value;
             
@@ -979,7 +978,6 @@ async function salvaIntervento() {
                 return;
             }
 
-            // LOGICA DATA: Se inserita manualmente la formatta, altrimenti usa data/ora attuale
             let dataOraFinale;
             if (dataManuale && oraManuale) {
                 const [anno, mese, giorno] = dataManuale.split('-');
@@ -1005,7 +1003,6 @@ async function salvaIntervento() {
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
-                    // Pulisce i campi dopo il salvataggio
                     document.getElementById('chiamataScuola').value = '';
                     document.getElementById('chiamataNote').value = '';
                     document.getElementById('chiamataDataManuale').value = '';
@@ -1017,45 +1014,44 @@ async function salvaIntervento() {
 
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
-                // 1. Recupera la chiamata dal server
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
                 const chiamata = chiamate.find(c => c.id == id);
                 
                 if (chiamata) {
-                    // SE L'INTERVENTO È FINITO
+                    // SE L'INTERVENTO È FINITO (TRASFERIMENTO DATI)
                     if (nuovoStato === 'Completata') {
                         if (confirm("Vuoi trasferire i dati della chiamata nei 'Dettagli Intervento Corrente'?")) {
                             
-                            // 2. Cerchiamo i campi del modulo "Dettagli Intervento Corrente"
-                            const inputScuola = document.getElementById('scuola');
-                            const inputDescrizione = document.getElementById('descrizione');
+                            // Bersagli corretti trovati nel tuo index.html: nomeScuola e descrizioneLavori
+                            const inputScuola = document.getElementById('nomeScuola');
+                            const inputDescrizione = document.getElementById('descrizioneLavori');
                             
                             if (inputScuola && inputDescrizione) {
-                                // Inseriamo i dati: mettiamo anche la data originale per precisione
                                 inputScuola.value = chiamata.scuola;
                                 inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
                                 
-                                // 3. Chiudiamo il registro e torniamo in cima alla pagina
+                                // Reset campi orari per sicurezza
+                                document.getElementById('oraInizio').value = '08:30';
+                                document.getElementById('oraFine').value = '10:00';
+                                
                                 toggleRegistroChiamate();
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
+                                
+                                // Chiamiamo il calcolo per aggiornare subito il totale
+                                calcolaManodopera();
 
-                                // Piccola animazione o focus sul campo Prezzo per dirti: "Ora scrivi quanto costa"
-                                const inputPrezzo = document.getElementById('prezzoUnitario');
-                                if (inputPrezzo) {
-                                    setTimeout(() => inputPrezzo.focus(), 800);
-                                }
+                                showMessage('success', 'Dati trasferiti nel modulo!');
                             }
                         }
                         
-                        // 4. In ogni caso (sia che trasferiamo i dati o no), 
-                        // la chiamata viene rimossa dal registro perché non è più un "promemoria"
+                        // Rimuoviamo la chiamata dal registro dopo il completamento
                         await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
                         caricaChiamate();
                         return;
                     }
 
-                    // GESTIONE NORMALE (LAVORA / ATTESA)
+                    // CAMBIO STATO NORMALE (LAVORA)
                     chiamata.stato = nuovoStato;
                     const saveRes = await fetch('/api/chiamate', {
                         method: 'POST',
@@ -1071,43 +1067,9 @@ async function salvaIntervento() {
                 console.error("Errore nel trasferimento dati:", e); 
             }
         }
-        async function cambiaStatoChiamata(id, nuovoStato) {
-            try {
-                // 1. Recupera i dati
-                const res = await fetch('/api/chiamate');
-                const chiamate = await res.json();
-                
-                // 2. Cerca la chiamata (usiamo == invece di === per essere meno rigidi con gli ID)
-                const chiamata = chiamate.find(c => c.id == id);
-                
-                if (!chiamata) {
-                    alert("Attenzione: Chiamata non trovata con ID: " + id);
-                    return;
-                }
 
-                // 3. Aggiorna lo stato
-                chiamata.stato = nuovoStato;
-
-                // 4. Salva sul server
-                const response = await fetch('/api/chiamate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(chiamata)
-                });
-
-                if (response.ok) {
-                    caricaChiamate(); // Aggiorna la grafica
-                } else {
-                    alert("Il server non ha accettato l'aggiornamento.");
-                }
-            } catch (e) { 
-                console.error("Errore stato:", e); 
-                alert("Errore tecnico: " + e.message);
-            }
-        }
-
-        async function eliminaChiamata(id, isCompletato = false) {
-            if (!isCompletato && !confirm("Vuoi eliminare questa chiamata?")) return;
+        async function eliminaChiamata(id) {
+            if (!confirm("Vuoi eliminare definitivamente questa chiamata?")) return;
             try {
                 await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
                 caricaChiamate();
@@ -1157,6 +1119,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
