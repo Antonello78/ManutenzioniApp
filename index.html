@@ -928,8 +928,9 @@ async function salvaIntervento() {
                 chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
 
                 container.innerHTML = chiamate.map(c => {
+                    // Scegliamo il colore del bordo e dello sfondo in base allo stato
                     let stileCard = "border-blue-400 bg-blue-50"; 
-                    if (c.stato === 'In Lavorazione') stileCard = "border-orange-500 bg-orange-50";
+                    if (c.stato === 'In Lavorazione') stileCard = "border-orange-500 bg-orange-100";
                     if (c.priorita === 'Alta' && c.stato !== 'In Lavorazione') stileCard = "border-red-500 bg-red-50";
 
                     return `
@@ -944,21 +945,25 @@ async function salvaIntervento() {
                             </span>
                         </div>
                         <p class="text-sm mt-1 text-gray-700 font-medium italic">"${c.note}"</p>
+                        
                         <div class="flex justify-between items-center mt-3 pt-2 border-t border-black border-opacity-5">
                             <span class="text-[10px] font-black uppercase ${c.stato === 'In Lavorazione' ? 'text-orange-600' : 'text-gray-400'}">
                                 ${c.stato || 'IN ATTESA'}
                             </span>
+                            
                             <div class="flex gap-2">
                                 ${c.stato !== 'In Lavorazione' ? 
-                                    `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold">LAVORA</button>` : 
-                                    `<button onclick="eliminaChiamata('${c.id}', true)" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold">COMPLETATO</button>`
+                                    `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
+                                    `<button onclick="eliminaChiamata('${c.id}', true)" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>`
                                 }
                                 <button onclick="eliminaChiamata('${c.id}')" class="text-[10px] bg-gray-200 text-gray-500 px-2 py-1.5 rounded font-bold">ELIMINA</button>
                             </div>
                         </div>
-                    </div>
-                `;}).join('');
-            } catch (e) { container.innerHTML = 'Errore caricamento.'; }
+                    </div>`;
+                }).join('');
+            } catch (e) { 
+                container.innerHTML = 'Errore caricamento.'; 
+            }
         }
 
         async function nuovaChiamata() {
@@ -1012,29 +1017,36 @@ async function salvaIntervento() {
 
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
-                // 1. Recupera la lista chiamate aggiornata
+                // 1. Recupera i dati
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
                 
-                // 2. Trova la chiamata specifica
-                const chiamata = chiamate.find(c => c.id === id);
-                if (chiamata) {
-                    // 3. Aggiorna solo lo stato mantenendo tutti gli altri dati (inclusa la data originale)
-                    chiamata.stato = nuovoStato;
-                    
-                    const saveRes = await fetch('/api/chiamate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(chiamata)
-                    });
+                // 2. Cerca la chiamata (usiamo == invece di === per essere meno rigidi con gli ID)
+                const chiamata = chiamate.find(c => c.id == id);
+                
+                if (!chiamata) {
+                    alert("Attenzione: Chiamata non trovata con ID: " + id);
+                    return;
+                }
 
-                    if (saveRes.ok) {
-                        caricaChiamate(); // Rinfresca la lista
-                    }
+                // 3. Aggiorna lo stato
+                chiamata.stato = nuovoStato;
+
+                // 4. Salva sul server
+                const response = await fetch('/api/chiamate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(chiamata)
+                });
+
+                if (response.ok) {
+                    caricaChiamate(); // Aggiorna la grafica
+                } else {
+                    alert("Il server non ha accettato l'aggiornamento.");
                 }
             } catch (e) { 
-                console.error("Errore stato:", e);
-                alert("Errore nel cambio stato");
+                console.error("Errore stato:", e); 
+                alert("Errore tecnico: " + e.message);
             }
         }
 
@@ -1124,6 +1136,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
