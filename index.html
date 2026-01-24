@@ -927,18 +927,41 @@ async function salvaIntervento() {
                 chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
 
                 container.innerHTML = chiamate.map(c => {
-                    let stileCard = "border-blue-400 bg-blue-50"; 
-                    if (c.stato === 'In Lavorazione') stileCard = "border-orange-500 bg-orange-100";
-                    if (c.priorita === 'Alta' && c.stato !== 'In Lavorazione') stileCard = "border-red-500 bg-red-50";
+                    // --- NUOVA LOGICA COLORI PRIORITÀ ---
+                    let stileCard = "border-gray-300 bg-white"; // Default
+                    
+                    if (c.stato === 'In Lavorazione') {
+                        stileCard = "border-orange-500 bg-orange-50";
+                    } else {
+                        // Colori basati sulla priorità se non in lavorazione
+                        switch(c.priorita) {
+                            case 'Alta':
+                                stileCard = "border-red-600 bg-red-50";
+                                break;
+                            case 'Media':
+                                stileCard = "border-amber-500 bg-amber-50";
+                                break;
+                            case 'Bassa':
+                                stileCard = "border-green-500 bg-green-50";
+                                break;
+                        }
+                    }
+
+                    // Badge dinamico per la priorità
+                    const badgeColor = {
+                        'Alta': 'bg-red-600',
+                        'Media': 'bg-amber-500',
+                        'Bassa': 'bg-green-600'
+                    }[c.priorita] || 'bg-blue-600';
 
                     return `
                     <div class="border-l-4 p-3 rounded shadow-sm border ${stileCard} mb-3 text-left">
                         <div class="flex justify-between items-start">
                             <div class="flex flex-col">
-                                <span class="font-bold text-blue-900 uppercase text-sm">${c.scuola}</span>
+                                <span class="font-bold text-gray-900 uppercase text-sm">${c.scuola}</span>
                                 <span class="text-[10px] text-gray-500 font-bold">${c.dataOra || 'Data non disponibile'}</span>
                             </div>
-                            <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-blue-600 text-white">
+                            <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor} text-white">
                                 ${c.priorita}
                             </span>
                         </div>
@@ -1143,4 +1166,5 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
