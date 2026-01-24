@@ -1077,12 +1077,25 @@ async function salvaIntervento() {
             return 'bg-blue-500 text-white';
         }
         window.onload = () => {
-            const dataOggi = new Date().toLocaleDateString('it-IT');
-            document.getElementById('dataStampa').textContent = dataOggi;
-            caricaDatiServer().finally(() => {
-                initializeInputs();
-                calcolaManodopera();
-            });
+            console.log("App avviata, caricamento dati...");
+            try {
+                const dataOggi = new Date().toLocaleDateString('it-IT');
+                const campoData = document.getElementById('dataStampa');
+                if (campoData) campoData.textContent = dataOggi;
+
+                // Verifichiamo che caricaDatiServer esista prima di chiamarla
+                if (typeof caricaDatiServer === 'function') {
+                    caricaDatiServer().finally(() => {
+                        if (typeof initializeInputs === 'function') initializeInputs();
+                        if (typeof calcolaManodopera === 'function') calcolaManodopera();
+                    });
+                } else {
+                    console.error("Errore: caricaDatiServer non trovata!");
+                }
+            } catch (erroreAvvio) {
+                console.error("Errore critico durante l'onload:", erroreAvvio);
+            }
+        };
         };
     </script>
     <button onclick="toggleRegistroChiamate()" class="fixed bottom-24 left-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl hover:bg-blue-700 transition-all z-50 flex items-center justify-center">
@@ -1123,6 +1136,7 @@ async function salvaIntervento() {
 </div>
 </body>
 </html>
+
 
 
 
