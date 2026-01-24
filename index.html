@@ -1017,60 +1017,30 @@ async function salvaIntervento() {
 
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
-                // 1. Scarica la lista attuale delle chiamate
+                // 1. Recupera tutte le chiamate
                 const res = await fetch('/api/chiamate');
-                let chiamate = await res.json();
+                const chiamate = await res.json();
                 
-                // 2. Trova la chiamata da modificare e aggiorna lo stato
-                let chiamataTrovata = false;
-                chiamate = chiamate.map(c => {
-                    if (String(c.id) === String(id)) {
-                        chiamataTrovata = true;
-                        return { ...c, stato: nuovoStato };
-                    }
-                    return c;
-                });
-
-                if (!chiamataTrovata) return;
-
-                // 3. Rimuoviamo TUTTI i duplicati (stessa scuola e stessa nota) 
-                // per evitare che versioni vecchie rimangano nel database
-                const listaPulita = [];
-                const chiaviViste = new Set();
+                // 2. Trova quella corretta
+                const chiamata = chiamate.find(c => c.id == id);
                 
-                chiamate.forEach(c => {
-                    const chiaveUnica = c.scuola + c.note;
-                    if (!chiaviViste.has(chiaveUnica) || c.id == id) {
-                        if (c.id == id) {
-                            // Se è quella che stiamo modificando, la teniamo come prioritaria
-                            listaPulita.push(c);
-                            chiaviViste.add(chiaveUnica);
-                        } else if (!chiaviViste.has(chiaveUnica)) {
-                            listaPulita.push(c);
-                            chiaviViste.add(chiaveUnica);
-                        }
-                    }
-                });
+                if (chiamata) {
+                    // 3. Cambia solo lo stato
+                    chiamata.stato = nuovoStato;
 
-                // 4. ELIMINIAMO la vecchia chiamata dal server per sicurezza
-                await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
+                    // 4. Invia al server (il server ora riconosce l'ID e sovrascrive)
+                    const saveRes = await fetch('/api/chiamate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(chiamata)
+                    });
 
-                // 5. SALVIAMO la chiamata aggiornata
-                const chiamataAggiornata = listaPulita.find(c => c.id == id);
-                const saveRes = await fetch('/api/chiamate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(chiamataAggiornata)
-                });
-
-                if (saveRes.ok) {
-                    // Aspettiamo un attimo per dare tempo al server di scrivere il file
-                    setTimeout(() => {
+                    if (saveRes.ok) {
                         caricaChiamate();
-                    }, 300);
+                    }
                 }
-            } catch (e) {
-                console.error("Errore nel cambio stato:", e);
+            } catch (e) { 
+                console.error("Errore aggiornamento:", e); 
             }
         }
         async function cambiaStatoChiamata(id, nuovoStato) {
@@ -1159,6 +1129,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
