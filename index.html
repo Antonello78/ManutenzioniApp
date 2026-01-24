@@ -899,9 +899,7 @@ async function salvaIntervento() {
             setTimeout(() => { document.title = titoloOriginale; }, 1000);
         }
 
-        // --- GESTIONE REGISTRO CHIAMATE ---
-        
-        // --- GESTIONE REGISTRO CHIAMATE AGGIORNATA ---
+        // --- GESTIONE REGISTRO CHIAMATE E EMAIL ---
         
         function toggleRegistroChiamate() {
             const modal = document.getElementById('modalChiamate');
@@ -1019,11 +1017,8 @@ async function salvaIntervento() {
                 const chiamata = chiamate.find(c => c.id == id);
                 
                 if (chiamata) {
-                    // SE L'INTERVENTO È FINITO (TRASFERIMENTO DATI)
                     if (nuovoStato === 'Completata') {
                         if (confirm("Vuoi trasferire i dati della chiamata nei 'Dettagli Intervento Corrente'?")) {
-                            
-                            // Bersagli corretti trovati nel tuo index.html: nomeScuola e descrizioneLavori
                             const inputScuola = document.getElementById('nomeScuola');
                             const inputDescrizione = document.getElementById('descrizioneLavori');
                             
@@ -1031,41 +1026,26 @@ async function salvaIntervento() {
                                 inputScuola.value = chiamata.scuola;
                                 inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
                                 
-                                // Reset campi orari per sicurezza
-                                document.getElementById('oraInizio').value = '08:30';
-                                document.getElementById('oraFine').value = '10:00';
-                                
                                 toggleRegistroChiamate();
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                                
-                                // Chiamiamo il calcolo per aggiornare subito il totale
-                                calcolaManodopera();
-
+                                if (typeof calcolaManodopera === "function") calcolaManodopera();
                                 showMessage('success', 'Dati trasferiti nel modulo!');
                             }
                         }
-                        
-                        // Rimuoviamo la chiamata dal registro dopo il completamento
                         await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
                         caricaChiamate();
                         return;
                     }
 
-                    // CAMBIO STATO NORMALE (LAVORA)
                     chiamata.stato = nuovoStato;
-                    const saveRes = await fetch('/api/chiamate', {
+                    await fetch('/api/chiamate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(chiamata)
                     });
-
-                    if (saveRes.ok) {
-                        caricaChiamate();
-                    }
+                    caricaChiamate();
                 }
-            } catch (e) { 
-                console.error("Errore nel trasferimento dati:", e); 
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function eliminaChiamata(id) {
@@ -1074,6 +1054,20 @@ async function salvaIntervento() {
                 await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
                 caricaChiamate();
             } catch (e) { alert("Errore eliminazione"); }
+        }
+
+        function inviaEmail() {
+            const scuola = document.getElementById('nomeScuola').value || "[Nome della Scuola]";
+            const oggetto = `R: Richiesta intervento urgente di manutenzione ${scuola}`;
+            const corpo = `Gentile Referente,%0D%0A%0D%0A` +
+                `Le confermo di aver ricevuto la Sua email e di aver preso visione della richiesta di intervento urgente di manutenzione.%0D%0A%0D%0A` +
+                `Stiamo organizzando il programma della settimana per poter inserire l'intervento con la massima priorità e garantirLe l'esecuzione dei lavori nel più breve tempo possibile.%0D%0A%0D%0A` +
+                `Sarà nostra cura comunicarLe il giorno esatto dell'intervento quanto prima, non appena definita la pianificazione.%0D%0A%0D%0A` +
+                `Restiamo a Sua completa disposizione per ogni eventuale chiarimento.%0D%0A%0D%0A` +
+                `Cordiali saluti,%0D%0A%0D%0A` +
+                `Ditta D'Angelo Antonello`;
+
+            window.location.href = `mailto:?subject=${encodeURIComponent(oggetto)}&body=${corpo}`;
         }
 
         window.onload = () => {
@@ -1119,6 +1113,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
