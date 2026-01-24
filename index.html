@@ -965,21 +965,31 @@ async function salvaIntervento() {
             const scuola = document.getElementById('chiamataScuola').value;
             const priorita = document.getElementById('chiamataPriorita').value;
             const note = document.getElementById('chiamataNote').value;
+            // Recupero data e ora manuale
+            const dataManuale = document.getElementById('chiamataDataManuale').value;
+            const oraManuale = document.getElementById('chiamataOraManuale').value;
             
             if (!scuola || !note) {
                 alert("Inserisci Scuola e Note!");
                 return;
             }
 
-            const ora = new Date();
-            const dataOra = ora.toLocaleDateString('it-IT') + ' - ' + ora.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+            // LOGICA DATA: Se inserita manualmente la formatta, altrimenti usa data/ora attuale
+            let dataOraFinale;
+            if (dataManuale && oraManuale) {
+                const [anno, mese, giorno] = dataManuale.split('-');
+                dataOraFinale = `${giorno}/${mese}/${anno} - ${oraManuale}`;
+            } else {
+                const oraAttuale = new Date();
+                dataOraFinale = oraAttuale.toLocaleDateString('it-IT') + ' - ' + oraAttuale.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+            }
 
             const payload = { 
                 scuola: scuola.toUpperCase(), 
                 priorita, 
                 note, 
                 id: Date.now().toString(),
-                dataOra: dataOra,
+                dataOra: dataOraFinale,
                 stato: 'In Attesa'
             };
 
@@ -990,11 +1000,42 @@ async function salvaIntervento() {
                     body: JSON.stringify(payload)
                 });
                 if (res.ok) {
+                    // Pulisce i campi dopo il salvataggio
                     document.getElementById('chiamataScuola').value = '';
                     document.getElementById('chiamataNote').value = '';
+                    document.getElementById('chiamataDataManuale').value = '';
+                    document.getElementById('chiamataOraManuale').value = '';
                     caricaChiamate();
                 }
             } catch (e) { alert("Errore salvataggio"); }
+        }
+
+        async function cambiaStatoChiamata(id, nuovoStato) {
+            try {
+                // 1. Recupera la lista chiamate aggiornata
+                const res = await fetch('/api/chiamate');
+                const chiamate = await res.json();
+                
+                // 2. Trova la chiamata specifica
+                const chiamata = chiamate.find(c => c.id === id);
+                if (chiamata) {
+                    // 3. Aggiorna solo lo stato mantenendo tutti gli altri dati (inclusa la data originale)
+                    chiamata.stato = nuovoStato;
+                    
+                    const saveRes = await fetch('/api/chiamate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(chiamata)
+                    });
+
+                    if (saveRes.ok) {
+                        caricaChiamate(); // Rinfresca la lista
+                    }
+                }
+            } catch (e) { 
+                console.error("Errore stato:", e);
+                alert("Errore nel cambio stato");
+            }
         }
 
         async function cambiaStatoChiamata(id, nuovoStato) {
@@ -1041,26 +1082,31 @@ async function salvaIntervento() {
     </button>
 
     <div id="modalChiamate" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden flex flex-col shadow-2xl">
+        <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
             <div class="p-4 border-b flex justify-between items-center bg-blue-50">
                 <h2 class="font-bold text-blue-900 uppercase">Registro Chiamate</h2>
                 <button onclick="toggleRegistroChiamate()" class="text-2xl">&times;</button>
             </div>
             <div class="p-4 bg-gray-50 border-b space-y-2">
                 <input type="text" id="chiamataScuola" placeholder="Scuola" class="w-full p-2 border rounded">
+                <div class="flex gap-2">
+                    <input type="date" id="chiamataDataManuale" class="w-1/2 p-2 border rounded text-sm">
+                    <input type="time" id="chiamataOraManuale" class="w-1/2 p-2 border rounded text-sm">
+                </div>
                 <select id="chiamataPriorita" class="w-full p-2 border rounded">
                     <option value="Bassa">Bassa</option>
                     <option value="Media">Media</option>
                     <option value="Alta">Alta</option>
                 </select>
-                <input type="text" id="chiamataNote" placeholder="Note" class="w-full p-2 border rounded">
-                <button onclick="nuovaChiamata()" class="w-full bg-blue-600 text-white p-2 rounded font-bold">Aggiungi</button>
+                <input type="text" id="chiamataNote" placeholder="Note intervento" class="w-full p-2 border rounded">
+                <button onclick="nuovaChiamata()" class="w-full bg-blue-600 text-white p-2 rounded font-bold uppercase">Aggiungi Chiamata</button>
             </div>
             <div id="listaChiamate" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white"></div>
         </div>
     </div>
 </body>
 </html>
+
 
 
 
