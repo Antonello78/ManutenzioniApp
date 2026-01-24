@@ -1017,18 +1017,46 @@ async function salvaIntervento() {
 
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
-                // 1. Recupera tutte le chiamate
+                // 1. Recupera la chiamata dal server
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
-                
-                // 2. Trova quella corretta
                 const chiamata = chiamate.find(c => c.id == id);
                 
                 if (chiamata) {
-                    // 3. Cambia solo lo stato
-                    chiamata.stato = nuovoStato;
+                    // SE L'INTERVENTO È FINITO
+                    if (nuovoStato === 'Completata') {
+                        if (confirm("Vuoi trasferire i dati della chiamata nei 'Dettagli Intervento Corrente'?")) {
+                            
+                            // 2. Cerchiamo i campi del modulo "Dettagli Intervento Corrente"
+                            const inputScuola = document.getElementById('scuola');
+                            const inputDescrizione = document.getElementById('descrizione');
+                            
+                            if (inputScuola && inputDescrizione) {
+                                // Inseriamo i dati: mettiamo anche la data originale per precisione
+                                inputScuola.value = chiamata.scuola;
+                                inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
+                                
+                                // 3. Chiudiamo il registro e torniamo in cima alla pagina
+                                toggleRegistroChiamate();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
 
-                    // 4. Invia al server (il server ora riconosce l'ID e sovrascrive)
+                                // Piccola animazione o focus sul campo Prezzo per dirti: "Ora scrivi quanto costa"
+                                const inputPrezzo = document.getElementById('prezzoUnitario');
+                                if (inputPrezzo) {
+                                    setTimeout(() => inputPrezzo.focus(), 800);
+                                }
+                            }
+                        }
+                        
+                        // 4. In ogni caso (sia che trasferiamo i dati o no), 
+                        // la chiamata viene rimossa dal registro perché non è più un "promemoria"
+                        await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
+                        caricaChiamate();
+                        return;
+                    }
+
+                    // GESTIONE NORMALE (LAVORA / ATTESA)
+                    chiamata.stato = nuovoStato;
                     const saveRes = await fetch('/api/chiamate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -1040,7 +1068,7 @@ async function salvaIntervento() {
                     }
                 }
             } catch (e) { 
-                console.error("Errore aggiornamento:", e); 
+                console.error("Errore nel trasferimento dati:", e); 
             }
         }
         async function cambiaStatoChiamata(id, nuovoStato) {
@@ -1129,6 +1157,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
