@@ -1017,39 +1017,36 @@ async function salvaIntervento() {
 
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
-                // 1. Recupera i dati
+                // 1. Recuperiamo tutte le chiamate
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
                 
-                // 2. Cerca la chiamata (usiamo == invece di === per essere meno rigidi con gli ID)
+                // 2. Troviamo quella da modificare
                 const chiamata = chiamate.find(c => c.id == id);
                 
-                if (!chiamata) {
-                    alert("Attenzione: Chiamata non trovata con ID: " + id);
-                    return;
-                }
+                if (chiamata) {
+                    // Aggiorniamo lo stato nell'oggetto
+                    chiamata.stato = nuovoStato;
 
-                // 3. Aggiorna lo stato
-                chiamata.stato = nuovoStato;
+                    // --- TRUCCO PER EVITARE DUPLICATI ---
+                    // Prima eliminiamo la vecchia versione dal server tramite il suo ID
+                    await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
 
-                // 4. Salva sul server
-                const response = await fetch('/api/chiamate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(chiamata)
-                });
+                    // Ora salviamo la versione aggiornata (che ha lo stesso ID ma stato diverso)
+                    const saveRes = await fetch('/api/chiamate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(chiamata)
+                    });
 
-                if (response.ok) {
-                    caricaChiamate(); // Aggiorna la grafica
-                } else {
-                    alert("Il server non ha accettato l'aggiornamento.");
+                    if (saveRes.ok) {
+                        caricaChiamate(); // Rinfresca la lista: vedrai solo quella corretta
+                    }
                 }
             } catch (e) { 
-                console.error("Errore stato:", e); 
-                alert("Errore tecnico: " + e.message);
+                console.error("Errore durante l'aggiornamento:", e); 
             }
         }
-
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
                 // 1. Recupera i dati
@@ -1136,6 +1133,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
