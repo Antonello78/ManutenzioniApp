@@ -1010,6 +1010,20 @@ async function salvaIntervento() {
             }
         }
 
+        function impostaDataOraAttuale() {
+            const adesso = new Date();
+            const anno = adesso.getFullYear();
+            const mese = String(adesso.getMonth() + 1).padStart(2, '0');
+            const giorno = String(adesso.getDate()).padStart(2, '0');
+            const dataOggi = `${anno}-${mese}-${giorno}`;
+            const oraAdesso = adesso.toTimeString().slice(0, 5);
+
+            const campoData = document.getElementById('chiamataDataManuale');
+            const campoOra = document.getElementById('chiamataOraManuale');
+    
+            if (campoData) campoData.value = dataOggi;
+            if (campoOra) campoOra.value = oraAdesso;
+        }
         async function nuovaChiamata() {
             const scuola = document.getElementById('chiamataScuola').value;
             const priorita = document.getElementById('chiamataPriorita').value;
@@ -1049,8 +1063,10 @@ async function salvaIntervento() {
                 if (res.ok) {
                     document.getElementById('chiamataScuola').value = '';
                     document.getElementById('chiamataNote').value = '';
-                    document.getElementById('chiamataDataManuale').value = '';
-                    document.getElementById('chiamataOraManuale').value = '';
+                    
+                    // Sostituiamo la pulizia dei campi con il ripristino dell'ora attuale
+                    impostaDataOraAttuale(); 
+                    
                     caricaChiamate();
                 }
             } catch (e) { alert("Errore salvataggio"); }
@@ -1189,6 +1205,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
