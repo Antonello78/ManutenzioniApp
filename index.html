@@ -954,17 +954,17 @@ async function salvaIntervento() {
             if (!container) return;
             try {
                 const res = await fetch('/api/chiamate');
-                const datiDalServer = await res.json();
-                let chiamate = [...datiDalServer];
         
-                if (!chiamate || chiamate.length === 0) {
-                    container.innerHTML = '<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata nel registro.</p>';
-                    return;
-                }
+                // LEGGIAMO I DATI UNA VOLTA SOLA
+                const datiDalServer = await res.json(); 
+        
+                // POPOLIAMO LA VARIABILE GLOBALE (Indispensabile!)
+                chiamateGlobali = datiDalServer; 
+        
+                // CREIAMO LA COPIA PER IL FILTRO
+                let chiamate = [...datiDalServer]; 
 
-                // --- NUOVO FILTRO ---
-                // Se filtroChiamateCompletate è true, prendiamo solo le 'Completata'
-                // Se è false, prendiamo tutto tranne le 'Completata'
+                // Ora applichiamo il filtro che abbiamo deciso nel Punto 4
                 chiamate = chiamate.filter(c => {
                     if (filtroChiamateCompletate) {
                         return c.stato === 'Completata';
@@ -1212,50 +1212,35 @@ async function salvaIntervento() {
             }
         };
         async function completaChiamataEArchivia(id) {
-            // 1. Troviamo la chiamata nei dati caricati globalmente
-            // Nota: Usiamo chiamateGlobali che viene popolata in caricaChiamate
-            const chiamata = (typeof chiamateGlobali !== 'undefined') 
-                ? chiamateGlobali.find(c => c.id === id)
-                : null;
+            // Debug: vediamo cosa c'è dentro il magazzino
+            console.log("Cerco ID:", id, "in", chiamateGlobali);
 
+            // Cerchiamo la chiamata confrontando l'ID come stringa per sicurezza
+            const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
+    
             if (!chiamata) {
-                alert("Errore: impossibile recuperare i dati della chiamata.");
+                alert("Errore: chiamata non trovata. Prova a chiudere e riaprire il registro.");
                 return;
             }
 
-            // 2. Copiamo i dati nel modulo principale dell'intervento
-            // Usiamo i nomi dei campi del tuo index.html v1.4.0
+            // Copia i dati nel form principale (nomi campi del tuo v1.4.0)
             document.getElementById('nomeScuola').value = chiamata.scuola;
             document.getElementById('descrizioneLavori').value = chiamata.note;
-
-            // Opzionale: scrolla la pagina verso l'alto per mostrare il form compilato
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             try {
-                // 3. Aggiorniamo lo stato sul server impostandolo come "Completata"
-                // Usiamo l'endpoint /api/chiamate che già gestisce il metodo PUT
                 const res = await fetch('/api/chiamate', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        ...chiamata,
-                        stato: 'Completata'
-                    })
+                    body: JSON.stringify({ ...chiamata, stato: 'Completata' })
                 });
 
                 if (res.ok) {
-                    // 4. Chiudiamo il registro e rinfreschiamo la lista
-                    toggleRegistroChiamate();
-                    caricaChiamate();
-                    
-                    // Notifica rapida per l'utente
-                    console.log('Chiamata archiviata con successo');
-                } else {
-                    alert('Errore durante l\'archiviazione della chiamata.');
+                    toggleRegistroChiamate(); // Chiude il pannello
+                    caricaChiamate();         // Aggiorna la lista
                 }
             } catch (e) {
-                console.error("Errore connessione API:", e);
-                alert('Errore di connessione al database.');
+                alert('Errore di connessione.');
             }
         }
     </script>
@@ -1297,6 +1282,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
