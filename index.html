@@ -995,6 +995,48 @@ async function salvaIntervento() {
         container.innerHTML = 'Errore caricamento.'; 
     }
 }
+        async function completaChiamata(id) {
+    const chiamata = chiamateLocali.find(c => c.id == id);
+    if (!chiamata) return;
+
+    if (confirm(`Trasferire "${chiamata.scuola}" nei dettagli intervento?\n\nLa scheda verrà spostata in ARCHIVIO.`)) {
+        
+        // --- QUESTA È LA PARTE CHE TI MANCAVA PER N. INTERVENTO E DATA ---
+        if (typeof nuovoIntervento === 'function') {
+            nuovoIntervento(); // Genera n. intervento e data odierna
+        }
+
+        // Compilazione campi modulo principale
+        const inputScuola = document.getElementById('nomeScuola');
+        const inputDescrizione = document.getElementById('descrizioneLavori');
+        
+        if (inputScuola) inputScuola.value = chiamata.scuola;
+        if (inputDescrizione) {
+            inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
+        }
+
+        // Chiude il registro e aggiorna i calcoli
+        toggleRegistroChiamate();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (typeof calcolaManodopera === "function") calcolaManodopera();
+
+        try {
+            // Cambia lo stato in 'completata' (così finisce in Archivio invece di essere eliminata)
+            chiamata.stato = 'completata';
+            chiamata.dataArchiviazione = new Date().toLocaleDateString('it-IT');
+
+            await fetch('/api/chiamate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(chiamata)
+            });
+
+            await caricaChiamate();
+        } catch (e) {
+            console.error("Errore archiviazione:", e);
+        }
+    }
+}
 
         function impostaDataOraAttuale() {
             const adesso = new Date();
@@ -1059,49 +1101,23 @@ async function salvaIntervento() {
         }
 
         async function cambiaStatoChiamata(id, nuovoStato) {
-            try {
-                const res = await fetch('/api/chiamate');
-                const chiamate = await res.json();
-                const chiamata = chiamate.find(c => c.id == id);
-                
-                if (chiamata) {
-                    // --- LOGICA PER COMPLETAMENTO (CANCELLA E TRASFERISCE) ---
-                    if (nuovoStato === 'Completata') {
-                        if (confirm("Vuoi trasferire i dati della chiamata nei 'Dettagli Intervento Corrente'?")) {
-                            const inputScuola = document.getElementById('nomeScuola');
-                            const inputDescrizione = document.getElementById('descrizioneLavori');
-                            
-                            if (inputScuola && inputDescrizione) {
-                                inputScuola.value = chiamata.scuola;
-                                inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
-                                
-                                toggleRegistroChiamate();
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                                if (typeof calcolaManodopera === "function") calcolaManodopera();
-                                showMessage('success', 'Dati trasferiti nel modulo!');
-                            }
-                        }
-                        // Quando è completata, viene eliminata dal registro chiamate
-                        await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
-                        caricaChiamate();
-                        return;
-                    }
+    try {
+        const chiamata = chiamateLocali.find(c => c.id == id);
+        if (!chiamata) return;
 
-                    // --- LOGICA PER LAVORA O RESET (AGGIORNA SOLO LO STATO) ---
-                    chiamata.stato = nuovoStato;
-                    await fetch('/api/chiamate', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(chiamata)
-                    });
-                    
-                    // Ricarica la lista (utile per il tasto Reset o Lavora)
-                    caricaChiamate();
-                }
-            } catch (e) { 
-                console.error(e); 
-            }
-        }
+        chiamata.stato = nuovoStato;
+        
+        await fetch('/api/chiamate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(chiamata)
+        });
+        
+        caricaChiamate();
+    } catch (e) { 
+        console.error("Errore cambio stato:", e); 
+    }
+}
 
         async function eliminaChiamata(id) {
             if (!confirm("Vuoi eliminare definitivamente questa chiamata?")) return;
@@ -1231,29 +1247,36 @@ async function completaChiamata(id) {
 
     if (confirm(`Trasferire "${chiamata.scuola}" nei dettagli intervento?\n\nLa scheda verrà spostata in ARCHIVIO.`)) {
         
-        // 1. Pulizia e generazione nuovo numero/data
-        nuovoIntervento();
+        // --- QUESTA RIGA COMPILA AUTOMATICAMENTE N. INTERVENTO E DATA ---
+        if (typeof nuovoIntervento === "function") nuovoIntervento();
 
-        // 2. Compilazione campi (usando gli ID corretti del tuo HTML)
-        const elScuola = document.getElementById('nomeScuola');
-        const elNote = document.getElementById('descrizioneLavori');
+        const inputScuola = document.getElementById('nomeScuola');
+        const inputDescrizione = document.getElementById('descrizioneLavori');
 
-        if (elScuola) elScuola.value = chiamata.scuola;
-        if (elNote) elNote.value = chiamata.note;
-        
-        // Aggiorna la preview visiva
-        calcolaManodopera();
+        if (inputScuola && inputDescrizione) {
+            inputScuola.value = chiamata.scuola;
+            // Prendiamo solo la data dalla stringa dataOra (es: "25/01/2026")
+            const dataSolo = chiamata.dataOra.split(' - ')[0];
+            inputDescrizione.value = `Intervento del ${dataSolo}: ${chiamata.note}`;
+            
+            toggleRegistroChiamate();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Aggiorna la preview a video
+            if (typeof calcolaManodopera === "function") calcolaManodopera();
+        }
 
         try {
-            // 3. Spostamento in archivio tramite l'API (DELETE ora archivia)
-            const res = await fetch(`/api/chiamate?id=${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                await caricaChiamate();
-                toggleRegistroChiamate();
-            }
+            // Spostiamo la chiamata in stato completata (va in Archivio)
+            chiamata.stato = 'completata';
+            await fetch('/api/chiamate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(chiamata)
+            });
+            caricaChiamate();
         } catch (e) {
-            console.error(e);
-            alert("Errore durante l'archiviazione");
+            console.error("Errore archiviazione:", e);
         }
     }
 }        
@@ -1306,6 +1329,7 @@ async function completaChiamata(id) {
     </div>
 </body>
 </html>
+
 
 
 
