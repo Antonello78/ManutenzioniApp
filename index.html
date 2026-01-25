@@ -1223,31 +1223,40 @@ function cambiaVistaChiamate(mostraArchivio) {
     renderizzaChiamate(); 
 }
 
-// Funzione per archiviare la chiamata e copiare i dati
 async function completaChiamata(id) {
     const chiamata = chiamateLocali.find(c => c.id == id);
     if (!chiamata) return;
 
     if (confirm(`Trasferire "${chiamata.scuola}" nei dettagli intervento?\n\nLa scheda verrà spostata in ARCHIVIO.`)) {
-        // TRASFERIMENTO DATI NEI CAMPI PRINCIPALI
-        document.getElementById('nomeScuola').value = chiamata.scuola;
-        document.getElementById('descrizioneLavori').value = chiamata.note;
         
+        // 1. Reset modulo (per avere nuovo numero e data odierna)
+        if (typeof nuovoIntervento === 'function') {
+            await nuovoIntervento();
+        }
+
+        // 2. Compilazione campi
+        const elScuola = document.getElementById('nomeScuola');
+        const elNote = document.getElementById('descrizioneLavori');
+
+        if (elScuola) elScuola.value = chiamata.scuola;
+        if (elNote) elNote.value = chiamata.note;
+        
+        // Forza l'aggiornamento della preview a video
+        if (typeof calcolaManodopera === 'function') calcolaManodopera();
+
         try {
-            // Chiamata all'API (che ora archivia invece di eliminare)
+            // 3. Spostamento in archivio tramite l'API
+            // Nota: l'API chiamate.js nel tuo caso usa DELETE per rimuovere/archiviare
             const res = await fetch(`/api/chiamate?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
-                await caricaChiamate(); // Ricarica la lista dal server
-                toggleRegistroChiamate(); // Chiude il registro
-                if (typeof calcolaManodopera === 'function') calcolaManodopera();
+                await caricaChiamate();
+                toggleRegistroChiamate();
             }
         } catch (e) {
-            console.error("Errore archiviazione:", e);
             alert("Errore durante l'archiviazione");
         }
     }
-}    
-        
+}        
         window.onload = () => {
             const dataOggi = new Date().toLocaleDateString('it-IT');
             const elData = document.getElementById('dataStampa');
@@ -1297,6 +1306,7 @@ async function completaChiamata(id) {
     </div>
 </body>
 </html>
+
 
 
 
