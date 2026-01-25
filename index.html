@@ -925,32 +925,41 @@ async function salvaIntervento() {
             try {
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
-                
+        
+                // SALVIAMO LE CHIAMATE NELLA VARIABILE LOCALE (Serve per i Tab)
+                chiamateLocali = chiamate;
+
                 if (!chiamate || chiamate.length === 0) {
                     container.innerHTML = '<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata nel registro.</p>';
                     return;
                 }
 
+                // --- MANTEGO IL TUO ORDINAMENTO ---
                 const ordine = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
                 chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
 
-                container.innerHTML = chiamate.map(c => {
-                    // --- LOGICA COLORI PRIORITÀ ---
+                // --- AGGIUNGO IL FILTRO PER L'ARCHIVIO ---
+                const daMostrare = chiamate.filter(c => {
+                    if (vistaArchivio) return c.stato === 'completata' || c.stato === 'Completata';
+                    return c.stato !== 'completata' && c.stato !== 'Completata';
+                });
+
+                if (daMostrare.length === 0) {
+                    container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata ${vistaArchivio ? 'in archivio' : 'attiva'}.</p>`;
+                    return;
+                }
+
+                container.innerHTML = daMostrare.map(c => {
+                    // --- MANTEGO TUTTA LA TUA LOGICA COLORI PRIORITÀ ---
                     let stileCard = "border-gray-300 bg-white"; 
-                    
+            
                     if (c.stato === 'In Lavorazione') {
                         stileCard = "border-orange-500 bg-orange-50";
                     } else {
                         switch(c.priorita) {
-                            case 'Alta':
-                                stileCard = "border-red-600 bg-red-50";
-                                break;
-                            case 'Media':
-                                stileCard = "border-amber-500 bg-amber-50";
-                                break;
-                            case 'Bassa':
-                                stileCard = "border-green-500 bg-green-50";
-                                break;
+                            case 'Alta': stileCard = "border-red-600 bg-red-50"; break;
+                            case 'Media': stileCard = "border-amber-500 bg-amber-50"; break;
+                            case 'Bassa': stileCard = "border-green-500 bg-green-50"; break;
                         }
                     }
 
@@ -960,6 +969,7 @@ async function salvaIntervento() {
                         'Bassa': 'bg-green-600'
                     }[c.priorita] || 'bg-blue-600';
 
+                    // --- MANTEGO IL TUO LAYOUT IDENTICO ---
                     return `
                     <div class="border-l-4 p-3 rounded shadow-sm border ${stileCard} mb-3 text-left">
                         <div class="flex justify-between items-start">
@@ -972,19 +982,20 @@ async function salvaIntervento() {
                             </span>
                         </div>
                         <p class="text-sm mt-1 text-gray-700 font-medium italic">"${c.note}"</p>
-                        
+                
                         <div class="flex justify-between items-center mt-3 pt-2 border-t border-black border-opacity-5">
                             <span class="text-[10px] font-black uppercase ${c.stato === 'In Lavorazione' ? 'text-orange-600' : 'text-gray-400'}">
                                 ${c.stato || 'IN ATTESA'}
                             </span>
-                            
+                    
                             <div class="flex gap-2">
-                                ${c.stato !== 'In Lavorazione' ? 
-                                    `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
-                                    `
-                                    <button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase">Reset</button>
-                                    <button onclick="cambiaStatoChiamata('${c.id}', 'Completata')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>
-                                    `
+                                ${vistaArchivio ? 
+                                    `<span class="text-[10px] text-blue-600 font-bold uppercase">Archiviata</span>` :
+                                    (c.stato !== 'In Lavorazione' ? 
+                                        `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
+                                        `<button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase">Reset</button>
+                                         <button onclick="completaChiamata('${c.id}')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>`
+                                    )
                                 }
                                 <button onclick="eliminaChiamata('${c.id}')" class="text-[10px] bg-gray-200 text-gray-500 px-2 py-1.5 rounded font-bold">ELIMINA</button>
                             </div>
@@ -994,7 +1005,7 @@ async function salvaIntervento() {
             } catch (e) { 
                 container.innerHTML = 'Errore caricamento.'; 
             }
-        }
+        }}
 
         function impostaDataOraAttuale() {
             const adesso = new Date();
@@ -1299,6 +1310,7 @@ async function completaChiamata(id) {
     </div>
 </body>
 </html>
+
 
 
 
