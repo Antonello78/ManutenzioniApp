@@ -1175,9 +1175,15 @@ async function salvaIntervento() {
 
     <div id="modalChiamate" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div class="p-4 border-b flex justify-between items-center bg-blue-50">
-                <h2 class="font-bold text-blue-900 uppercase">Registro Chiamate</h2>
-                <button onclick="toggleRegistroChiamate()" class="text-2xl">&times;</button>
+            <div class="p-4 border-b flex justify-between items-start bg-blue-50">
+                <div class="flex flex-col">
+                    <h2 class="font-bold text-blue-900 uppercase">Registro Chiamate</h2>
+                    <div class="flex gap-4 mt-2">
+                        <button id="btnVistaAttive" onclick="cambiaVistaChiamate(false)" class="text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase">Attive</button>
+                        <button id="btnVistaArchivio" onclick="cambiaVistaChiamate(true)" class="text-[10px] font-extrabold text-gray-400 pb-1 uppercase">Archivio</button>
+                    </div>
+                </div>
+                <button onclick="toggleRegistroChiamate()" class="text-2xl leading-none">&times;</button>
             </div>
             <div class="p-4 bg-gray-50 border-b space-y-2">
                 <input type="text" id="chiamataScuola" oninput="this.value = this.value.toUpperCase()" placeholder="Scuola" class="w-full p-2 border rounded">
@@ -1198,6 +1204,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
