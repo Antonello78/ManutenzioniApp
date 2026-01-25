@@ -23,19 +23,10 @@ export default async function handler(req, res) {
                 const datiChiamata = req.body;
                 const idChiamata = datiChiamata.id || Date.now().toString();
                 datiChiamata.id = idChiamata;
-                // Assegna 'In Attesa' solo se lo stato è totalmente mancante
+                // Assegna stato solo se manca
                 if (!datiChiamata.stato) datiChiamata.stato = 'In Attesa';
                 await kv.set(`chiamata:${idChiamata}`, datiChiamata);
                 return res.status(201).json(datiChiamata);
-
-            case 'POST':
-    const datiChiamata = req.body;
-    const idChiamata = datiChiamata.id || Date.now().toString();
-    datiChiamata.id = idChiamata;
-    // Se lo stato è già definito (es. 'completata'), lo mantiene, altrimenti mette 'In Attesa'
-    if (!datiChiamata.stato) datiChiamata.stato = 'In Attesa';
-    await kv.set(`chiamata:${idChiamata}`, datiChiamata);
-    return res.status(201).json(datiChiamata);
 
             case 'DELETE':
                 // TRASFORMAZIONE IN ARCHIVIAZIONE
