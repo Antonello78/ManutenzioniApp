@@ -20,13 +20,13 @@ export default async function handler(req, res) {
                 return res.status(200).json(chiamateAttive);
 
             case 'POST':
-                const nuovaChiamata = req.body;
-                const id = nuovaChiamata.id || Date.now();
-                nuovaChiamata.id = id;
-                // Ogni nuova chiamata nasce con stato 'aperta'
-                nuovaChiamata.stato = 'aperta';
-                await kv.set(`chiamata:${id}`, nuovaChiamata);
-                return res.status(201).json(nuovaChiamata);
+                const datiChiamata = req.body;
+                const id = datiChiamata.id || Date.now().toString();
+                datiChiamata.id = id;
+                // Se lo stato non è specificato, allora è 'In Attesa'
+                if (!datiChiamata.stato) datiChiamata.stato = 'In Attesa';
+                await kv.set(`chiamata:${id}`, datiChiamata);
+                return res.status(201).json(datiChiamata);
 
             case 'PUT':
                 const chiamataAggiornata = req.body;
