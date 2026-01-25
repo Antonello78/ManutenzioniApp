@@ -921,30 +921,35 @@ async function salvaIntervento() {
             }
         }
 
-        async function caricaChiamate() {
+        // --- VARIABILI DI STATO ---
+let chiamateLocali = [];
+let vistaArchivio = false;
+
+// 1. CARICAMENTO E FILTRO (ATTIVE / ARCHIVIO)
+async function caricaChiamate() {
     const container = document.getElementById('listaChiamate');
     if (!container) return;
     try {
         const res = await fetch('/api/chiamate');
         const chiamate = await res.json();
-        
         chiamateLocali = chiamate;
 
         if (!chiamate || chiamate.length === 0) {
-            container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata ${vistaArchivio ? 'in archivio' : 'nel registro'}.</p>`;
+            container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata.</p>`;
             return;
         }
 
         const ordine = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
         chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
 
+        // Filtro per stato: se vistaArchivio è true, mostriamo le 'completata'
         const daMostrare = chiamate.filter(c => {
-            if (vistaArchivio) return c.stato === 'completata' || c.stato === 'Completata';
-            return c.stato !== 'completata' && c.stato !== 'Completata';
+            const isComp = (c.stato === 'completata' || c.stato === 'Completata');
+            return vistaArchivio ? isComp : !isComp;
         });
 
         if (daMostrare.length === 0) {
-            container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata ${vistaArchivio ? 'in archivio' : 'attiva'}.</p>`;
+            container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata qui.</p>`;
             return;
         }
 
@@ -959,7 +964,6 @@ async function salvaIntervento() {
                     case 'Bassa': stileCard = "border-green-500 bg-green-50"; break;
                 }
             }
-
             const badgeColor = { 'Alta': 'bg-red-600', 'Media': 'bg-amber-500', 'Bassa': 'bg-green-600' }[c.priorita] || 'bg-blue-600';
 
             return `
@@ -967,7 +971,7 @@ async function salvaIntervento() {
                 <div class="flex justify-between items-start">
                     <div class="flex flex-col">
                         <span class="font-bold text-gray-900 uppercase text-sm">${c.scuola}</span>
-                        <span class="text-[10px] text-gray-500 font-bold">${c.dataOra || 'Data non disponibile'}</span>
+                        <span class="text-[10px] text-gray-500 font-bold">${c.dataOra || ''}</span>
                     </div>
                     <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor} text-white">${c.priorita}</span>
                 </div>
@@ -978,320 +982,137 @@ async function salvaIntervento() {
                     </span>
                     <div class="flex gap-2">
                         ${vistaArchivio ? 
-                            `<span class="text-[10px] text-blue-600 font-bold uppercase">In Archivio</span>` :
+                            `<span class="text-[10px] text-blue-600 font-bold uppercase italic">In Archivio</span>` :
                             (c.stato !== 'In Lavorazione' ? 
-                                `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
-                                `<button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase">Reset</button>
-                                 <button onclick="completaChiamata('${c.id}')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>`
+                                `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase shadow-sm">Lavora</button>` : 
+                                `<button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase shadow-sm">Reset</button>
+                                 <button onclick="completaChiamata('${c.id}')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase shadow-sm">Completato</button>`
                             )
                         }
-                        <button onclick="eliminaChiamata('${c.id}')" class="text-[10px] bg-gray-200 text-gray-500 px-2 py-1.5 rounded font-bold">ELIMINA</button>
+                        <button onclick="eliminaChiamata('${c.id}')" class="text-[10px] bg-gray-200 text-gray-500 px-2 py-1.5 rounded font-bold uppercase">Elimina</button>
                     </div>
                 </div>
             </div>`;
         }).join('');
-    } catch (e) { 
-        console.error(e);
-        container.innerHTML = 'Errore caricamento.'; 
-    }
-}
-        async function completaChiamata(id) {
-    const chiamata = chiamateLocali.find(c => c.id == id);
-    if (!chiamata) return;
-
-    if (confirm(`Trasferire "${chiamata.scuola}" nei dettagli intervento?\n\nLa scheda verrà spostata in ARCHIVIO.`)) {
-        
-        // --- QUESTA È LA PARTE CHE TI MANCAVA PER N. INTERVENTO E DATA ---
-        if (typeof nuovoIntervento === 'function') {
-            nuovoIntervento(); // Genera n. intervento e data odierna
-        }
-
-        // Compilazione campi modulo principale
-        const inputScuola = document.getElementById('nomeScuola');
-        const inputDescrizione = document.getElementById('descrizioneLavori');
-        
-        if (inputScuola) inputScuola.value = chiamata.scuola;
-        if (inputDescrizione) {
-            inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
-        }
-
-        // Chiude il registro e aggiorna i calcoli
-        toggleRegistroChiamate();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        if (typeof calcolaManodopera === "function") calcolaManodopera();
-
-        try {
-            // Cambia lo stato in 'completata' (così finisce in Archivio invece di essere eliminata)
-            chiamata.stato = 'completata';
-            chiamata.dataArchiviazione = new Date().toLocaleDateString('it-IT');
-
-            await fetch('/api/chiamate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(chiamata)
-            });
-
-            await caricaChiamate();
-        } catch (e) {
-            console.error("Errore archiviazione:", e);
-        }
-    }
+    } catch (e) { console.error("Errore:", e); }
 }
 
-        function impostaDataOraAttuale() {
-            const adesso = new Date();
-            const anno = adesso.getFullYear();
-            const mese = String(adesso.getMonth() + 1).padStart(2, '0');
-            const giorno = String(adesso.getDate()).padStart(2, '0');
-            const dataOggi = `${anno}-${mese}-${giorno}`;
-            const oraAdesso = adesso.toTimeString().slice(0, 5);
-
-            const campoData = document.getElementById('chiamataDataManuale');
-            const campoOra = document.getElementById('chiamataOraManuale');
-    
-            if (campoData) campoData.value = dataOggi;
-            if (campoOra) campoOra.value = oraAdesso;
-        }
-        async function nuovaChiamata() {
-            const scuola = document.getElementById('chiamataScuola').value;
-            const priorita = document.getElementById('chiamataPriorita').value;
-            const note = document.getElementById('chiamataNote').value;
-            const dataManuale = document.getElementById('chiamataDataManuale').value;
-            const oraManuale = document.getElementById('chiamataOraManuale').value;
-            
-            if (!scuola || !note) {
-                alert("Inserisci Scuola e Note!");
-                return;
-            }
-
-            let dataOraFinale;
-            if (dataManuale && oraManuale) {
-                const [anno, mese, giorno] = dataManuale.split('-');
-                dataOraFinale = `${giorno}/${mese}/${anno} - ${oraManuale}`;
-            } else {
-                const oraAttuale = new Date();
-                dataOraFinale = oraAttuale.toLocaleDateString('it-IT') + ' - ' + oraAttuale.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
-            }
-
-            const payload = { 
-                scuola: scuola.toUpperCase(), 
-                priorita, 
-                note, 
-                id: Date.now().toString(),
-                dataOra: dataOraFinale,
-                stato: 'In Attesa'
-            };
-
-            try {
-                const res = await fetch('/api/chiamate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    document.getElementById('chiamataScuola').value = '';
-                    document.getElementById('chiamataNote').value = '';
-                    
-                    // Sostituiamo la pulizia dei campi con il ripristino dell'ora attuale
-                    impostaDataOraAttuale(); 
-                    
-                    caricaChiamate();
-                }
-            } catch (e) { alert("Errore salvataggio"); }
-        }
-
-        async function cambiaStatoChiamata(id, nuovoStato) {
-    try {
-        const chiamata = chiamateLocali.find(c => c.id == id);
-        if (!chiamata) return;
-
-        chiamata.stato = nuovoStato;
-        
-        await fetch('/api/chiamate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(chiamata)
-        });
-        
-        caricaChiamate();
-    } catch (e) { 
-        console.error("Errore cambio stato:", e); 
-    }
-}
-
-        async function eliminaChiamata(id) {
-            if (!confirm("Vuoi eliminare definitivamente questa chiamata?")) return;
-            try {
-                await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
-                caricaChiamate();
-            } catch (e) { alert("Errore eliminazione"); }
-        }
-
-        // QUESTA FUNZIONE ORA INVIA IL REPORT PROFESSIONALE TRAMITE API
-        async function inviaReport() {
-            // Recupero i dati dai nuovi ID corretti presenti nel tuo HTML
-            const reportData = {
-                nIntervento: document.getElementById('nIntervento').value,
-                dataIntervento: document.getElementById('dataIntervento').value,
-                nomeScuola: document.getElementById('nomeScuola').value,
-                plessoEdificio: document.getElementById('plessoEdificio').value,
-                descrizioneLavori: document.getElementById('descrizioneLavori').value,
-                orario: `${document.getElementById('oraInizio').value} - ${document.getElementById('oraFine').value}`,
-                operai: document.getElementById('numOperai').value, // Corretto da numeroOperai
-                tariffa: document.getElementById('tariffaOraria').innerText, // Corretto .innerText
-                minutiFatturabili: document.getElementById('minutiFatturabili').innerText, // Corretto ID
-                costoUscita: document.getElementById('costoUscita').innerText,
-                costoAggiuntivo: document.getElementById('costoAggiuntivo').innerText,
-                totale: document.getElementById('totaleManodopera').innerText, // Corretto ID
-                destinatario: document.getElementById('emailDestinatario').value || prompt("A quale email vuoi inviare il report?", "manutenzione@scuola.it")
-            };
-
-            if (!reportData.destinatario) {
-                showMessage('error', 'Inserire un indirizzo email valido.');
-                return;
-            }
-
-            try {
-                showMessage('info', 'Invio report in corso...');
-                const response = await fetch('/api/inviaReport', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(reportData)
-                });
-
-                if (response.ok) {
-                    showMessage('success', 'Report inviato con successo alla scuola!');
-                } else {
-                    const errorData = await response.json();
-                    alert("Errore nell'invio: " + (errorData.message || 'Errore server'));
-                }
-            } catch (error) {
-                console.error("Errore:", error);
-                alert("Errore di connessione al server.");
-            }
-        }
-    
-        let vistaArchivio = false;
-
- // QUESTA È LA FUNZIONE CHE MANCAVA: CREALA DA ZERO
-function renderizzaChiamate() {
-    const container = document.getElementById('listaChiamate');
-    if (!container) return;
-    
-    // Puliamo il contenitore prima di disegnare
-    container.innerHTML = '';
-
-    // FILTRO: Mostra le chiamate in base al tab selezionato
-    const daMostrare = chiamateLocali.filter(ch => {
-        if (vistaArchivio) return ch.stato === 'completata';
-        // Se non è completata (o se lo stato è ancora undefined per le vecchie chiamate)
-        return ch.stato !== 'completata';
-    });
-
-    if (daMostrare.length === 0) {
-        container.innerHTML = `<p class="text-center text-gray-500 text-[10px] py-4 uppercase font-bold">Nessuna chiamata ${vistaArchivio ? 'in archivio' : 'attiva'}.</p>`;
-        return;
-    }
-
-    // DISEGNIAMO LE SCHEDE
-    daMostrare.forEach(ch => {
-        const div = document.createElement('div');
-        // Se la chiamata è "Alta" priorità e NON è in archivio, coloriamo di rosso
-        const coloreSfondo = (ch.priorita === 'Alta' && !vistaArchivio) ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200';
-        
-        div.className = `p-3 border rounded-lg shadow-sm mb-3 ${coloreSfondo}`;
-        
-        // Elementi condizionali per l'archivio
-        const infoArchivio = vistaArchivio ? `<div class="text-[10px] text-blue-600 font-bold mt-2 uppercase">Archiviata il: ${ch.dataArchiviazione || 'N/D'}</div>` : '';
-        const bottoneAzione = !vistaArchivio 
-            ? `<button onclick="completaChiamata(${ch.id})" class="bg-green-600 text-white px-3 py-1 rounded text-[10px] font-extrabold uppercase">Completato</button>`
-            : '';
-
-        div.innerHTML = `
-            <div class="flex justify-between items-start mb-2">
-                <div>
-                    <span class="text-[9px] font-extrabold px-2 py-0.5 rounded uppercase ${ch.priorita === 'Alta' ? 'bg-red-200 text-red-800' : 'bg-gray-200 text-gray-700'}">${ch.priorita}</span>
-                    <h3 class="font-bold text-gray-900 mt-1 uppercase text-sm">${ch.scuola}</h3>
-                </div>
-            </div>
-            <p class="text-xs text-gray-600 mb-3">${ch.note}</p>
-            <div class="flex justify-between items-center">
-                <span class="text-[10px] text-gray-400 font-bold">${ch.data} - ${ch.ora}</span>
-                ${bottoneAzione}
-            </div>
-            ${infoArchivio}
-        `;
-        container.appendChild(div);
-    });
-}       
-        
-// Funzione per cambiare tra Attive e Archivio
-function cambiaVistaChiamate(mostraArchivio) {
-    vistaArchivio = mostraArchivio;
-    const btnAttive = document.getElementById('btnVistaAttive');
-    const btnArchivio = document.getElementById('btnVistaArchivio');
-
-    if (vistaArchivio) {
-        btnArchivio.className = "text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase";
-        btnAttive.className = "text-[10px] font-extrabold text-gray-400 pb-1 uppercase";
-    } else {
-        btnAttive.className = "text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase";
-        btnArchivio.className = "text-[10px] font-extrabold text-gray-400 pb-1 uppercase";
-    }
-    renderizzaChiamate(); 
-}
-
+// 2. TRASFERIMENTO DATI (QUI COMPILIAMO N. INTERVENTO E DATA)
 async function completaChiamata(id) {
     const chiamata = chiamateLocali.find(c => c.id == id);
     if (!chiamata) return;
 
     if (confirm(`Trasferire "${chiamata.scuola}" nei dettagli intervento?\n\nLa scheda verrà spostata in ARCHIVIO.`)) {
         
-        // --- QUESTA RIGA COMPILA AUTOMATICAMENTE N. INTERVENTO E DATA ---
-        if (typeof nuovoIntervento === "function") nuovoIntervento();
-
-        const inputScuola = document.getElementById('nomeScuola');
-        const inputDescrizione = document.getElementById('descrizioneLavori');
-
-        if (inputScuola && inputDescrizione) {
-            inputScuola.value = chiamata.scuola;
-            // Prendiamo solo la data dalla stringa dataOra (es: "25/01/2026")
-            const dataSolo = chiamata.dataOra.split(' - ')[0];
-            inputDescrizione.value = `Intervento del ${dataSolo}: ${chiamata.note}`;
-            
-            toggleRegistroChiamate();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            // Aggiorna la preview a video
-            if (typeof calcolaManodopera === "function") calcolaManodopera();
+        // --- QUESTA RIGA ATTIVA IL TASTO "NUOVO" AUTOMATICAMENTE ---
+        if (typeof nuovoIntervento === "function") {
+            await nuovoIntervento(); 
         }
 
+        // Compilazione campi modulo
+        const elScuola = document.getElementById('nomeScuola');
+        const elNote = document.getElementById('descrizioneLavori');
+
+        if (elScuola) elScuola.value = chiamata.scuola;
+        if (elNote) {
+            const dataSolo = chiamata.dataOra.split(' - ')[0];
+            elNote.value = `Intervento del ${dataSolo}: ${chiamata.note}`;
+        }
+
+        // Chiude il registro e aggiorna calcoli
+        toggleRegistroChiamate();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (typeof calcolaManodopera === "function") calcolaManodopera();
+
         try {
-            // Spostiamo la chiamata in stato completata (va in Archivio)
+            // Sposta in archivio sul server
             chiamata.stato = 'completata';
             await fetch('/api/chiamate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(chiamata)
             });
-            caricaChiamate();
-        } catch (e) {
-            console.error("Errore archiviazione:", e);
-        }
+            await caricaChiamate();
+        } catch (e) { alert("Errore archiviazione"); }
     }
-}        
-        window.onload = () => {
-            const dataOggi = new Date().toLocaleDateString('it-IT');
-            const elData = document.getElementById('dataStampa');
-            if (elData) elData.textContent = dataOggi;
+}
 
-            if (typeof caricaDatiServer === 'function') {
-                caricaDatiServer().finally(() => {
-                    if (typeof initializeInputs === 'function') initializeInputs();
-                    if (typeof calcolaManodopera === 'function') calcolaManodopera();
-                });
-            }
-        };
+// 3. CAMBIO STATO SEMPLICE (LAVORA/RESET)
+async function cambiaStatoChiamata(id, nuovoStato) {
+    try {
+        const chiamata = chiamateLocali.find(c => c.id == id);
+        if (!chiamata) return;
+        chiamata.stato = nuovoStato;
+        await fetch('/api/chiamate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(chiamata)
+        });
+        caricaChiamate();
+    } catch (e) { console.error(e); }
+}
+
+// 4. ELIMINAZIONE
+async function eliminaChiamata(id) {
+    if (!confirm("Vuoi eliminare definitivamente questa chiamata?")) return;
+    try {
+        await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
+        caricaChiamate();
+    } catch (e) { alert("Errore eliminazione"); }
+}
+
+// 5. GESTIONE TAB ARCHIVIO/ATTIVE
+function cambiaVistaChiamate(mostraArchivio) {
+    vistaArchivio = mostraArchivio;
+    const btnA = document.getElementById('btnVistaAttive');
+    const btnB = document.getElementById('btnVistaArchivio');
+    
+    if (vistaArchivio) {
+        btnB.className = "text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase";
+        btnA.className = "text-[10px] font-extrabold text-gray-400 pb-1 uppercase";
+    } else {
+        btnA.className = "text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase";
+        btnB.className = "text-[10px] font-extrabold text-gray-400 pb-1 uppercase";
+    }
+    caricaChiamate();
+}
+
+// Funzioni per l'ora nel modulo di aggiunta
+function impostaDataOraAttuale() {
+    const adesso = new Date();
+    const campoData = document.getElementById('chiamataDataManuale');
+    const campoOra = document.getElementById('chiamataOraManuale');
+    if (campoData) campoData.value = adesso.toISOString().split('T')[0];
+    if (campoOra) campoOra.value = adesso.toTimeString().slice(0, 5);
+}
+
+async function nuovaChiamata() {
+    const scuola = document.getElementById('chiamataScuola').value;
+    const priorita = document.getElementById('chiamataPriorita').value;
+    const note = document.getElementById('chiamataNote').value;
+    const d = document.getElementById('chiamataDataManuale').value;
+    const t = document.getElementById('chiamataOraManuale').value;
+
+    if (!scuola || !note) { alert("Inserisci Scuola e Note!"); return; }
+
+    const dataOra = d ? `${d.split('-').reverse().join('/')} - ${t}` : new Date().toLocaleString('it-IT');
+
+    const payload = { scuola: scuola.toUpperCase(), priorita, note, id: Date.now().toString(), dataOra, stato: 'In Attesa' };
+
+    try {
+        const res = await fetch('/api/chiamate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+            document.getElementById('chiamataScuola').value = '';
+            document.getElementById('chiamataNote').value = '';
+            impostaDataOraAttuale();
+            caricaChiamate();
+        }
+    } catch (e) { alert("Errore salvataggio"); }
+}
     </script>
 
     <button onclick="toggleRegistroChiamate()" class="fixed bottom-24 left-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-50">
@@ -1329,6 +1150,7 @@ async function completaChiamata(id) {
     </div>
 </body>
 </html>
+
 
 
 
