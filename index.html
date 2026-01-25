@@ -320,6 +320,8 @@
         const INIZIO_2025 = 74; 
         
         let annoSelezionato = new Date().getFullYear().toString().substring(2);
+        let chiamateLocali = [];
+        let vistaArchivio = false;
 
         function parseTime(timeString) {
             const [hours, minutes] = timeString.split(':').map(Number);
@@ -1229,30 +1231,28 @@ async function completaChiamata(id) {
 
     if (confirm(`Trasferire "${chiamata.scuola}" nei dettagli intervento?\n\nLa scheda verrà spostata in ARCHIVIO.`)) {
         
-        // 1. Reset modulo (per avere nuovo numero e data odierna)
-        if (typeof nuovoIntervento === 'function') {
-            await nuovoIntervento();
-        }
+        // 1. Pulizia e generazione nuovo numero/data
+        nuovoIntervento();
 
-        // 2. Compilazione campi
+        // 2. Compilazione campi (usando gli ID corretti del tuo HTML)
         const elScuola = document.getElementById('nomeScuola');
         const elNote = document.getElementById('descrizioneLavori');
 
         if (elScuola) elScuola.value = chiamata.scuola;
         if (elNote) elNote.value = chiamata.note;
         
-        // Forza l'aggiornamento della preview a video
-        if (typeof calcolaManodopera === 'function') calcolaManodopera();
+        // Aggiorna la preview visiva
+        calcolaManodopera();
 
         try {
-            // 3. Spostamento in archivio tramite l'API
-            // Nota: l'API chiamate.js nel tuo caso usa DELETE per rimuovere/archiviare
+            // 3. Spostamento in archivio tramite l'API (DELETE ora archivia)
             const res = await fetch(`/api/chiamate?id=${id}`, { method: 'DELETE' });
             if (res.ok) {
                 await caricaChiamate();
                 toggleRegistroChiamate();
             }
         } catch (e) {
+            console.error(e);
             alert("Errore durante l'archiviazione");
         }
     }
@@ -1306,6 +1306,7 @@ async function completaChiamata(id) {
     </div>
 </body>
 </html>
+
 
 
 
