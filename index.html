@@ -1157,6 +1157,58 @@ async function salvaIntervento() {
     
         let vistaArchivio = false;
 
+ // QUESTA È LA FUNZIONE CHE MANCAVA: CREALA DA ZERO
+function renderizzaChiamate() {
+    const container = document.getElementById('listaChiamate');
+    if (!container) return;
+    
+    // Puliamo il contenitore prima di disegnare
+    container.innerHTML = '';
+
+    // FILTRO: Mostra le chiamate in base al tab selezionato
+    const daMostrare = chiamateLocali.filter(ch => {
+        if (vistaArchivio) return ch.stato === 'completata';
+        // Se non è completata (o se lo stato è ancora undefined per le vecchie chiamate)
+        return ch.stato !== 'completata';
+    });
+
+    if (daMostrare.length === 0) {
+        container.innerHTML = `<p class="text-center text-gray-500 text-[10px] py-4 uppercase font-bold">Nessuna chiamata ${vistaArchivio ? 'in archivio' : 'attiva'}.</p>`;
+        return;
+    }
+
+    // DISEGNIAMO LE SCHEDE
+    daMostrare.forEach(ch => {
+        const div = document.createElement('div');
+        // Se la chiamata è "Alta" priorità e NON è in archivio, coloriamo di rosso
+        const coloreSfondo = (ch.priorita === 'Alta' && !vistaArchivio) ? 'bg-red-50 border-red-200' : 'bg-white border-gray-200';
+        
+        div.className = `p-3 border rounded-lg shadow-sm mb-3 ${coloreSfondo}`;
+        
+        // Elementi condizionali per l'archivio
+        const infoArchivio = vistaArchivio ? `<div class="text-[10px] text-blue-600 font-bold mt-2 uppercase">Archiviata il: ${ch.dataArchiviazione || 'N/D'}</div>` : '';
+        const bottoneAzione = !vistaArchivio 
+            ? `<button onclick="completaChiamata(${ch.id})" class="bg-green-600 text-white px-3 py-1 rounded text-[10px] font-extrabold uppercase">Completato</button>`
+            : '';
+
+        div.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <span class="text-[9px] font-extrabold px-2 py-0.5 rounded uppercase ${ch.priorita === 'Alta' ? 'bg-red-200 text-red-800' : 'bg-gray-200 text-gray-700'}">${ch.priorita}</span>
+                    <h3 class="font-bold text-gray-900 mt-1 uppercase text-sm">${ch.scuola}</h3>
+                </div>
+            </div>
+            <p class="text-xs text-gray-600 mb-3">${ch.note}</p>
+            <div class="flex justify-between items-center">
+                <span class="text-[10px] text-gray-400 font-bold">${ch.data} - ${ch.ora}</span>
+                ${bottoneAzione}
+            </div>
+            ${infoArchivio}
+        `;
+        container.appendChild(div);
+    });
+}       
+        
 // Funzione per cambiare tra Attive e Archivio
 function cambiaVistaChiamate(mostraArchivio) {
     vistaArchivio = mostraArchivio;
@@ -1247,6 +1299,7 @@ async function completaChiamata(id) {
     </div>
 </body>
 </html>
+
 
 
 
