@@ -935,13 +935,12 @@ async function salvaIntervento() {
                 chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
 
                 container.innerHTML = chiamate.map(c => {
-                    // --- NUOVA LOGICA COLORI PRIORITÀ ---
-                    let stileCard = "border-gray-300 bg-white"; // Default
+                    // --- LOGICA COLORI PRIORITÀ ---
+                    let stileCard = "border-gray-300 bg-white"; 
                     
                     if (c.stato === 'In Lavorazione') {
                         stileCard = "border-orange-500 bg-orange-50";
                     } else {
-                        // Colori basati sulla priorità se non in lavorazione
                         switch(c.priorita) {
                             case 'Alta':
                                 stileCard = "border-red-600 bg-red-50";
@@ -955,7 +954,6 @@ async function salvaIntervento() {
                         }
                     }
 
-                    // Badge dinamico per la priorità
                     const badgeColor = {
                         'Alta': 'bg-red-600',
                         'Media': 'bg-amber-500',
@@ -983,7 +981,10 @@ async function salvaIntervento() {
                             <div class="flex gap-2">
                                 ${c.stato !== 'In Lavorazione' ? 
                                     `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
-                                    `<button onclick="cambiaStatoChiamata('${c.id}', 'Completata')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>`
+                                    `
+                                    <button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase">Reset</button>
+                                    <button onclick="cambiaStatoChiamata('${c.id}', 'Completata')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>
+                                    `
                                 }
                                 <button onclick="eliminaChiamata('${c.id}')" class="text-[10px] bg-gray-200 text-gray-500 px-2 py-1.5 rounded font-bold">ELIMINA</button>
                             </div>
@@ -1190,6 +1191,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
