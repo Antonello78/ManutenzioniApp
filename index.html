@@ -317,7 +317,7 @@
         let chiamateGlobali = []; 
         function toggleFiltroChiamate() {
             filtroChiamateCompletate = !filtroChiamateCompletate;
-            
+    
             const btn = document.getElementById('btnFiltroChiamate');
             const titolo = document.getElementById('titoloRegistro');
             const sottotitolo = document.getElementById('sottotitoloRegistro');
@@ -335,14 +335,10 @@
                 titolo.innerText = "Registro Chiamate";
                 sottotitolo.innerText = "In attesa di intervento";
             }
-            
-            // Ricarica la lista per applicare il filtro visivo
-            if (typeof chiamateGlobali !== 'undefined') {
-                renderChiamate(chiamateGlobali);
-            } else {
-                caricaChiamate();
-            }
-        }
+    
+    // CORREZIONE QUI: chiamiamo la funzione che hai effettivamente nel codice
+    caricaChiamate(); 
+}
         const ORARIO_INIZIO_ORD = 8 * 60; 
         const ORARIO_FINE_ORD = 17 * 60; 
         const STORAGE_KEY = 'manodoperaInterventi';
@@ -1107,43 +1103,41 @@ async function salvaIntervento() {
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
                 const chiamata = chiamate.find(c => c.id == id);
-                
+        
                 if (chiamata) {
-                    // --- LOGICA PER COMPLETAMENTO (CANCELLA E TRASFERISCE) ---
+                    // --- LOGICA PER TRASFERIMENTO DATI (Solo se premi Completo) ---
                     if (nuovoStato === 'Completata') {
                         if (confirm("Vuoi trasferire i dati della chiamata nei 'Dettagli Intervento Corrente'?")) {
                             const inputScuola = document.getElementById('nomeScuola');
                             const inputDescrizione = document.getElementById('descrizioneLavori');
-                            
+                    
                             if (inputScuola && inputDescrizione) {
                                 inputScuola.value = chiamata.scuola;
                                 inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
-                                
+                        
                                 toggleRegistroChiamate();
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                                 if (typeof calcolaManodopera === "function") calcolaManodopera();
                                 showMessage('success', 'Dati trasferiti nel modulo!');
                             }
                         }
-                        // Quando è completata, viene eliminata dal registro chiamate
-                        await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
-                        caricaChiamate();
-                        return;
                     }
 
-                    // --- LOGICA PER LAVORA O RESET (AGGIORNA SOLO LO STATO) ---
+                    // --- NUOVA LOGICA: AGGIORNA LO STATO INVECE DI ELIMINARE ---
                     chiamata.stato = nuovoStato;
+            
+                    // Usiamo POST o PUT per aggiornare la chiamata sul server
                     await fetch('/api/chiamate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(chiamata)
                     });
-                    
-                    // Ricarica la lista (utile per il tasto Reset o Lavora)
+            
+                    // Ricarichiamo la lista (che ora filtrerà in base al tasto Attive/Storico)
                     caricaChiamate();
                 }
             } catch (e) { 
-                console.error(e); 
+                console.error("Errore nel cambio stato:", e); 
             }
         }
 
@@ -1282,6 +1276,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
