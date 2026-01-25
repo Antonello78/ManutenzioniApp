@@ -318,10 +318,8 @@
         const STORAGE_KEY = 'manodoperaInterventi';
         const EMAIL_KEY = 'reportEmailDestinatario'; 
         const INIZIO_2025 = 74; 
-    
-    let annoSelezionato = new Date().getFullYear().toString().substring(2);
-    let chiamateLocali = []; // LASCIALA QUI
-    let vistaArchivio = false; // LASCIALA QUI
+        
+        let annoSelezionato = new Date().getFullYear().toString().substring(2);
 
         function parseTime(timeString) {
             const [hours, minutes] = timeString.split(':').map(Number);
@@ -910,211 +908,276 @@ async function salvaIntervento() {
         // --- GESTIONE REGISTRO CHIAMATE E INVIO REPORT API ---
         
         function toggleRegistroChiamate() {
-            const reg = document.getElementById('registroChiamate');
-            if (!reg) return;
-    
-            // Se usi la classe 'hidden' di Tailwind (come nel tuo HTML)
-            if (reg.classList.contains('hidden')) {
-                reg.classList.remove('hidden');
-                reg.classList.add('flex'); // Per centrare la modale
-                caricaChiamate();
-            } else {
-                reg.classList.add('hidden');
-                reg.classList.remove('flex');
-            }
-        }
-
-// --- VARIABILI DI STATO ---
-let chiamateLocali = [];
-let vistaArchivio = false;
-
-async function caricaChiamate() {
-    const container = document.getElementById('listaChiamate');
-    if (!container) return;
-    try {
-        const res = await fetch('/api/chiamate');
-        const chiamate = await res.json();
-        chiamateLocali = chiamate;
-
-        const ordine = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
-        chiamate.sort((a, b) => (ordine[a.priorita] || 99) - (ordine[b.priorita] || 99));
-
-        const daMostrare = chiamate.filter(c => {
-            const isComp = (c.stato === 'completata' || c.stato === 'Completata');
-            return vistaArchivio ? isComp : !isComp;
-        });
-
-        if (daMostrare.length === 0) {
-            container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata.</p>`;
-            return;
-        }
-
-        container.innerHTML = daMostrare.map(c => {
-            let stileCard = "border-gray-300 bg-white"; 
-            if (c.stato === 'In Lavorazione') {
-                stileCard = "border-orange-500 bg-orange-50";
-            } else {
-                switch(c.priorita) {
-                    case 'Alta': stileCard = "border-red-600 bg-red-50"; break;
-                    case 'Media': stileCard = "border-amber-500 bg-amber-50"; break;
-                    case 'Bassa': stileCard = "border-green-500 bg-green-50"; break;
+            const modal = document.getElementById('modalChiamate');
+            if (modal) {
+                modal.classList.toggle('hidden');
+                if (!modal.classList.contains('hidden')) {
+                    // Richiamiamo la funzione che hai creato al punto 1
+                    impostaDataOraAttuale();
+                    caricaChiamate();
                 }
             }
-            const badgeColor = { 'Alta': 'bg-red-600', 'Media': 'bg-amber-500', 'Bassa': 'bg-green-600' }[c.priorita] || 'bg-blue-600';
+        }
 
-            return `
-            <div class="border-l-4 p-3 rounded shadow-sm border ${stileCard} mb-3 text-left">
-                <div class="flex justify-between items-start">
-                    <div class="flex flex-col">
-                        <span class="font-bold text-gray-900 uppercase text-sm">${c.scuola}</span>
-                        <span class="text-[10px] text-gray-500 font-bold">${c.dataOra || ''}</span>
-                    </div>
-                    <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor} text-white">${c.priorita}</span>
-                </div>
-                <p class="text-sm mt-1 text-gray-700 font-medium italic">"${c.note}"</p>
-                <div class="flex justify-between items-center mt-3 pt-2 border-t border-black border-opacity-5">
-                    <span class="text-[10px] font-black uppercase ${c.stato === 'In Lavorazione' ? 'text-orange-600' : 'text-gray-400'}">
-                        ${vistaArchivio ? 'ARCHIVIATA' : (c.stato || 'IN ATTESA')}
-                    </span>
-                    <div class="flex gap-2">
-                        ${vistaArchivio ? 
-                            `<span class="text-[10px] text-blue-600 font-bold uppercase italic font-black">In Archivio</span>` :
-                            (c.stato !== 'In Lavorazione' ? 
-                                `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
-                                `<button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase">Reset</button>
-                                 <button onclick="completaChiamata('${c.id}')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>`
-                            )
+        async function caricaChiamate() {
+            const container = document.getElementById('listaChiamate');
+            if (!container) return;
+            try {
+                const res = await fetch('/api/chiamate');
+                const chiamate = await res.json();
+                
+                if (!chiamate || chiamate.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata nel registro.</p>';
+                    return;
+                }
+
+                const ordine = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
+                chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
+
+                container.innerHTML = chiamate.map(c => {
+                    // --- LOGICA COLORI PRIORITÀ ---
+                    let stileCard = "border-gray-300 bg-white"; 
+                    
+                    if (c.stato === 'In Lavorazione') {
+                        stileCard = "border-orange-500 bg-orange-50";
+                    } else {
+                        switch(c.priorita) {
+                            case 'Alta':
+                                stileCard = "border-red-600 bg-red-50";
+                                break;
+                            case 'Media':
+                                stileCard = "border-amber-500 bg-amber-50";
+                                break;
+                            case 'Bassa':
+                                stileCard = "border-green-500 bg-green-50";
+                                break;
                         }
-                        <button onclick="eliminaChiamata('${c.id}')" class="text-[10px] bg-gray-200 text-gray-500 px-2 py-1.5 rounded font-bold uppercase">Elimina</button>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-    } catch (e) { console.error("Errore caricamento:", e); }
-}
+                    }
 
-async function completaChiamata(id) {
-    const chiamata = chiamateLocali.find(c => c.id == id);
-    if (!chiamata) return;
+                    const badgeColor = {
+                        'Alta': 'bg-red-600',
+                        'Media': 'bg-amber-500',
+                        'Bassa': 'bg-green-600'
+                    }[c.priorita] || 'bg-blue-600';
 
-    if (confirm(`Trasferire "${chiamata.scuola}" nel modulo?\n\nLa chiamata verrà archiviata.`)) {
-        
-        // --- 1. AZIONE TASTO AZZURRO (Reset e Nuovo Numero) ---
-        if (typeof nuovoIntervento === "function") {
-            await nuovoIntervento(); 
+                    return `
+                    <div class="border-l-4 p-3 rounded shadow-sm border ${stileCard} mb-3 text-left">
+                        <div class="flex justify-between items-start">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-gray-900 uppercase text-sm">${c.scuola}</span>
+                                <span class="text-[10px] text-gray-500 font-bold">${c.dataOra || 'Data non disponibile'}</span>
+                            </div>
+                            <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor} text-white">
+                                ${c.priorita}
+                            </span>
+                        </div>
+                        <p class="text-sm mt-1 text-gray-700 font-medium italic">"${c.note}"</p>
+                        
+                        <div class="flex justify-between items-center mt-3 pt-2 border-t border-black border-opacity-5">
+                            <span class="text-[10px] font-black uppercase ${c.stato === 'In Lavorazione' ? 'text-orange-600' : 'text-gray-400'}">
+                                ${c.stato || 'IN ATTESA'}
+                            </span>
+                            
+                            <div class="flex gap-2">
+                                ${c.stato !== 'In Lavorazione' ? 
+                                    `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
+                                    `
+                                    <button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase">Reset</button>
+                                    <button onclick="cambiaStatoChiamata('${c.id}', 'Completata')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completato</button>
+                                    `
+                                }
+                                <button onclick="eliminaChiamata('${c.id}')" class="text-[10px] bg-gray-200 text-gray-500 px-2 py-1.5 rounded font-bold">ELIMINA</button>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) { 
+                container.innerHTML = 'Errore caricamento.'; 
+            }
         }
 
-        // --- 2. COMPILAZIONE CAMPI ---
-        const inputScuola = document.getElementById('nomeScuola');
-        const inputDesc = document.getElementById('descrizioneLavori');
+        function impostaDataOraAttuale() {
+            const adesso = new Date();
+            const anno = adesso.getFullYear();
+            const mese = String(adesso.getMonth() + 1).padStart(2, '0');
+            const giorno = String(adesso.getDate()).padStart(2, '0');
+            const dataOggi = `${anno}-${mese}-${giorno}`;
+            const oraAdesso = adesso.toTimeString().slice(0, 5);
 
-        if (inputScuola) inputScuola.value = chiamata.scuola;
-        if (inputDesc) {
-            const dataSolo = chiamata.dataOra.split(' - ')[0];
-            inputDesc.value = `Intervento del ${dataSolo}: ${chiamata.note}`;
+            const campoData = document.getElementById('chiamataDataManuale');
+            const campoOra = document.getElementById('chiamataOraManuale');
+    
+            if (campoData) campoData.value = dataOggi;
+            if (campoOra) campoOra.value = oraAdesso;
+        }
+        async function nuovaChiamata() {
+            const scuola = document.getElementById('chiamataScuola').value;
+            const priorita = document.getElementById('chiamataPriorita').value;
+            const note = document.getElementById('chiamataNote').value;
+            const dataManuale = document.getElementById('chiamataDataManuale').value;
+            const oraManuale = document.getElementById('chiamataOraManuale').value;
+            
+            if (!scuola || !note) {
+                alert("Inserisci Scuola e Note!");
+                return;
+            }
+
+            let dataOraFinale;
+            if (dataManuale && oraManuale) {
+                const [anno, mese, giorno] = dataManuale.split('-');
+                dataOraFinale = `${giorno}/${mese}/${anno} - ${oraManuale}`;
+            } else {
+                const oraAttuale = new Date();
+                dataOraFinale = oraAttuale.toLocaleDateString('it-IT') + ' - ' + oraAttuale.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+            }
+
+            const payload = { 
+                scuola: scuola.toUpperCase(), 
+                priorita, 
+                note, 
+                id: Date.now().toString(),
+                dataOra: dataOraFinale,
+                stato: 'In Attesa'
+            };
+
+            try {
+                const res = await fetch('/api/chiamate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    document.getElementById('chiamataScuola').value = '';
+                    document.getElementById('chiamataNote').value = '';
+                    
+                    // Sostituiamo la pulizia dei campi con il ripristino dell'ora attuale
+                    impostaDataOraAttuale(); 
+                    
+                    caricaChiamate();
+                }
+            } catch (e) { alert("Errore salvataggio"); }
         }
 
-        // --- 3. UI E AGGIORNAMENTO ---
-        toggleRegistroChiamate();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        
-        // Ricalcola se necessario
-        if (typeof calcolaManodopera === "function") calcolaManodopera();
+        async function cambiaStatoChiamata(id, nuovoStato) {
+            try {
+                const res = await fetch('/api/chiamate');
+                const chiamate = await res.json();
+                const chiamata = chiamate.find(c => c.id == id);
+                
+                if (chiamata) {
+                    // --- LOGICA PER COMPLETAMENTO (CANCELLA E TRASFERISCE) ---
+                    if (nuovoStato === 'Completata') {
+                        if (confirm("Vuoi trasferire i dati della chiamata nei 'Dettagli Intervento Corrente'?")) {
+                            const inputScuola = document.getElementById('nomeScuola');
+                            const inputDescrizione = document.getElementById('descrizioneLavori');
+                            
+                            if (inputScuola && inputDescrizione) {
+                                inputScuola.value = chiamata.scuola;
+                                inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
+                                
+                                toggleRegistroChiamate();
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                if (typeof calcolaManodopera === "function") calcolaManodopera();
+                                showMessage('success', 'Dati trasferiti nel modulo!');
+                            }
+                        }
+                        // Quando è completata, viene eliminata dal registro chiamate
+                        await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
+                        caricaChiamate();
+                        return;
+                    }
 
-        // --- 4. ARCHIVIAZIONE SUL DATABASE ---
-        try {
-            chiamata.stato = 'completata';
-            await fetch('/api/chiamate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(chiamata)
-            });
-            caricaChiamate();
-        } catch (e) { console.error("Errore archiviazione:", e); }
-    }
-}
+                    // --- LOGICA PER LAVORA O RESET (AGGIORNA SOLO LO STATO) ---
+                    chiamata.stato = nuovoStato;
+                    await fetch('/api/chiamate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(chiamata)
+                    });
+                    
+                    // Ricarica la lista (utile per il tasto Reset o Lavora)
+                    caricaChiamate();
+                }
+            } catch (e) { 
+                console.error(e); 
+            }
+        }
 
-async function cambiaStatoChiamata(id, nuovoStato) {
-    try {
-        const chiamata = chiamateLocali.find(c => c.id == id);
-        if (!chiamata) return;
-        chiamata.stato = nuovoStato;
-        await fetch('/api/chiamate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(chiamata)
-        });
-        caricaChiamate();
-    } catch (e) { console.error(e); }
-}
+        async function eliminaChiamata(id) {
+            if (!confirm("Vuoi eliminare definitivamente questa chiamata?")) return;
+            try {
+                await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
+                caricaChiamate();
+            } catch (e) { alert("Errore eliminazione"); }
+        }
 
-async function eliminaChiamata(id) {
-    if (!confirm("Eliminare definitivamente?")) return;
-    try {
-        await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
-        caricaChiamate();
-    } catch (e) { console.error(e); }
-}
+        // QUESTA FUNZIONE ORA INVIA IL REPORT PROFESSIONALE TRAMITE API
+        async function inviaReport() {
+            // Recupero i dati dai nuovi ID corretti presenti nel tuo HTML
+            const reportData = {
+                nIntervento: document.getElementById('nIntervento').value,
+                dataIntervento: document.getElementById('dataIntervento').value,
+                nomeScuola: document.getElementById('nomeScuola').value,
+                plessoEdificio: document.getElementById('plessoEdificio').value,
+                descrizioneLavori: document.getElementById('descrizioneLavori').value,
+                orario: `${document.getElementById('oraInizio').value} - ${document.getElementById('oraFine').value}`,
+                operai: document.getElementById('numOperai').value, // Corretto da numeroOperai
+                tariffa: document.getElementById('tariffaOraria').innerText, // Corretto .innerText
+                minutiFatturabili: document.getElementById('minutiFatturabili').innerText, // Corretto ID
+                costoUscita: document.getElementById('costoUscita').innerText,
+                costoAggiuntivo: document.getElementById('costoAggiuntivo').innerText,
+                totale: document.getElementById('totaleManodopera').innerText, // Corretto ID
+                destinatario: document.getElementById('emailDestinatario').value || prompt("A quale email vuoi inviare il report?", "manutenzione@scuola.it")
+            };
 
-function cambiaVistaChiamate(mostraArchivio) {
-    vistaArchivio = mostraArchivio;
-    const btnA = document.getElementById('btnVistaAttive');
-    const btnB = document.getElementById('btnVistaArchivio');
-    if (btnA && btnB) {
-        btnA.className = !vistaArchivio ? "text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase" : "text-[10px] font-extrabold text-gray-400 pb-1 uppercase";
-        btnB.className = vistaArchivio ? "text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase" : "text-[10px] font-extrabold text-gray-400 pb-1 uppercase";
-    }
-    caricaChiamate();
-}
+            if (!reportData.destinatario) {
+                showMessage('error', 'Inserire un indirizzo email valido.');
+                return;
+            }
 
-function impostaDataOraAttuale() {
-    const adesso = new Date();
-    const d = document.getElementById('chiamataDataManuale');
-    const t = document.getElementById('chiamataOraManuale');
-    if (d) d.value = adesso.toISOString().split('T')[0];
-    if (t) t.value = adesso.toTimeString().slice(0, 5);
-}
+            try {
+                showMessage('info', 'Invio report in corso...');
+                const response = await fetch('/api/inviaReport', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(reportData)
+                });
 
-async function nuovaChiamata() {
-    const scuola = document.getElementById('chiamataScuola').value;
-    const priorita = document.getElementById('chiamataPriorita').value;
-    const note = document.getElementById('chiamataNote').value;
-    const d = document.getElementById('chiamataDataManuale').value;
-    const t = document.getElementById('chiamataOraManuale').value;
+                if (response.ok) {
+                    showMessage('success', 'Report inviato con successo alla scuola!');
+                } else {
+                    const errorData = await response.json();
+                    alert("Errore nell'invio: " + (errorData.message || 'Errore server'));
+                }
+            } catch (error) {
+                console.error("Errore:", error);
+                alert("Errore di connessione al server.");
+            }
+        }
 
-    if (!scuola || !note) { alert("Compila Scuola e Note!"); return; }
-    const dataOra = d ? `${d.split('-').reverse().join('/')} - ${t}` : new Date().toLocaleString('it-IT');
-    const payload = { scuola: scuola.toUpperCase(), priorita, note, id: Date.now().toString(), dataOra, stato: 'In Attesa' };
+        window.onload = () => {
+            const dataOggi = new Date().toLocaleDateString('it-IT');
+            const elData = document.getElementById('dataStampa');
+            if (elData) elData.textContent = dataOggi;
 
-    try {
-        await fetch('/api/chiamate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        document.getElementById('chiamataScuola').value = '';
-        document.getElementById('chiamataNote').value = '';
-        impostaDataOraAttuale();
-        caricaChiamate();
-    } catch (e) { alert("Errore"); }
-}
+            if (typeof caricaDatiServer === 'function') {
+                caricaDatiServer().finally(() => {
+                    if (typeof initializeInputs === 'function') initializeInputs();
+                    if (typeof calcolaManodopera === 'function') calcolaManodopera();
+                });
+            }
+        };
     </script>
 
     <button onclick="toggleRegistroChiamate()" class="fixed bottom-24 left-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-50">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>
     </button>
 
-    <div id="registroChiamate" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
+    <div id="modalChiamate" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
-            <div class="p-4 border-b flex justify-between items-start bg-blue-50">
-                <div class="flex flex-col">
-                    <h2 class="font-bold text-blue-900 uppercase">Registro Chiamate</h2>
-                    <div class="flex gap-4 mt-2">
-                        <button id="btnVistaAttive" onclick="cambiaVistaChiamate(false)" class="text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase">Attive</button>
-                        <button id="btnVistaArchivio" onclick="cambiaVistaChiamate(true)" class="text-[10px] font-extrabold text-gray-400 pb-1 uppercase">Archivio</button>
-                    </div>
-                </div>
-                <button onclick="toggleRegistroChiamate()" class="text-2xl leading-none">&times;</button>
+            <div class="p-4 border-b flex justify-between items-center bg-blue-50">
+                <h2 class="font-bold text-blue-900 uppercase">Registro Chiamate</h2>
+                <button onclick="toggleRegistroChiamate()" class="text-2xl">&times;</button>
             </div>
             <div class="p-4 bg-gray-50 border-b space-y-2">
                 <input type="text" id="chiamataScuola" oninput="this.value = this.value.toUpperCase()" placeholder="Scuola" class="w-full p-2 border rounded">
@@ -1135,19 +1198,6 @@ async function nuovaChiamata() {
     </div>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
