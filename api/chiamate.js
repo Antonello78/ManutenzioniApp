@@ -28,11 +28,14 @@ export default async function handler(req, res) {
                 await kv.set(`chiamata:${idChiamata}`, datiChiamata);
                 return res.status(201).json(datiChiamata);
 
-            case 'PUT':
-                const chiamataAggiornata = req.body;
-                if (!chiamataAggiornata.id) throw new Error('ID mancante');
-                await kv.set(`chiamata:${chiamataAggiornata.id}`, chiamataAggiornata);
-                return res.status(200).json(chiamataAggiornata);
+            case 'POST':
+    const datiChiamata = req.body;
+    const idChiamata = datiChiamata.id || Date.now().toString();
+    datiChiamata.id = idChiamata;
+    // Se lo stato è già definito (es. 'completata'), lo mantiene, altrimenti mette 'In Attesa'
+    if (!datiChiamata.stato) datiChiamata.stato = 'In Attesa';
+    await kv.set(`chiamata:${idChiamata}`, datiChiamata);
+    return res.status(201).json(datiChiamata);
 
             case 'DELETE':
                 // TRASFORMAZIONE IN ARCHIVIAZIONE
