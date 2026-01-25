@@ -921,11 +921,10 @@ async function salvaIntervento() {
             }
         }
 
-// --- VARIABILI DI STATO (Assicurati che siano dichiarate una sola volta) ---
+// --- VARIABILI DI STATO ---
 let chiamateLocali = [];
 let vistaArchivio = false;
 
-// 1. CARICAMENTO CHIAMATE
 async function caricaChiamate() {
     const container = document.getElementById('listaChiamate');
     if (!container) return;
@@ -943,7 +942,7 @@ async function caricaChiamate() {
         });
 
         if (daMostrare.length === 0) {
-            container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata presente.</p>`;
+            container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata.</p>`;
             return;
         }
 
@@ -976,7 +975,7 @@ async function caricaChiamate() {
                     </span>
                     <div class="flex gap-2">
                         ${vistaArchivio ? 
-                            `<span class="text-[10px] text-blue-600 font-bold uppercase italic">In Archivio</span>` :
+                            `<span class="text-[10px] text-blue-600 font-bold uppercase italic font-black">In Archivio</span>` :
                             (c.stato !== 'In Lavorazione' ? 
                                 `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
                                 `<button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase">Reset</button>
@@ -991,34 +990,29 @@ async function caricaChiamate() {
     } catch (e) { console.error("Errore caricamento:", e); }
 }
 
-// 2. FUNZIONE COMPLETAMENTO (Trasferisce i dati e attiva "NUOVO")
 async function completaChiamata(id) {
     const chiamata = chiamateLocali.find(c => c.id == id);
     if (!chiamata) return;
 
-    if (confirm(`Trasferire "${chiamata.scuola}" nel modulo?\nLa chiamata verrà archiviata.`)) {
-        
-        // --- 1. Reset modulo e generazione N. Intervento/Data ---
-        if (typeof nuovoIntervento === "function") {
-            await nuovoIntervento(); 
-        }
+    if (confirm(`Trasferire "${chiamata.scuola}" nel modulo?\n\nLa chiamata verrà archiviata.`)) {
+        // 1. Attiva funzione NUOVO (Azzurra) per N. Intervento e Data
+        if (typeof nuovoIntervento === "function") await nuovoIntervento();
 
-        // --- 2. Compilazione campi modulo ---
+        // 2. Compila i campi
         const inputScuola = document.getElementById('nomeScuola');
-        const inputDescrizione = document.getElementById('descrizioneLavori');
-
+        const inputDesc = document.getElementById('descrizioneLavori');
         if (inputScuola) inputScuola.value = chiamata.scuola;
-        if (inputDescrizione) {
+        if (inputDesc) {
             const dataSolo = chiamata.dataOra.split(' - ')[0];
-            inputDescrizione.value = `Intervento del ${dataSolo}: ${chiamata.note}`;
+            inputDesc.value = `Intervento del ${dataSolo}: ${chiamata.note}`;
         }
 
-        // --- 3. UI e Calcoli ---
+        // 3. UI
         toggleRegistroChiamate();
         window.scrollTo({ top: 0, behavior: 'smooth' });
         if (typeof calcolaManodopera === "function") calcolaManodopera();
 
-        // --- 4. Archivio sul server ---
+        // 4. Salva stato completato
         try {
             chiamata.stato = 'completata';
             await fetch('/api/chiamate', {
@@ -1027,11 +1021,10 @@ async function completaChiamata(id) {
                 body: JSON.stringify(chiamata)
             });
             caricaChiamate();
-        } catch (e) { console.error("Errore archiviazione:", e); }
+        } catch (e) { console.error(e); }
     }
 }
 
-// 3. CAMBIO STATO (Lavora/Reset)
 async function cambiaStatoChiamata(id, nuovoStato) {
     try {
         const chiamata = chiamateLocali.find(c => c.id == id);
@@ -1046,7 +1039,6 @@ async function cambiaStatoChiamata(id, nuovoStato) {
     } catch (e) { console.error(e); }
 }
 
-// 4. ELIMINA
 async function eliminaChiamata(id) {
     if (!confirm("Eliminare definitivamente?")) return;
     try {
@@ -1055,7 +1047,6 @@ async function eliminaChiamata(id) {
     } catch (e) { console.error(e); }
 }
 
-// 5. GESTIONE TAB ARCHIVIO
 function cambiaVistaChiamate(mostraArchivio) {
     vistaArchivio = mostraArchivio;
     const btnA = document.getElementById('btnVistaAttive');
@@ -1067,7 +1058,6 @@ function cambiaVistaChiamate(mostraArchivio) {
     caricaChiamate();
 }
 
-// 6. FUNZIONI AGGIUNTA CHIAMATA
 function impostaDataOraAttuale() {
     const adesso = new Date();
     const d = document.getElementById('chiamataDataManuale');
@@ -1084,9 +1074,7 @@ async function nuovaChiamata() {
     const t = document.getElementById('chiamataOraManuale').value;
 
     if (!scuola || !note) { alert("Compila Scuola e Note!"); return; }
-
     const dataOra = d ? `${d.split('-').reverse().join('/')} - ${t}` : new Date().toLocaleString('it-IT');
-
     const payload = { scuola: scuola.toUpperCase(), priorita, note, id: Date.now().toString(), dataOra, stato: 'In Attesa' };
 
     try {
@@ -1099,7 +1087,7 @@ async function nuovaChiamata() {
         document.getElementById('chiamataNote').value = '';
         impostaDataOraAttuale();
         caricaChiamate();
-    } catch (e) { alert("Errore nel salvataggio"); }
+    } catch (e) { alert("Errore"); }
 }
     </script>
 
@@ -1138,6 +1126,7 @@ async function nuovaChiamata() {
     </div>
 </body>
 </html>
+
 
 
 
