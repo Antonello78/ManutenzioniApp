@@ -21,11 +21,11 @@ export default async function handler(req, res) {
 
             case 'POST':
                 const datiChiamata = req.body;
-                const id = datiChiamata.id || Date.now().toString();
-                datiChiamata.id = id;
-                // Se lo stato non è specificato, allora è 'In Attesa'
+                const idChiamata = datiChiamata.id || Date.now().toString();
+                datiChiamata.id = idChiamata;
+                // Assegna 'In Attesa' solo se lo stato è totalmente mancante
                 if (!datiChiamata.stato) datiChiamata.stato = 'In Attesa';
-                await kv.set(`chiamata:${id}`, datiChiamata);
+                await kv.set(`chiamata:${idChiamata}`, datiChiamata);
                 return res.status(201).json(datiChiamata);
 
             case 'PUT':
