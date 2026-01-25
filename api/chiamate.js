@@ -12,39 +12,27 @@ export default async function handler(req, res) {
                 
                 // Recupera i dettagli di tutte le chiamate
                 const chiamate = await kv.mget(...keys);
-                
-                // FILTRO: Restituiamo solo le chiamate NON completate per il registro principale
-                // Manteniamo la compatibilità con i vecchi dati (c.stato === undefined)
-                const chiamateAttive = chiamate.filter(c => c !== null && c.stato !== 'completata');
-                
-                return res.status(200).json(chiamateAttive);
+                // Ordina per data (le più recenti sopra) o per priorità
+                return res.status(200).json(chiamate.filter(c => c !== null));
 
             case 'POST':
-                const datiChiamata = req.body;
-                const idChiamata = datiChiamata.id || Date.now().toString();
-                datiChiamata.id = idChiamata;
-                // Assegna stato solo se manca
-                if (!datiChiamata.stato) datiChiamata.stato = 'In Attesa';
-                await kv.set(`chiamata:${idChiamata}`, datiChiamata);
-                return res.status(201).json(datiChiamata);
+                const nuovaChiamata = req.body;
+                // Se la chiamata ha già un ID, usa quello, altrimenti creane uno nuovo
+                const id = nuovaChiamata.id || Date.now();
+                nuovaChiamata.id = id;
+                await kv.set(`chiamata:${id}`, nuovaChiamata);
+                return res.status(201).json(nuovaChiamata);
+
+            case 'PUT':
+                const chiamataAggiornata = req.body;
+                if (!chiamataAggiornata.id) throw new Error('ID mancante');
+                await kv.set(`chiamata:${chiamataAggiornata.id}`, chiamataAggiornata);
+                return res.status(200).json(chiamataAggiornata);
 
             case 'DELETE':
-                // TRASFORMAZIONE IN ARCHIVIAZIONE
-                const { id: idArchivia } = req.query;
-                if (!idArchivia) throw new Error('ID mancante');
-
-                // Recuperiamo la chiamata esistente per non perdere i dati
-                const chiamataDaArchiviare = await kv.get(`chiamata:${idArchivia}`);
-                
-                if (chiamataDaArchiviare) {
-                    // Cambiamo solo lo stato invece di cancellare
-                    chiamataDaArchiviare.stato = 'completata';
-                    chiamataDaArchiviare.dataArchiviazione = new Date().toLocaleString('it-IT');
-                    await kv.set(`chiamata:${idArchivia}`, chiamataDaArchiviare);
-                    return res.status(200).json({ message: 'Chiamata spostata in archivio' });
-                } else {
-                    return res.status(404).json({ message: 'Chiamata non trovata' });
-                }
+                const { id: idElimina } = req.query;
+                await kv.del(`chiamata:${idElimina}`);
+                return res.status(200).json({ message: 'Chiamata eliminata' });
 
             default:
                 res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
