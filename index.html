@@ -1065,6 +1065,7 @@ async function salvaIntervento() {
                 const chiamata = chiamate.find(c => c.id == id);
                 
                 if (chiamata) {
+                    // --- LOGICA PER COMPLETAMENTO (CANCELLA E TRASFERISCE) ---
                     if (nuovoStato === 'Completata') {
                         if (confirm("Vuoi trasferire i dati della chiamata nei 'Dettagli Intervento Corrente'?")) {
                             const inputScuola = document.getElementById('nomeScuola');
@@ -1080,20 +1081,26 @@ async function salvaIntervento() {
                                 showMessage('success', 'Dati trasferiti nel modulo!');
                             }
                         }
+                        // Quando è completata, viene eliminata dal registro chiamate
                         await fetch('/api/chiamate?id=' + id, { method: 'DELETE' });
                         caricaChiamate();
                         return;
                     }
 
+                    // --- LOGICA PER LAVORA O RESET (AGGIORNA SOLO LO STATO) ---
                     chiamata.stato = nuovoStato;
                     await fetch('/api/chiamate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(chiamata)
                     });
+                    
+                    // Ricarica la lista (utile per il tasto Reset o Lavora)
                     caricaChiamate();
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e); 
+            }
         }
 
         async function eliminaChiamata(id) {
@@ -1191,6 +1198,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
