@@ -314,6 +314,7 @@
 
     <script>
         let filtroChiamateCompletate = false; // False = mostra solo le attive, True = mostra lo storico
+        let chiamateGlobali = []; 
         function toggleFiltroChiamate() {
             filtroChiamateCompletate = !filtroChiamateCompletate;
             
@@ -953,7 +954,8 @@ async function salvaIntervento() {
             if (!container) return;
             try {
                 const res = await fetch('/api/chiamate');
-                let chiamate = await res.json();
+                const datiDalServer = await res.json();
+                let chiamate = [...datiDalServer];
         
                 if (!chiamate || chiamate.length === 0) {
                     container.innerHTML = '<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata nel registro.</p>';
@@ -1295,6 +1297,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
