@@ -1154,7 +1154,50 @@ async function salvaIntervento() {
                 alert("Errore di connessione al server.");
             }
         }
+    
+        let vistaArchivio = false;
 
+// Funzione per cambiare tra Attive e Archivio
+function cambiaVistaChiamate(mostraArchivio) {
+    vistaArchivio = mostraArchivio;
+    const btnAttive = document.getElementById('btnVistaAttive');
+    const btnArchivio = document.getElementById('btnVistaArchivio');
+
+    if (vistaArchivio) {
+        btnArchivio.className = "text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase";
+        btnAttive.className = "text-[10px] font-extrabold text-gray-400 pb-1 uppercase";
+    } else {
+        btnAttive.className = "text-[10px] font-extrabold border-b-2 border-blue-600 text-blue-600 pb-1 uppercase";
+        btnArchivio.className = "text-[10px] font-extrabold text-gray-400 pb-1 uppercase";
+    }
+    renderizzaChiamate(); 
+}
+
+// Funzione per archiviare la chiamata e copiare i dati
+async function completaChiamata(id) {
+    const chiamata = chiamateLocali.find(c => c.id == id);
+    if (!chiamata) return;
+
+    if (confirm(`Trasferire "${chiamata.scuola}" nei dettagli intervento?\n\nLa scheda verrà spostata in ARCHIVIO.`)) {
+        // TRASFERIMENTO DATI NEI CAMPI PRINCIPALI
+        document.getElementById('nomeScuola').value = chiamata.scuola;
+        document.getElementById('descrizioneLavori').value = chiamata.note;
+        
+        try {
+            // Chiamata all'API (che ora archivia invece di eliminare)
+            const res = await fetch(`/api/chiamate?id=${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                await caricaChiamate(); // Ricarica la lista dal server
+                toggleRegistroChiamate(); // Chiude il registro
+                if (typeof calcolaManodopera === 'function') calcolaManodopera();
+            }
+        } catch (e) {
+            console.error("Errore archiviazione:", e);
+            alert("Errore durante l'archiviazione");
+        }
+    }
+}    
+        
         window.onload = () => {
             const dataOggi = new Date().toLocaleDateString('it-IT');
             const elData = document.getElementById('dataStampa');
@@ -1204,6 +1247,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
