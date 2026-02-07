@@ -1119,64 +1119,58 @@ async function salvaIntervento() {
         }
 
         function caricaPerModifica(id) {
-            const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
-            if (!chiamata) return;
+    const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
+    if (!chiamata) return;
 
-            chiamataInModificaId = id;
+    console.log("CONTENUTO INTEGRALE CHIAMATA:", chiamata); // <--- Guarda qui in F12!
 
-            document.getElementById('chiamataScuola').value = chiamata.scuola || '';
-            document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
-            document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
-            document.getElementById('chiamataNote').value = chiamata.note || '';
+    chiamataInModificaId = id;
 
-            setTimeout(() => {
-                const campoData = document.getElementById('chiamataDataManuale');
-                const campoOra = document.getElementById('chiamataOraManuale');
+    document.getElementById('chiamataScuola').value = chiamata.scuola || '';
+    document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
+    document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
+    document.getElementById('chiamataNote').value = chiamata.note || '';
 
-                let d = "";
-                let o = "";
+    setTimeout(() => {
+        const campoData = document.getElementById('chiamataDataManuale');
+        const campoOra = document.getElementById('chiamataOraManuale');
 
-                // 1. Cerchiamo i dati nei campi separati
-                if (chiamata.data) d = chiamata.data;
-                if (chiamata.ora) o = chiamata.ora;
+        let d = "";
+        let o = "";
 
-                // 2. Se l'ora è ancora vuota, proviamo a prenderla da dataOra
-                if (!o && chiamata.dataOra) {
-                    const parti = chiamata.dataOra.split(' ');
-                    // Se ci sono due parti (Data e Ora), prendiamo la seconda
-                    if (parti.length >= 2) {
-                        o = parti[1];
-                    }
-                }
+        // Prova a pescare da ogni possibile nome di campo
+        d = chiamata.data || chiamata.dataOra || "";
+        o = chiamata.ora || "";
 
-                // 3. Sistemiamo la DATA (AAAA-MM-GG)
-                if (d.includes('/')) {
-                    const p = d.split('/');
-                    if (p.length === 3) d = `${p[2]}-${p[1]}-${p[0]}`;
-                }
-
-                // 4. SISTEMIAMO L'ORA (Deve essere solo HH:mm)
-                // Se o è un trattino o non è valida, la lasciamo vuota invece di mettere l'ora attuale
-                o = o.trim();
-                if (o === "-" || !o || o === "undefined") {
-                    o = ""; 
-                } else {
-                    o = o.slice(0, 5); // Taglia eventuali secondi
-                }
-
-                if (campoData) campoData.value = d;
-                if (campoOra) campoOra.value = o;
-                
-                console.log("Dati finali inseriti -> Data:", d, "Ora:", o);
-            }, 200);
-
-            const btn = document.getElementById('btnAggiungiChiamata');
-            btn.innerText = "Aggiorna Chiamata";
-            btn.classList.remove('bg-blue-600');
-            btn.classList.add('bg-orange-600');
-    
-            document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
+        // Se dataOra conteneva tutto insieme (es. "2026-02-07 10:30")
+        if (d.includes(' ')) {
+            const parti = d.split(' ');
+            d = parti[0];
+            if (!o) o = parti[1];
         }
+
+        // Se la data è in formato italiano GG/MM/AAAA, girala per il quadratino
+        if (d.includes('/')) {
+            const p = d.split('/');
+            if (p.length === 3) d = `${p[2]}-${p[1]}-${p[0]}`;
+        }
+
+        // Pulizia finale
+        if (d.length > 10) d = d.slice(0, 10);
+        if (o.length > 5) o = o.slice(0, 5);
+        if (o === "-") o = "";
+
+        campoData.value = d;
+        campoOra.value = o;
+        
+        console.log("RISULTATO FINALE -> Data:", d, "Ora:", o);
+    }, 200);
+
+    const btn = document.getElementById('btnAggiungiChiamata');
+    btn.innerText = "Aggiorna Chiamata";
+    btn.classList.remove('bg-blue-600'); btn.classList.add('bg-orange-600');
+    document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
+}
         
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
@@ -1345,6 +1339,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
