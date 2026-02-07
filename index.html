@@ -956,7 +956,7 @@ async function salvaIntervento() {
             if (modal) {
                 modal.classList.toggle('hidden');
                 if (!modal.classList.contains('hidden')) {
-                    // MODIFICA QUI: Mettiamo l'ora attuale SOLO se NON stiamo modificando una chiamata esistente
+                    // Solo se NON stiamo modificando mettiamo l'ora di adesso
                     if (!chiamataInModificaId) {
                         impostaDataOraAttuale();
                     }
@@ -1122,22 +1122,17 @@ async function salvaIntervento() {
 
             chiamataInModificaId = id;
 
-            // Carichiamo i testi normali
+            // Popoliamo i campi
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
+            
+            // CARICHIAMO DATA E ORA ORIGINALI
+            if (chiamata.data) document.getElementById('chiamataDataManuale').value = chiamata.data;
+            if (chiamata.ora) document.getElementById('chiamataOraManuale').value = chiamata.ora;
 
-            // USIAMO UN RITARDO per evitare che il sistema sovrascriva con l'ora attuale
-            setTimeout(() => {
-                if (chiamata.data) {
-                    document.getElementById('chiamataDataManuale').value = chiamata.data;
-                }
-                if (chiamata.ora) {
-                    document.getElementById('chiamataOraManuale').value = chiamata.ora;
-                }
-            }, 50);
-
+            // Cambiamo il pulsante
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
@@ -1145,7 +1140,6 @@ async function salvaIntervento() {
     
             document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
         }
-
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
                 const res = await fetch('/api/chiamate');
@@ -1313,6 +1307,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
