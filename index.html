@@ -1119,54 +1119,63 @@ async function salvaIntervento() {
         }
 
         function caricaPerModifica(id) {
-            const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
-            if (!chiamata) return;
+    // 1. Trova i dati
+    const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
+    if (!chiamata) return;
 
-            console.log("CONTENUTO INTEGRALE CHIAMATA:", chiamata);
-            chiamataInModificaId = id;
+    // 2. BLOCCA IMMEDIATAMENTE L'ID (Questo impedisce al reset di scattare)
+    chiamataInModificaId = id;
 
-            document.getElementById('chiamataScuola').value = chiamata.scuola || '';
-            document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
-            document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
-            document.getElementById('chiamataNote').value = chiamata.note || '';
+    // 3. Popola i testi
+    document.getElementById('chiamataScuola').value = chiamata.scuola || '';
+    document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
+    document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
+    document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            setTimeout(() => {
-                const campoData = document.getElementById('chiamataDataManuale');
-                const campoOra = document.getElementById('chiamataOraManuale');
+    // 4. FORZA I DATI (con un ritardo leggermente maggiore per "vincere" sul toggle)
+    setTimeout(() => {
+        const campoData = document.getElementById('chiamataDataManuale');
+        const campoOra = document.getElementById('chiamataOraManuale');
 
-                let d = "";
-                let o = "";
+        // Analizziamo cosa c'è nel database
+        let dataSalvata = chiamata.data || "";
+        let oraSalvata = chiamata.ora || "";
 
-                // Peschiamo la data
-                d = chiamata.data || (chiamata.dataOra ? chiamata.dataOra.split(' ')[0] : "");
-        
-                // Peschiamo l'ora (se c'è)
-                o = chiamata.ora || (chiamata.dataOra && chiamata.dataOra.includes(' ') ? chiamata.dataOra.split(' ')[1] : "");
-
-                // Convertiamo la data per il quadratino (da GG/MM/AAAA a AAAA-MM-GG)
-                if (d && d.includes('/')) {
-                    const p = d.split('/');
-                    if (parti.length === 3) d = `${p[2]}-${p[1]}-${p[0]}`;
-                }
-
-                // Pulizia Ora: deve essere HH:mm
-                if (o && o !== "-") {
-                    o = o.trim().slice(0, 5);
-                } else {
-                    o = ""; // Forza vuoto se c'è un trattino o nulla
-                }
-
-                campoData.value = d;
-                campoOra.value = o;
-        
-                console.log("RISULTATO FINALE -> Data:", d, "Ora:", o);
-            }, 200);
-
-            const btn = document.getElementById('btnAggiungiChiamata');
-            btn.innerText = "Aggiorna Chiamata";
-            btn.classList.remove('bg-blue-600'); btn.classList.add('bg-orange-600');
-            document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
+        // Se i campi sono vuoti ma esiste dataOra (vecchio formato), li estraiamo
+        if (!dataSalvata && chiamata.dataOra) {
+            const parti = chiamata.dataOra.split(' ');
+            dataSalvata = parti[0];
+            oraSalvata = parti[1] || "";
         }
+
+        // TRASFORMAZIONE DATA: Se è GG/MM/AAAA (italiana) la giriamo in AAAA-MM-GG per il quadratino
+        if (dataSalvata.includes('/')) {
+            const p = dataSalvata.split('/');
+            dataSalvata = `${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}`;
+        }
+
+        // PULIZIA ORA
+        if (oraSalvata) {
+            oraSalvata = oraSalvata.trim().slice(0, 5);
+            if (oraSalvata === "-") oraSalvata = "";
+        }
+
+        // SCRITTURA FINALE: Se i dati esistono, li mettiamo. 
+        // Se non esistono, NON mettiamo l'ora attuale, lasciamo vuoto.
+        if (dataSalvata) campoData.value = dataSalvata;
+        if (oraSalvata) campoOra.value = oraSalvata;
+
+        console.log("MATITA - Ho inserito questi dati:", { data: dataSalvata, ora: oraSalvata });
+    }, 300); // Aumentato a 300ms per sicurezza
+
+    // 5. Trasforma il tasto
+    const btn = document.getElementById('btnAggiungiChiamata');
+    btn.innerText = "Aggiorna Chiamata";
+    btn.classList.remove('bg-blue-600');
+    btn.classList.add('bg-orange-600');
+    
+    document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
+}
         
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
@@ -1335,6 +1344,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
