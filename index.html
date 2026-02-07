@@ -1249,15 +1249,26 @@ async function salvaIntervento() {
 
             // Cerchiamo la chiamata confrontando l'ID come stringa per sicurezza
             const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
-    
+
             if (!chiamata) {
                 alert("Errore: chiamata non trovata. Prova a chiudere e riaprire il registro.");
                 return;
             }
 
             // Copia i dati nel form principale (nomi campi del tuo v1.4.0)
-            document.getElementById('nomeScuola').value = chiamata.scuola;
-            document.getElementById('descrizioneLavori').value = chiamata.note;
+            document.getElementById('nomeScuola').value = chiamata.scuola || '';
+    
+            // AGGIUNTA: Trasferimento del Plesso al campo "plessoEdificio" del modulo principale
+            if (document.getElementById('plessoEdificio')) {
+                document.getElementById('plessoEdificio').value = chiamata.plesso || '';
+            }
+
+            // Note della chiamata inserite nella descrizione lavori
+            document.getElementById('descrizioneLavori').value = chiamata.note || '';
+    
+            // Trigger dell'evento input per aggiornare l'anteprima del preventivo
+            document.getElementById('descrizioneLavori').dispatchEvent(new Event('input'));
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
             try {
@@ -1317,6 +1328,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
