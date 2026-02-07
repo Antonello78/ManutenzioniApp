@@ -1117,11 +1117,14 @@ async function salvaIntervento() {
         }
 
         function caricaPerModifica(id) {
-            // Troviamo i dati
             const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
-            if (!chiamata) return;
+            if (!chiamata) {
+                console.error("Chiamata non trovata!");
+                return;
+            }
 
-            // Impostiamo l'ID PRIMA di ogni altra operazione
+            console.log("Dati recuperati dal database:", chiamata); // Questo apparirà nella console F12
+
             chiamataInModificaId = id;
 
             // Popoliamo i campi testo
@@ -1130,23 +1133,23 @@ async function salvaIntervento() {
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // --- QUESTA È LA MODIFICA FONDAMENTALE ---
-            // Usiamo un piccolo ritardo di 100ms per assicurarci che il modulo 
-            // sia completamente aperto prima di scrivere la data vecchia
+            // Applichiamo la data e l'ora con un ritardo maggiore per sicurezza
             setTimeout(() => {
-                if (chiamata.data) document.getElementById('chiamataDataManuale').value = chiamata.data;
-                if (chiamata.ora) document.getElementById('chiamataOraManuale').value = chiamata.ora;
-                console.log("Data e ora caricate con ritardo:", chiamata.data, chiamata.ora);
-            }, 100); 
-            // ------------------------------------------
+                const campoData = document.getElementById('chiamataDataManuale');
+                const campoOra = document.getElementById('chiamataOraManuale');
 
-            // Trasformiamo il pulsante
+                // Se nel database i campi si chiamano 'data' e 'ora', li usiamo
+                if (chiamata.data) campoData.value = chiamata.data;
+                if (chiamata.ora) campoOra.value = chiamata.ora;
+                
+                console.log("Ho provato a inserire:", chiamata.data, chiamata.ora);
+            }, 200); 
+
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
             btn.classList.add('bg-orange-600');
     
-            // Scroll in alto
             document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
         }
         
@@ -1317,6 +1320,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
