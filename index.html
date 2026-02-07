@@ -1023,7 +1023,9 @@ async function salvaIntervento() {
                             <div class="flex flex-col">
                                 <span class="font-bold text-gray-900 uppercase text-sm">${c.scuola} ${c.stato === 'Completata' ? '✅' : ''}</span>
                                 ${c.plesso ? `<span class="text-[11px] text-blue-600 font-extrabold italic uppercase">${c.plesso}</span>` : ''}
-                                <span class="text-[10px] text-gray-500 font-bold">${(c.data ? formatDate(c.data) : '')} ${(c.ora || '')}</span>
+                                <span class="text-[10px] text-gray-500 font-bold">
+                                    ${c.dataOra ? c.dataOra : (c.data ? formatDate(c.data) + ' ' + (c.ora || '') : 'Data N.D.')}
+                                </span>
                             </div>
                             
                             <div class="flex items-center gap-2">
@@ -1120,22 +1122,28 @@ async function salvaIntervento() {
             const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
             if (!chiamata) return;
 
-            // 1. Blocchiamo subito l'ID
             chiamataInModificaId = id;
 
-            // 2. Riempiamo i campi subito
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // 3. Forziamo data e ora con un ritardo per evitare che toggleRegistro o caricaChiamate le sovrascrivano
+            // Gestione intelligente della data per la matita
             setTimeout(() => {
-                if (chiamata.data) document.getElementById('chiamataDataManuale').value = chiamata.data;
-                if (chiamata.ora) document.getElementById('chiamataOraManuale').value = chiamata.ora;
+                if (chiamata.data && chiamata.ora) {
+                    // Se è una chiamata nuova con campi separati
+                    document.getElementById('chiamataDataManuale').value = chiamata.data;
+                    document.getElementById('chiamataOraManuale').value = chiamata.ora;
+                } else if (chiamata.dataOra) {
+                    // Se è una chiamata vecchia (es: "2025-11-20 10:30")
+                    // Proviamo a dividerla per riempire i campi
+                    const parti = chiamata.dataOra.split(' ');
+                    if (parti[0]) document.getElementById('chiamataDataManuale').value = parti[0];
+                    if (parti[1]) document.getElementById('chiamataOraManuale').value = parti[1];
+                }
             }, 150);
 
-            // 4. Cambiamo il pulsante
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
@@ -1311,6 +1319,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
