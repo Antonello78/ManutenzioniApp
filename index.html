@@ -956,8 +956,10 @@ async function salvaIntervento() {
             if (modal) {
                 modal.classList.toggle('hidden');
                 if (!modal.classList.contains('hidden')) {
-                    // Richiamiamo la funzione che hai creato al punto 1
-                    impostaDataOraAttuale();
+                    // MODIFICA QUI: Mettiamo l'ora attuale SOLO se NON stiamo modificando una chiamata esistente
+                    if (!chiamataInModificaId) {
+                        impostaDataOraAttuale();
+                    }
                     caricaChiamate();
                 }
             }
@@ -1311,6 +1313,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
