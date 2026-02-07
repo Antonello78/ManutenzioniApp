@@ -1103,6 +1103,32 @@ async function salvaIntervento() {
             }
         }
 
+        function caricaPerModifica(id) {
+            // Cerchiamo la chiamata nell'array globale usando l'ID
+            const chiamata = chiamateGlobali.find(c => c.id == id);
+            if (!chiamata) return;
+
+            // Impostiamo l'ID globale per dire al sistema che stiamo modificando
+            chiamataInModificaId = id;
+    
+            // Ripopoliamo i campi del modulo con i dati salvati
+            document.getElementById('chiamataScuola').value = chiamata.scuola || '';
+            document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
+            document.getElementById('chiamataDataManuale').value = chiamata.data || '';
+            document.getElementById('chiamataOraManuale').value = chiamata.ora || '';
+            document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
+            document.getElementById('chiamataNote').value = chiamata.note || '';
+
+            // Trasformiamo il pulsante: diventa Arancione e cambia testo
+            const btn = document.getElementById('btnAggiungiChiamata');
+            btn.innerText = "Aggiorna Chiamata";
+            btn.classList.remove('bg-blue-600');
+            btn.classList.add('bg-orange-600');
+    
+            // Scrolliamo verso l'alto per portare il modulo bene in vista
+            document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
+        }    
+
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
                 const res = await fetch('/api/chiamate');
@@ -1284,6 +1310,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
