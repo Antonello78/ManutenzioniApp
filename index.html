@@ -1130,9 +1130,15 @@ async function salvaIntervento() {
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // FORZIAMO la data e l'ora del database nei campi
-            if (chiamata.data) document.getElementById('chiamataDataManuale').value = chiamata.data;
-            if (chiamata.ora) document.getElementById('chiamataOraManuale').value = chiamata.ora;
+            // --- QUESTA È LA MODIFICA FONDAMENTALE ---
+            // Usiamo un piccolo ritardo di 100ms per assicurarci che il modulo 
+            // sia completamente aperto prima di scrivere la data vecchia
+            setTimeout(() => {
+                if (chiamata.data) document.getElementById('chiamataDataManuale').value = chiamata.data;
+                if (chiamata.ora) document.getElementById('chiamataOraManuale').value = chiamata.ora;
+                console.log("Data e ora caricate con ritardo:", chiamata.data, chiamata.ora);
+            }, 100); 
+            // ------------------------------------------
 
             // Trasformiamo il pulsante
             const btn = document.getElementById('btnAggiungiChiamata');
@@ -1143,6 +1149,7 @@ async function salvaIntervento() {
             // Scroll in alto
             document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
         }
+        
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
                 const res = await fetch('/api/chiamate');
@@ -1310,6 +1317,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
