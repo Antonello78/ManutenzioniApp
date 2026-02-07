@@ -321,14 +321,17 @@
             chiamataInModificaId = null;
             document.getElementById('chiamataScuola').value = '';
             document.getElementById('chiamataPlesso').value = '';
-            document.getElementById('chiamataDataManuale').value = '';
-            document.getElementById('chiamataOraManuale').value = '';
-            document.getElementById('chiamataPriorita').value = 'Bassa';
             document.getElementById('chiamataNote').value = '';
+            document.getElementById('chiamataPriorita').value = 'Bassa';
+    
+            // Ripristina il pulsante blu
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiungi Chiamata";
             btn.classList.remove('bg-orange-600');
             btn.classList.add('bg-blue-600');
+
+            // TORNA A METTERE DATA E ORA DI ADESSO
+            impostaDataOraAttuale(); 
         }
         function toggleFiltroChiamate() {
             filtroChiamateCompletate = !filtroChiamateCompletate;
@@ -1310,6 +1313,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
