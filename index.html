@@ -1122,39 +1122,37 @@ async function salvaIntervento() {
             const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
             if (!chiamata) return;
 
+            // 1. Blocchiamo l'ID così il reset automatico non scatta
             chiamataInModificaId = id;
 
-            // Testi normali
+            // 2. Testi
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // GESTIONE DATA (Conversione per il campo HTML)
+            // 3. LA DATA (Il punto critico)
             setTimeout(() => {
-                let dataFormattata = "";
-                
-                if (chiamata.data) {
-                    // Se la data è salvata come AAAA-MM-GG la usiamo direttamente
-                    if (chiamata.data.includes('-')) {
-                        dataFormattata = chiamata.data;
-                    } 
-                    // Se invece è salvata in formato italiano GG/MM/AAAA, la convertiamo per il quadratino
-                    else if (chiamata.data.includes('/')) {
-                        const parti = chiamata.data.split('/');
-                        dataFormattata = `${parti[2]}-${parti[1]}-${parti[0]}`;
-                    }
+                let dataPerInput = "";
+                let valoreData = chiamata.data || "";
+
+                if (valoreData.includes('/')) {
+                    // Se è in formato italiano GG/MM/AAAA, la giriamo per il quadratino
+                    const p = valoreData.split('/');
+                    dataPerInput = `${p[2]}-${p[1]}-${p[0]}`;
+                } else if (valoreData.includes('-')) {
+                    // Se è già AAAA-MM-GG (formato tecnico)
+                    dataPerInput = valoreData;
                 }
 
                 const campoData = document.getElementById('chiamataDataManuale');
                 const campoOra = document.getElementById('chiamataOraManuale');
-                
-                if (campoData) campoData.value = dataFormattata;
-                if (campoOra) campoOra.value = chiamata.ora || "";
-                
-            }, 200);
 
-            // Pulsante Arancione
+                if (campoData) campoData.value = dataPerInput;
+                if (campoOra) campoOra.value = chiamata.ora || "";
+            }, 150);
+
+            // 4. Pulsante
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
@@ -1330,6 +1328,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
