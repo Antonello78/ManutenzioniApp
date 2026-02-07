@@ -314,7 +314,22 @@
 
     <script>
         let filtroChiamateCompletate = false; // False = mostra solo le attive, True = mostra lo storico
-        let chiamateGlobali = []; 
+        let chiamateGlobali = [];
+        let chiamataInModificaId = null; 
+
+        function resetModuloChiamata() {
+            chiamataInModificaId = null;
+            document.getElementById('chiamataScuola').value = '';
+            document.getElementById('chiamataPlesso').value = '';
+            document.getElementById('chiamataDataManuale').value = '';
+            document.getElementById('chiamataOraManuale').value = '';
+            document.getElementById('chiamataPriorita').value = 'Bassa';
+            document.getElementById('chiamataNote').value = '';
+            const btn = document.getElementById('btnAggiungiChiamata');
+            btn.innerText = "Aggiungi Chiamata";
+            btn.classList.remove('bg-orange-600');
+            btn.classList.add('bg-blue-600');
+        }
         function toggleFiltroChiamate() {
             filtroChiamateCompletate = !filtroChiamateCompletate;
     
@@ -1049,53 +1064,43 @@ async function salvaIntervento() {
     
             if (campoData) campoData.value = dataOggi;
             if (campoOra) campoOra.value = oraAdesso;
-        }
+            
         async function nuovaChiamata() {
             const scuola = document.getElementById('chiamataScuola').value;
+            const plesso = document.getElementById('chiamataPlesso').value; // Recupera il nuovo campo
+            const data = document.getElementById('chiamataDataManuale').value;
+            const ora = document.getElementById('chiamataOraManuale').value;
             const priorita = document.getElementById('chiamataPriorita').value;
             const note = document.getElementById('chiamataNote').value;
-            const dataManuale = document.getElementById('chiamataDataManuale').value;
-            const oraManuale = document.getElementById('chiamataOraManuale').value;
-            
-            if (!scuola || !note) {
-                alert("Inserisci Scuola e Note!");
-                return;
-            }
 
-            let dataOraFinale;
-            if (dataManuale && oraManuale) {
-                const [anno, mese, giorno] = dataManuale.split('-');
-                dataOraFinale = `${giorno}/${mese}/${anno} - ${oraManuale}`;
-            } else {
-                const oraAttuale = new Date();
-                dataOraFinale = oraAttuale.toLocaleDateString('it-IT') + ' - ' + oraAttuale.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
-            }
-
-            const payload = { 
-                scuola: scuola.toUpperCase(), 
-                priorita, 
-                note, 
-                id: Date.now().toString(),
-                dataOra: dataOraFinale,
-                stato: 'In Attesa'
+            if (!scuola) { alert("Inserire almeno il nome della scuola."); return; }
+            const payload = {
+                id: chiamataInModificaId || Date.now().toString(),
+                scuola,
+                plesso,
+                data,
+                ora,
+                priorita,
+                note,
+                stato: 'In attesa'
             };
 
             try {
-                const res = await fetch('/api/chiamate', {
-                    method: 'POST',
+                // Se c'è un ID in modifica usiamo il metodo PUT, altrimenti POST per la nuova
+                const method = chiamataInModificaId ? 'PUT' : 'POST';
+                const response = await fetch('/api/chiamate', {
+                    method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                if (res.ok) {
-                    document.getElementById('chiamataScuola').value = '';
-                    document.getElementById('chiamataNote').value = '';
-                    
-                    // Sostituiamo la pulizia dei campi con il ripristino dell'ora attuale
-                    impostaDataOraAttuale(); 
-                    
-                    caricaChiamate();
+
+                if (response.ok) {
+                    resetModuloChiamata(); // Torna in modalità "Aggiungi" e svuota i campi
+                    caricaChiamate(); // Ricarica la lista per vedere le modifiche
                 }
-            } catch (e) { alert("Errore salvataggio"); }
+            } catch (err) {
+                console.error("Errore durante il salvataggio della chiamata:", err);
+            }
         }
 
         async function cambiaStatoChiamata(id, nuovoStato) {
@@ -1258,7 +1263,10 @@ async function salvaIntervento() {
                 </div>
             </div>
             <div class="p-4 bg-gray-50 border-b space-y-2">
-                <input type="text" id="chiamataScuola" oninput="this.value = this.value.toUpperCase()" placeholder="Scuola" class="w-full p-2 border rounded">
+                <div class="flex gap-2">
+                    <input type="text" id="chiamataScuola" oninput="this.value = this.value.toUpperCase()" placeholder="Scuola" class="w-2/3 p-2 border rounded">
+                    <input type="text" id="chiamataPlesso" oninput="this.value = this.value.toUpperCase()" placeholder="Plesso" class="w-1/3 p-2 border rounded">
+                </div>
                 <div class="flex gap-2">
                     <input type="date" id="chiamataDataManuale" class="w-1/2 p-2 border rounded text-sm">
                     <input type="time" id="chiamataOraManuale" class="w-1/2 p-2 border rounded text-sm">
@@ -1269,13 +1277,14 @@ async function salvaIntervento() {
                     <option value="Alta">Alta</option>
                 </select>
                 <input type="text" id="chiamataNote" placeholder="Note intervento" class="w-full p-2 border rounded">
-                <button onclick="nuovaChiamata()" class="w-full bg-blue-600 text-white p-2 rounded font-bold uppercase">Aggiungi Chiamata</button>
+                <button id="btnAggiungiChiamata" onclick="nuovaChiamata()" class="w-full bg-blue-600 text-white p-2 rounded font-bold uppercase transition-colors">Aggiungi Chiamata</button>
             </div>
             <div id="listaChiamate" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white"></div>
         </div>
     </div>
 </body>
 </html>
+
 
 
 
