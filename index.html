@@ -1124,38 +1124,40 @@ async function salvaIntervento() {
 
             chiamataInModificaId = id;
 
-            // Popoliamo i campi testo
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // GESTIONE DATA E ORA - Versione Definitiva
             setTimeout(() => {
                 const campoData = document.getElementById('chiamataDataManuale');
                 const campoOra = document.getElementById('chiamataOraManuale');
 
-                let dataVal = chiamata.data || "";
-                let oraVal = chiamata.ora || "";
+                let d = "";
+                let o = "";
 
-                // Se la data è nel formato GG/MM/AAAA (italiano), la trasformiamo in AAAA-MM-GG
-                if (dataVal.includes('/')) {
-                    const parti = dataVal.split('/');
-                    if (parti.length === 3) {
-                        dataVal = `${parti[2]}-${parti[1].padStart(2, '0')}-${parti[0].padStart(2, '0')}`;
-                    }
+                // 1. Prova a prendere i dati separati
+                if (chiamata.data) d = chiamata.data;
+                if (chiamata.ora) o = chiamata.ora;
+
+                // 2. Se sono vuoti, prova a estrarli da dataOra (formato: "AAAA-MM-GG HH:MM" o "GG/MM/AAAA HH:MM")
+                if (!d && chiamata.dataOra) {
+                    const parti = chiamata.dataOra.split(' ');
+                    d = parti[0] || "";
+                    o = parti[1] || "";
                 }
 
-                // Pulizia ora (se per caso arrivano secondi o altro)
-                if (oraVal && oraVal.length > 5) {
-                    oraVal = oraVal.slice(0, 5);
+                // 3. Se la data ha le sbarrette (italiana), girala per il quadratino (tecnica)
+                if (d.includes('/')) {
+                    const p = d.split('/');
+                    if (p.length === 3) d = `${p[2]}-${p[1]}-${p[0]}`;
                 }
 
-                if (campoData) campoData.value = dataVal;
-                if (campoOra) campoOra.value = oraVal;
+                if (campoData) campoData.value = d;
+                if (campoOra) campoOra.value = o.slice(0, 5); // Prende solo HH:MM
                 
-                console.log("Tentativo caricamento data:", dataVal, "ora:", oraVal);
-            }, 150);
+                console.log("Dati estratti per i campi -> Data:", d, "Ora:", o);
+            }, 200);
 
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
@@ -1332,6 +1334,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
