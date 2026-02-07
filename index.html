@@ -956,7 +956,7 @@ async function salvaIntervento() {
             if (modal) {
                 modal.classList.toggle('hidden');
                 if (!modal.classList.contains('hidden')) {
-                    // Solo se NON stiamo modificando mettiamo l'ora di adesso
+                    // MODIFICA QUI: mettiamo l'ora attuale SOLO se NON c'è un ID in modifica
                     if (!chiamataInModificaId) {
                         impostaDataOraAttuale();
                     }
@@ -1117,27 +1117,30 @@ async function salvaIntervento() {
         }
 
         function caricaPerModifica(id) {
+            // Troviamo i dati
             const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
             if (!chiamata) return;
 
+            // Impostiamo l'ID PRIMA di ogni altra operazione
             chiamataInModificaId = id;
 
-            // Popoliamo i campi
+            // Popoliamo i campi testo
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
-            
-            // CARICHIAMO DATA E ORA ORIGINALI
+
+            // FORZIAMO la data e l'ora del database nei campi
             if (chiamata.data) document.getElementById('chiamataDataManuale').value = chiamata.data;
             if (chiamata.ora) document.getElementById('chiamataOraManuale').value = chiamata.ora;
 
-            // Cambiamo il pulsante
+            // Trasformiamo il pulsante
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
             btn.classList.add('bg-orange-600');
     
+            // Scroll in alto
             document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
         }
         async function cambiaStatoChiamata(id, nuovoStato) {
@@ -1307,6 +1310,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
