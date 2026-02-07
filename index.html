@@ -1136,27 +1136,39 @@ async function salvaIntervento() {
                 let d = "";
                 let o = "";
 
-                // 1. Prova a prendere i dati separati
+                // 1. Cerchiamo i dati nei campi separati
                 if (chiamata.data) d = chiamata.data;
                 if (chiamata.ora) o = chiamata.ora;
 
-                // 2. Se sono vuoti, prova a estrarli da dataOra (formato: "AAAA-MM-GG HH:MM" o "GG/MM/AAAA HH:MM")
-                if (!d && chiamata.dataOra) {
+                // 2. Se vuoti, cerchiamo in dataOra (es: "2026-02-07 20:15")
+                if ((!d || !o) && chiamata.dataOra) {
                     const parti = chiamata.dataOra.split(' ');
-                    d = parti[0] || "";
-                    o = parti[1] || "";
+                    if (!d) d = parti[0] || "";
+                    if (!o) o = parti[1] || "";
                 }
 
-                // 3. Se la data ha le sbarrette (italiana), girala per il quadratino (tecnica)
+                // 3. Sistemiamo la DATA per il quadratino (AAAA-MM-GG)
                 if (d.includes('/')) {
                     const p = d.split('/');
                     if (p.length === 3) d = `${p[2]}-${p[1]}-${p[0]}`;
                 }
 
+                // 4. SISTEMIAMO L'ORA (Deve essere solo HH:mm)
+                // Puliamo l'ora da eventuali spazi o trattini residui
+                o = o.trim();
+                if (o === "-" || o === "") {
+                    // Se l'ora è un trattino o vuota, mettiamo un'ora di default o quella attuale
+                    const adesso = new Date();
+                    o = adesso.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    // Prende solo i primi 5 caratteri (HH:mm) per evitare errori con i secondi
+                    o = o.slice(0, 5);
+                }
+
                 if (campoData) campoData.value = d;
-                if (campoOra) campoOra.value = o.slice(0, 5); // Prende solo HH:MM
+                if (campoOra) campoOra.value = o;
                 
-                console.log("Dati estratti per i campi -> Data:", d, "Ora:", o);
+                console.log("Dati finali inseriti -> Data:", d, "Ora:", o);
             }, 200);
 
             const btn = document.getElementById('btnAggiungiChiamata');
@@ -1334,6 +1346,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
