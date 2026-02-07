@@ -1120,29 +1120,25 @@ async function salvaIntervento() {
 
             chiamataInModificaId = id;
 
-            // Popoliamo i campi con i dati esistenti
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // GESTIONE DATA E ORA: 
-            // Se la chiamata ha già una data e ora salvata, le carichiamo nel modulo
-            // così non le perdi e non vengono resettate a "oggi"
+            // --- QUESTE RIGHE CARICANO LA DATA ORIGINALE ---
             if (chiamata.data) {
                 document.getElementById('chiamataDataManuale').value = chiamata.data;
             }
             if (chiamata.ora) {
                 document.getElementById('chiamataOraManuale').value = chiamata.ora;
             }
+            // -----------------------------------------------
 
-            // Cambiamo il pulsante per far capire che stiamo salvando modifiche
             const btn = document.getElementById('btnAggiungiChiamata');
-            btn.innerText = "Salva Modifiche";
+            btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
             btn.classList.add('bg-orange-600');
     
-            // Torniamo su per vedere il modulo precompilato
             document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
         }
 
@@ -1313,6 +1309,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
