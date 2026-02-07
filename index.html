@@ -1120,19 +1120,21 @@ async function salvaIntervento() {
 
             chiamataInModificaId = id;
 
+            // Carichiamo i testi normali
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // --- QUESTE RIGHE CARICANO LA DATA ORIGINALE ---
-            if (chiamata.data) {
-                document.getElementById('chiamataDataManuale').value = chiamata.data;
-            }
-            if (chiamata.ora) {
-                document.getElementById('chiamataOraManuale').value = chiamata.ora;
-            }
-            // -----------------------------------------------
+            // USIAMO UN RITARDO per evitare che il sistema sovrascriva con l'ora attuale
+            setTimeout(() => {
+                if (chiamata.data) {
+                    document.getElementById('chiamataDataManuale').value = chiamata.data;
+                }
+                if (chiamata.ora) {
+                    document.getElementById('chiamataOraManuale').value = chiamata.ora;
+                }
+            }, 50);
 
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
@@ -1309,6 +1311,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
