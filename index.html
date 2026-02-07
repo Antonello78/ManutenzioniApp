@@ -1140,29 +1140,28 @@ async function salvaIntervento() {
                 if (chiamata.data) d = chiamata.data;
                 if (chiamata.ora) o = chiamata.ora;
 
-                // 2. Se vuoti, cerchiamo in dataOra (es: "2026-02-07 20:15")
-                if ((!d || !o) && chiamata.dataOra) {
+                // 2. Se l'ora è ancora vuota, proviamo a prenderla da dataOra
+                if (!o && chiamata.dataOra) {
                     const parti = chiamata.dataOra.split(' ');
-                    if (!d) d = parti[0] || "";
-                    if (!o) o = parti[1] || "";
+                    // Se ci sono due parti (Data e Ora), prendiamo la seconda
+                    if (parti.length >= 2) {
+                        o = parti[1];
+                    }
                 }
 
-                // 3. Sistemiamo la DATA per il quadratino (AAAA-MM-GG)
+                // 3. Sistemiamo la DATA (AAAA-MM-GG)
                 if (d.includes('/')) {
                     const p = d.split('/');
                     if (p.length === 3) d = `${p[2]}-${p[1]}-${p[0]}`;
                 }
 
                 // 4. SISTEMIAMO L'ORA (Deve essere solo HH:mm)
-                // Puliamo l'ora da eventuali spazi o trattini residui
+                // Se o è un trattino o non è valida, la lasciamo vuota invece di mettere l'ora attuale
                 o = o.trim();
-                if (o === "-" || o === "") {
-                    // Se l'ora è un trattino o vuota, mettiamo un'ora di default o quella attuale
-                    const adesso = new Date();
-                    o = adesso.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+                if (o === "-" || !o || o === "undefined") {
+                    o = ""; 
                 } else {
-                    // Prende solo i primi 5 caratteri (HH:mm) per evitare errori con i secondi
-                    o = o.slice(0, 5);
+                    o = o.slice(0, 5); // Taglia eventuali secondi
                 }
 
                 if (campoData) campoData.value = d;
@@ -1346,6 +1345,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
