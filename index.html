@@ -1304,46 +1304,41 @@ async function salvaIntervento() {
         }
 
         async function creaInterventoDaChiamata(id) {
-            // 1. Troviamo i dati della chiamata
+            // 1. Troviamo la chiamata
             const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
-            if (!chiamata) {
-                alert("Chiamata non trovata!");
-                return;
-            }
+            if (!chiamata) return;
 
-            // 2. Compiliamo i campi dell'Intervento Corrente (quelli in alto nella pagina)
-            // Usiamo toUpperCase() perché nel tuo modulo preferisci il tutto maiuscolo
+            // 2. Passiamo i dati al modulo Intervento Corrente (come già stiamo facendo)
             document.getElementById('nomeScuola').value = (chiamata.scuola || '').toUpperCase();
             document.getElementById('plessoEdificio').value = (chiamata.plesso || '').toUpperCase();
             document.getElementById('descrizioneLavori').value = chiamata.note || '';
     
-            // Se la chiamata ha una data specifica, la passiamo al modulo intervento
-            if (chiamata.data) {
-                document.getElementById('dataIntervento').value = chiamata.data;
-            }
-    
-            // Se la chiamata ha un'ora, la usiamo come ora di inizio
-            if (chiamata.ora) {
-                document.getElementById('oraInizio').value = chiamata.ora.trim().slice(0, 5);
-            }
+            if (chiamata.data) document.getElementById('dataIntervento').value = chiamata.data;
+            if (chiamata.ora) document.getElementById('oraInizio').value = chiamata.ora.trim().slice(0, 5);
 
-            // 3. Chiudiamo il registro chiamate
-            toggleRegistroChiamate();
-
-            // 4. Portiamo l'utente in alto all'inizio del modulo
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            // 5. (Opzionale) Cambiamo lo stato della chiamata in "In Lavorazione" sul server
+            // 3. --- QUESTA È LA PARTE MANCANTE ---
+            // Aggiorniamo lo stato sul server per spostarla nello storico
             try {
-                await fetch('/api/chiamate', {
+                const response = await fetch('/api/chiamate', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...chiamata, stato: 'In Lavorazione' })
+                    body: JSON.stringify({ 
+                        ...chiamata, 
+                        stato: 'Completata' // <--- La segniamo come completata
+                    })
                 });
-                caricaChiamate(); // Ricarica la lista per vedere il cambio colore
+
+                if (response.ok) {
+                    // Ricarichiamo la lista così scompare dalle attive e va nello storico
+                    await caricaChiamate();
+                }
             } catch (e) {
-                console.error("Errore aggiornamento stato:", e);
+                console.error("Errore nello spostamento allo storico:", e);
             }
+
+            // 4. Chiudiamo il registro e torniamo in alto
+            toggleRegistroChiamate();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 
@@ -1387,6 +1382,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
