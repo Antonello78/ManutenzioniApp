@@ -1122,37 +1122,41 @@ async function salvaIntervento() {
             const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
             if (!chiamata) return;
 
-            // 1. Blocchiamo l'ID così il reset automatico non scatta
             chiamataInModificaId = id;
 
-            // 2. Testi
+            // Popoliamo i campi testo
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // 3. LA DATA (Il punto critico)
+            // GESTIONE DATA E ORA - Versione Definitiva
             setTimeout(() => {
-                let dataPerInput = "";
-                let valoreData = chiamata.data || "";
-
-                if (valoreData.includes('/')) {
-                    // Se è in formato italiano GG/MM/AAAA, la giriamo per il quadratino
-                    const p = valoreData.split('/');
-                    dataPerInput = `${p[2]}-${p[1]}-${p[0]}`;
-                } else if (valoreData.includes('-')) {
-                    // Se è già AAAA-MM-GG (formato tecnico)
-                    dataPerInput = valoreData;
-                }
-
                 const campoData = document.getElementById('chiamataDataManuale');
                 const campoOra = document.getElementById('chiamataOraManuale');
 
-                if (campoData) campoData.value = dataPerInput;
-                if (campoOra) campoOra.value = chiamata.ora || "";
+                let dataVal = chiamata.data || "";
+                let oraVal = chiamata.ora || "";
+
+                // Se la data è nel formato GG/MM/AAAA (italiano), la trasformiamo in AAAA-MM-GG
+                if (dataVal.includes('/')) {
+                    const parti = dataVal.split('/');
+                    if (parti.length === 3) {
+                        dataVal = `${parti[2]}-${parti[1].padStart(2, '0')}-${parti[0].padStart(2, '0')}`;
+                    }
+                }
+
+                // Pulizia ora (se per caso arrivano secondi o altro)
+                if (oraVal && oraVal.length > 5) {
+                    oraVal = oraVal.slice(0, 5);
+                }
+
+                if (campoData) campoData.value = dataVal;
+                if (campoOra) campoOra.value = oraVal;
+                
+                console.log("Tentativo caricamento data:", dataVal, "ora:", oraVal);
             }, 150);
 
-            // 4. Pulsante
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
@@ -1328,6 +1332,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
