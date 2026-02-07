@@ -1017,11 +1017,18 @@ async function salvaIntervento() {
                         <div class="flex justify-between items-start">
                             <div class="flex flex-col">
                                 <span class="font-bold text-gray-900 uppercase text-sm">${c.scuola} ${c.stato === 'Completata' ? '✅' : ''}</span>
-                                <span class="text-[10px] text-gray-500 font-bold">${c.dataOra || 'Data non disponibile'}</span>
+                                ${c.plesso ? `<span class="text-[11px] text-blue-600 font-extrabold italic uppercase">${c.plesso}</span>` : ''}
+                                <span class="text-[10px] text-gray-500 font-bold">${c.dataOra || (c.data ? formatDate(c.data) + ' ' + (c.ora || '') : 'Data N.D.')}</span>
                             </div>
-                            <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor} text-white">
-                                ${c.priorita}
-                            </span>
+                            
+                            <div class="flex items-center gap-2">
+                                <button onclick="caricaPerModifica('${c.id}')" class="p-1.5 text-orange-500 bg-white border border-orange-200 rounded shadow-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor} text-white">
+                                    ${c.priorita}
+                                </span>
+                            </div>
                         </div>
                         <p class="text-sm mt-1 text-gray-700 font-medium italic">"${c.note}"</p>
                 
@@ -1037,7 +1044,7 @@ async function salvaIntervento() {
                                         `<button onclick="cambiaStatoChiamata('${c.id}', 'In Lavorazione')" class="text-[10px] bg-orange-500 text-white px-3 py-1.5 rounded font-bold uppercase">Lavora</button>` : 
                                         `
                                         <button onclick="cambiaStatoChiamata('${c.id}', 'In Attesa')" class="text-[10px] bg-gray-400 text-white px-2 py-1.5 rounded font-bold uppercase">Reset</button>
-                                        <button onclick="completaChiamataEArchivia('${c.id}')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completo</button>
+                                        <button onclick="creaInterventoDaChiamata('${c.id}')" class="text-[10px] bg-green-600 text-white px-3 py-1.5 rounded font-bold uppercase">Completo</button>
                                         `
                                     )
                                 }
@@ -1310,6 +1317,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
