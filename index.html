@@ -956,7 +956,7 @@ async function salvaIntervento() {
             if (modal) {
                 modal.classList.toggle('hidden');
                 if (!modal.classList.contains('hidden')) {
-                    // MODIFICA QUI: mettiamo l'ora attuale SOLO se NON c'è un ID in modifica
+                    // SE NON C'È UN ID IN MODIFICA, allora metti l'ora di adesso
                     if (!chiamataInModificaId) {
                         impostaDataOraAttuale();
                     }
@@ -1023,7 +1023,7 @@ async function salvaIntervento() {
                             <div class="flex flex-col">
                                 <span class="font-bold text-gray-900 uppercase text-sm">${c.scuola} ${c.stato === 'Completata' ? '✅' : ''}</span>
                                 ${c.plesso ? `<span class="text-[11px] text-blue-600 font-extrabold italic uppercase">${c.plesso}</span>` : ''}
-                                <span class="text-[10px] text-gray-500 font-bold">${c.dataOra || (c.data ? formatDate(c.data) + ' ' + (c.ora || '') : 'Data N.D.')}</span>
+                                <span class="text-[10px] text-gray-500 font-bold">${(c.data ? formatDate(c.data) : '')} ${(c.ora || '')}</span>
                             </div>
                             
                             <div class="flex items-center gap-2">
@@ -1118,33 +1118,24 @@ async function salvaIntervento() {
 
         function caricaPerModifica(id) {
             const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
-            if (!chiamata) {
-                console.error("Chiamata non trovata!");
-                return;
-            }
+            if (!chiamata) return;
 
-            console.log("Dati recuperati dal database:", chiamata); // Questo apparirà nella console F12
-
+            // 1. Blocchiamo subito l'ID
             chiamataInModificaId = id;
 
-            // Popoliamo i campi testo
+            // 2. Riempiamo i campi subito
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // Applichiamo la data e l'ora con un ritardo maggiore per sicurezza
+            // 3. Forziamo data e ora con un ritardo per evitare che toggleRegistro o caricaChiamate le sovrascrivano
             setTimeout(() => {
-                const campoData = document.getElementById('chiamataDataManuale');
-                const campoOra = document.getElementById('chiamataOraManuale');
+                if (chiamata.data) document.getElementById('chiamataDataManuale').value = chiamata.data;
+                if (chiamata.ora) document.getElementById('chiamataOraManuale').value = chiamata.ora;
+            }, 150);
 
-                // Se nel database i campi si chiamano 'data' e 'ora', li usiamo
-                if (chiamata.data) campoData.value = chiamata.data;
-                if (chiamata.ora) campoOra.value = chiamata.ora;
-                
-                console.log("Ho provato a inserire:", chiamata.data, chiamata.ora);
-            }, 200); 
-
+            // 4. Cambiamo il pulsante
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
@@ -1320,6 +1311,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
