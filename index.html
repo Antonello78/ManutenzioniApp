@@ -1071,16 +1071,18 @@ async function salvaIntervento() {
     
             if (campoData) campoData.value = dataOggi;
             if (campoOra) campoOra.value = oraAdesso;
-            
+        } // <--- QUESTA GRAFFA MANCAVA E BLOCCAVA TUTTO
+
         async function nuovaChiamata() {
             const scuola = document.getElementById('chiamataScuola').value;
-            const plesso = document.getElementById('chiamataPlesso').value; // Recupera il nuovo campo
+            const plesso = document.getElementById('chiamataPlesso').value; 
             const data = document.getElementById('chiamataDataManuale').value;
             const ora = document.getElementById('chiamataOraManuale').value;
             const priorita = document.getElementById('chiamataPriorita').value;
             const note = document.getElementById('chiamataNote').value;
 
             if (!scuola) { alert("Inserire almeno il nome della scuola."); return; }
+            
             const payload = {
                 id: chiamataInModificaId || Date.now().toString(),
                 scuola,
@@ -1093,7 +1095,6 @@ async function salvaIntervento() {
             };
 
             try {
-                // Se c'è un ID in modifica usiamo il metodo PUT, altrimenti POST per la nuova
                 const method = chiamataInModificaId ? 'PUT' : 'POST';
                 const response = await fetch('/api/chiamate', {
                     method: method,
@@ -1102,23 +1103,19 @@ async function salvaIntervento() {
                 });
 
                 if (response.ok) {
-                    resetModuloChiamata(); // Torna in modalità "Aggiungi" e svuota i campi
-                    caricaChiamate(); // Ricarica la lista per vedere le modifiche
+                    resetModuloChiamata();
+                    caricaChiamate();
                 }
             } catch (err) {
-                console.error("Errore durante il salvataggio della chiamata:", err);
+                console.error("Errore salvataggio:", err);
             }
         }
 
         function caricaPerModifica(id) {
-            // Cerchiamo la chiamata nell'array globale usando l'ID
             const chiamata = chiamateGlobali.find(c => c.id == id);
             if (!chiamata) return;
 
-            // Impostiamo l'ID globale per dire al sistema che stiamo modificando
             chiamataInModificaId = id;
-    
-            // Ripopoliamo i campi del modulo con i dati salvati
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataDataManuale').value = chiamata.data || '';
@@ -1126,57 +1123,30 @@ async function salvaIntervento() {
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // Trasformiamo il pulsante: diventa Arancione e cambia testo
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
             btn.classList.add('bg-orange-600');
-    
-            // Scrolliamo verso l'alto per portare il modulo bene in vista
+            
             document.querySelector('.bg-gray-50.border-b').scrollIntoView({ behavior: 'smooth' });
-        }    
+        }
 
         async function cambiaStatoChiamata(id, nuovoStato) {
             try {
                 const res = await fetch('/api/chiamate');
                 const chiamate = await res.json();
                 const chiamata = chiamate.find(c => c.id == id);
-        
+                
                 if (chiamata) {
-                    // --- LOGICA PER TRASFERIMENTO DATI (Solo se premi Completo) ---
-                    if (nuovoStato === 'Completata') {
-                        if (confirm("Vuoi trasferire i dati della chiamata nei 'Dettagli Intervento Corrente'?")) {
-                            const inputScuola = document.getElementById('nomeScuola');
-                            const inputDescrizione = document.getElementById('descrizioneLavori');
-                    
-                            if (inputScuola && inputDescrizione) {
-                                inputScuola.value = chiamata.scuola;
-                                inputDescrizione.value = `Intervento del ${chiamata.dataOra.split(' - ')[0]}: ${chiamata.note}`;
-                        
-                                toggleRegistroChiamate();
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                                if (typeof calcolaManodopera === "function") calcolaManodopera();
-                                showMessage('success', 'Dati trasferiti nel modulo!');
-                            }
-                        }
-                    }
-
-                    // --- NUOVA LOGICA: AGGIORNA LO STATO INVECE DI ELIMINARE ---
                     chiamata.stato = nuovoStato;
-            
-                    // Usiamo POST o PUT per aggiornare la chiamata sul server
                     await fetch('/api/chiamate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(chiamata)
                     });
-            
-                    // Ricarichiamo la lista (che ora filtrerà in base al tasto Attive/Storico)
                     caricaChiamate();
                 }
-            } catch (e) { 
-                console.error("Errore nel cambio stato:", e); 
-            }
+            } catch (e) { console.error(e); }
         }
 
         async function eliminaChiamata(id) {
@@ -1328,6 +1298,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
