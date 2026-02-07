@@ -1124,26 +1124,37 @@ async function salvaIntervento() {
 
             chiamataInModificaId = id;
 
+            // Testi normali
             document.getElementById('chiamataScuola').value = chiamata.scuola || '';
             document.getElementById('chiamataPlesso').value = chiamata.plesso || '';
             document.getElementById('chiamataPriorita').value = chiamata.priorita || 'Bassa';
             document.getElementById('chiamataNote').value = chiamata.note || '';
 
-            // Gestione intelligente della data per la matita
+            // GESTIONE DATA (Conversione per il campo HTML)
             setTimeout(() => {
-                if (chiamata.data && chiamata.ora) {
-                    // Se è una chiamata nuova con campi separati
-                    document.getElementById('chiamataDataManuale').value = chiamata.data;
-                    document.getElementById('chiamataOraManuale').value = chiamata.ora;
-                } else if (chiamata.dataOra) {
-                    // Se è una chiamata vecchia (es: "2025-11-20 10:30")
-                    // Proviamo a dividerla per riempire i campi
-                    const parti = chiamata.dataOra.split(' ');
-                    if (parti[0]) document.getElementById('chiamataDataManuale').value = parti[0];
-                    if (parti[1]) document.getElementById('chiamataOraManuale').value = parti[1];
+                let dataFormattata = "";
+                
+                if (chiamata.data) {
+                    // Se la data è salvata come AAAA-MM-GG la usiamo direttamente
+                    if (chiamata.data.includes('-')) {
+                        dataFormattata = chiamata.data;
+                    } 
+                    // Se invece è salvata in formato italiano GG/MM/AAAA, la convertiamo per il quadratino
+                    else if (chiamata.data.includes('/')) {
+                        const parti = chiamata.data.split('/');
+                        dataFormattata = `${parti[2]}-${parti[1]}-${parti[0]}`;
+                    }
                 }
-            }, 150);
 
+                const campoData = document.getElementById('chiamataDataManuale');
+                const campoOra = document.getElementById('chiamataOraManuale');
+                
+                if (campoData) campoData.value = dataFormattata;
+                if (campoOra) campoOra.value = chiamata.ora || "";
+                
+            }, 200);
+
+            // Pulsante Arancione
             const btn = document.getElementById('btnAggiungiChiamata');
             btn.innerText = "Aggiorna Chiamata";
             btn.classList.remove('bg-blue-600');
@@ -1319,6 +1330,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
