@@ -1302,6 +1302,49 @@ async function salvaIntervento() {
                 alert('Errore di connessione.');
             }
         }
+
+        async function creaInterventoDaChiamata(id) {
+            // 1. Troviamo i dati della chiamata
+            const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
+            if (!chiamata) {
+                alert("Chiamata non trovata!");
+                return;
+            }
+
+            // 2. Compiliamo i campi dell'Intervento Corrente (quelli in alto nella pagina)
+            // Usiamo toUpperCase() perché nel tuo modulo preferisci il tutto maiuscolo
+            document.getElementById('nomeScuola').value = (chiamata.scuola || '').toUpperCase();
+            document.getElementById('plessoEdificio').value = (chiamata.plesso || '').toUpperCase();
+            document.getElementById('descrizioneLavori').value = chiamata.note || '';
+    
+            // Se la chiamata ha una data specifica, la passiamo al modulo intervento
+            if (chiamata.data) {
+                document.getElementById('dataIntervento').value = chiamata.data;
+            }
+    
+            // Se la chiamata ha un'ora, la usiamo come ora di inizio
+            if (chiamata.ora) {
+                document.getElementById('oraInizio').value = chiamata.ora.trim().slice(0, 5);
+            }
+
+            // 3. Chiudiamo il registro chiamate
+            toggleRegistroChiamate();
+
+            // 4. Portiamo l'utente in alto all'inizio del modulo
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // 5. (Opzionale) Cambiamo lo stato della chiamata in "In Lavorazione" sul server
+            try {
+                await fetch('/api/chiamate', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...chiamata, stato: 'In Lavorazione' })
+                });
+                caricaChiamate(); // Ricarica la lista per vedere il cambio colore
+            } catch (e) {
+                console.error("Errore aggiornamento stato:", e);
+            }
+        }
     </script>
 
     <button onclick="toggleRegistroChiamate()" class="fixed bottom-24 left-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-50">
@@ -1344,6 +1387,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
