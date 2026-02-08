@@ -1386,6 +1386,22 @@ async function salvaIntervento() {
                 console.error("Errore nel segnare l'appuntamento:", err);
             }
         }
+
+        function copiaEVaiAlCalendar(scuola, plesso, note) {
+            // Prepariamo il testo completo da incollare nella descrizione/note di Calendar
+            const testoDescrizione = `SCUOLA: ${scuola}\nPLESSO: ${plesso || 'N.D.'}\nINTERVENTO: ${note || 'Nessuna nota'}`;
+    
+            // Copia negli appunti del telefono o PC
+            navigator.clipboard.writeText(testoDescrizione).then(() => {
+                // Avviso per confermare la copia
+                alert("Dati copiati!\nOra scegli il giorno su Google Calendar e incolla il testo nel campo NOTE/DESCRIZIONE.");
+                // Apre Google Calendar sulla vista settimanale
+                window.open("https://calendar.google.com/calendar/r/week", '_blank');
+            }).catch(err => {
+                console.error("Errore copia:", err);
+                alert("Errore durante la copia dei dati.");
+            });
+        }
     </script>
 
     <button onclick="toggleRegistroChiamate()" class="fixed bottom-24 left-6 bg-blue-600 text-white p-4 rounded-full shadow-2xl z-50">
@@ -1428,6 +1444,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
