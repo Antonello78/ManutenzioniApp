@@ -1399,15 +1399,24 @@ async function salvaIntervento() {
             }
         }
 
-        function copiaEVaiAlCalendar(scuola, plesso, note) {
-            // Prepariamo il testo completo da incollare nella descrizione/note di Calendar
+        function copiaEVaiAlCalendar(id, scuola, plesso, note) {
+            // 1. Prepariamo il testo completo per le note
             const testoDescrizione = `SCUOLA: ${scuola}\nPLESSO: ${plesso || 'N.D.'}\nINTERVENTO: ${note || 'Nessuna nota'}`;
-    
-            // Copia negli appunti del telefono o PC
+            
+            // 2. Copia negli appunti
             navigator.clipboard.writeText(testoDescrizione).then(() => {
-                // Avviso per confermare la copia
-                alert("Dati copiati!\nOra scegli il giorno su Google Calendar e incolla il testo nel campo NOTE/DESCRIZIONE.");
-                // Apre Google Calendar sulla vista settimanale
+                
+                // 3. AUTOMAZIONE: Segna l'appuntamento come "Preso" (icona verde)
+                // Se non lo era già, lo attiva. Se lo era, lo lascia tale.
+                // Recuperiamo lo stato attuale per non "spegnerlo" se è già attivo
+                const chiamata = chiamateGlobali.find(c => c.id === id);
+                if (chiamata && !chiamata.appuntamentoPreso) {
+                    toggleAppuntamento(id);
+                }
+        
+                alert("Dati copiati e appuntamento segnato!\nOra scegli il giorno su Google Calendar e incolla il testo.");
+                
+                // 4. Apre Google Calendar sulla vista mensile (come hai impostato tu)
                 window.open("https://calendar.google.com/calendar/r/month", '_blank');
             }).catch(err => {
                 console.error("Errore copia:", err);
@@ -1456,6 +1465,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
