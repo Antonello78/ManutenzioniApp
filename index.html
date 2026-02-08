@@ -1098,7 +1098,8 @@ async function salvaIntervento() {
                 ora,
                 priorita,
                 note,
-                stato: 'In attesa'
+                stato: 'In attesa',
+                appuntamentoPreso: false // <-- AGGIUNTA: di base l'appuntamento non è preso
             };
 
             try {
@@ -1390,6 +1391,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
