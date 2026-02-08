@@ -1035,12 +1035,13 @@ async function salvaIntervento() {
                             
                             <div class="flex items-center gap-2">
                                 ${(c.stato && c.stato.toLowerCase() === 'in attesa') || c.stato === 'In Lavorazione' ? `
-                                    <button onclick="event.stopPropagation(); copiaEVaiAlCalendar('${sPulita}', '${pPulito}', '${nPulite}')" 
-                                            class="p-1.5 border border-blue-200 rounded bg-blue-50 text-blue-600 shadow-sm" title="Copia dati per Note">
+                                    <button onclick="event.stopPropagation(); copiaEVaiAlCalendar('${c.id}', '${sPulita}', '${pPulito}', '${nPulite}')" 
+                                            class="p-1.5 border border-blue-200 rounded bg-blue-50 text-blue-600 shadow-sm" title="Copia e segna come preso">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
                                         </svg>
-                                    </button>
+                                    </button> 
+                                            
         
                                     <button onclick="event.stopPropagation(); toggleAppuntamento('${c.id}')" class="p-1.5 border rounded shadow-sm ${c.appuntamentoPreso ? 'bg-green-100 border-green-500 text-green-700' : 'bg-white border-gray-300 text-gray-400'}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1465,6 +1466,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
