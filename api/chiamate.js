@@ -6,26 +6,35 @@ export default async function handler(req, res) {
     try {
         switch (method) {
             case 'GET':
-                // Recupera tutte le chiavi che iniziano con 'chiamata:'
                 const keys = await kv.keys('chiamata:*');
                 if (keys.length === 0) return res.status(200).json([]);
                 
-                // Recupera i dettagli di tutte le chiamate
                 const chiamate = await kv.mget(...keys);
-                // Ordina per data (le più recenti sopra) o per priorità
+                // Restituisce le chiamate non nulle
                 return res.status(200).json(chiamate.filter(c => c !== null));
 
             case 'POST':
                 const nuovaChiamata = req.body;
-                // Se la chiamata ha già un ID, usa quello, altrimenti creane uno nuovo
                 const id = nuovaChiamata.id || Date.now();
                 nuovaChiamata.id = id;
+                
+                // INNOVAZIONE: Inizializza l'array materiali se non esiste
+                if (!nuovaChiamata.materiali) {
+                    nuovaChiamata.materiali = [];
+                }
+                
                 await kv.set(`chiamata:${id}`, nuovaChiamata);
                 return res.status(201).json(nuovaChiamata);
 
             case 'PUT':
                 const chiamataAggiornata = req.body;
                 if (!chiamataAggiornata.id) throw new Error('ID mancante');
+                
+                // Assicura che la struttura materiali sia preservata
+                if (!chiamataAggiornata.materiali) {
+                    chiamataAggiornata.materiali = [];
+                }
+
                 await kv.set(`chiamata:${chiamataAggiornata.id}`, chiamataAggiornata);
                 return res.status(200).json(chiamataAggiornata);
 
@@ -40,6 +49,6 @@ export default async function handler(req, res) {
         }
     } catch (error) {
         console.error('Errore API Chiamate:', error);
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: 'Errore interno del server' });
     }
 }
