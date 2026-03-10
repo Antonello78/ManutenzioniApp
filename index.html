@@ -1517,7 +1517,7 @@ async function salvaIntervento() {
                 <button onclick="chiudiListaSpesa()" class="text-2xl font-bold leading-none">&times;</button>
             </div>
             <div id="contenutoListaSpesa" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-3 text-left">
-                </div>
+            </div>
             <div class="p-3 bg-white rounded-b-2xl">
                 <button onclick="chiudiListaSpesa()" class="w-full py-3 bg-gray-800 text-white font-black rounded-xl uppercase text-[10px] tracking-widest">Chiudi</button>
             </div>
@@ -1530,22 +1530,21 @@ async function salvaIntervento() {
             const modal = document.getElementById('modalListaSpesa');
             const contenitore = document.getElementById('contenutoListaSpesa');
             
-            // Filtriamo le chiamate usando la tua variabile globale: chiamateGlobali
             const chiamateMancanti = chiamateGlobali.filter(c => 
                 c.materiali && c.materiali.some(m => !m.preso) && c.stato !== 'Completata'
             );
 
             if (chiamateMancanti.length === 0) {
-                contenitore.innerHTML = `<p class="text-center text-gray-500 italic py-10 text-xs font-semibold">Tutto pronto! Nessun materiale mancante.</p>`;
+                contenitore.innerHTML = `<p class="text-center text-gray-500 italic py-10 text-xs font-semibold uppercase">Tutto pronto! Nessun materiale mancante.</p>`;
             } else {
                 let html = "";
                 chiamateMancanti.forEach(c => {
                     const daPrendere = c.materiali.filter(m => !m.preso);
                     html += `
-                        <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-                            <p class="text-[9px] font-black text-blue-600 uppercase mb-0.5">${c.plesso || 'Sede Centrale'}</p>
-                            <p class="font-bold text-gray-900 text-xs uppercase mb-2 border-b border-gray-100 pb-1">${c.scuola}</p>
-                            <ul class="space-y-2">
+                        <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm mb-3">
+                            <p class="text-[9px] font-black text-blue-600 uppercase mb-0.5 text-left">${c.plesso || 'Sede Centrale'}</p>
+                            <p class="font-bold text-gray-900 text-xs uppercase mb-2 border-b border-gray-100 pb-1 text-left">${c.scuola}</p>
+                            <ul class="space-y-2 text-left">
                                 ${daPrendere.map(m => `
                                     <li class="flex items-center gap-2 text-[11px] text-gray-700 font-bold bg-gray-50 p-2 rounded-lg">
                                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full shadow-sm"></span>
@@ -1565,10 +1564,33 @@ async function salvaIntervento() {
             document.getElementById('modalListaSpesa').classList.add('hidden');
         }
 
-        // Assicurati che le altre tue funzioni (nuovaChiamata, toggleMateriale, ecc.) siano sotto qui
+        // --- FUNZIONE AGGIUNTA PER IL PUNTO 2 (SALVATAGGIO) ---
+        async function toggleMateriale(idChiamata, index) {
+            const chiamata = chiamateGlobali.find(c => c.id == idChiamata);
+            if (!chiamata) return;
+
+            chiamata.materiali[index].preso = !chiamata.materiali[index].preso;
+
+            try {
+                await fetch('/api/chiamate', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(chiamata)
+                });
+                // Ricarica la lista per il Punto 1 (grafica) e Punto 3 (Lista spesa)
+                caricaChiamate(); 
+            } catch (err) {
+                console.error("Errore salvataggio materiale:", err);
+            }
+        }
+
+        // Qui sotto incolla le tue funzioni originali: caricaChiamate, nuovaChiamata, ecc.
+        // Ricorda di controllare che in caricaChiamate il blocco dei materiali sia così:
+        // <span class="${m.preso ? 'line-through text-gray-400 font-normal' : 'text-gray-800 font-bold'}">${m.testo}</span>
     </script>
 </body>
 </html>
+
 
 
 
