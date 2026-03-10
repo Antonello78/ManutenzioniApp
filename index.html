@@ -1112,7 +1112,15 @@ async function salvaIntervento() {
             const ora = document.getElementById('chiamataOraManuale').value;
             const priorita = document.getElementById('chiamataPriorita').value;
             const note = document.getElementById('chiamataNote').value;
-
+        
+            // --- NUOVA LOGICA MATERIALI ---
+            const materialiInput = document.getElementById('chiamataMateriali').value;
+            // Crea l'array solo se il campo non è vuoto, altrimenti array vuoto
+            const materiali = materialiInput 
+                ? materialiInput.split(',').map(m => ({ testo: m.trim(), preso: false })).filter(m => m.testo !== "")
+                : [];
+            // ------------------------------
+        
             if (!scuola) { alert("Inserire almeno il nome della scuola."); return; }
             
             const payload = {
@@ -1123,10 +1131,11 @@ async function salvaIntervento() {
                 ora,
                 priorita,
                 note,
+                materiali, // <-- Aggiunto al payload
                 stato: 'In attesa',
-                appuntamentoPreso: false // <-- AGGIUNTA: di base l'appuntamento non è preso
+                appuntamentoPreso: false 
             };
-
+        
             try {
                 const method = chiamataInModificaId ? 'PUT' : 'POST';
                 const response = await fetch('/api/chiamate', {
@@ -1134,8 +1143,12 @@ async function salvaIntervento() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
+        
                 if (response.ok) {
+                    // Assicurati di svuotare anche il nuovo campo materiali nel reset
+                    if(document.getElementById('chiamataMateriali')) {
+                        document.getElementById('chiamataMateriali').value = '';
+                    }
                     resetModuloChiamata();
                     caricaChiamate();
                 }
@@ -1467,6 +1480,7 @@ async function salvaIntervento() {
     </div>
 </body>
 </html>
+
 
 
 
