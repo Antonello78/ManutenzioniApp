@@ -1471,13 +1471,17 @@ async function salvaIntervento() {
                     <h2 id="titoloRegistro" class="font-bold text-blue-900 uppercase">Registro Chiamate</h2>
                     <p id="sottotitoloRegistro" class="text-[10px] text-blue-700 font-semibold uppercase">In attesa di intervento</p>
                 </div>
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <button onclick="apriListaSpesa()" class="text-[10px] bg-green-600 text-white px-2 py-1 rounded font-bold uppercase shadow-sm">
+                        🛒 Spesa
+                    </button>
                     <button onclick="toggleFiltroChiamate()" id="btnFiltroChiamate" class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded font-bold uppercase shadow-sm">
                         Vedi Storico
                     </button>
                     <button onclick="toggleRegistroChiamate()" class="text-2xl text-gray-500">&times;</button>
                 </div>
             </div>
+            
             <div class="p-4 bg-gray-50 border-b space-y-2">
                 <div class="flex gap-2">
                     <input type="text" id="chiamataScuola" oninput="this.value = this.value.toUpperCase()" placeholder="Scuola" class="w-2/3 p-2 border rounded">
@@ -1496,11 +1500,71 @@ async function salvaIntervento() {
                 <input type="text" id="chiamataMateriali" placeholder="Materiali necessari (es: Serratura, Viti, Cavo)" class="w-full p-2 border rounded text-sm italic border-blue-200 focus:border-blue-500 outline-none">
                 <button id="btnAggiungiChiamata" onclick="nuovaChiamata()" class="w-full bg-blue-600 text-white p-2 rounded font-bold uppercase transition-colors">Aggiungi Chiamata</button>
             </div>
+
             <div id="listaChiamate" class="flex-1 overflow-y-auto p-4 space-y-3 bg-white"></div>
         </div>
     </div>
+
+    <div id="modalListaSpesa" class="fixed inset-0 bg-black bg-opacity-60 hidden z-[70] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl w-full max-w-sm max-h-[80vh] flex flex-col shadow-2xl border border-gray-200">
+            <div class="p-4 border-b flex justify-between items-center bg-green-600 text-white rounded-t-2xl">
+                <h3 class="font-bold uppercase text-xs tracking-widest">Materiali da acquistare</h3>
+                <button onclick="chiudiListaSpesa()" class="text-2xl font-bold leading-none">&times;</button>
+            </div>
+            <div id="contenutoListaSpesa" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-3 text-left">
+                </div>
+            <div class="p-3 bg-white rounded-b-2xl">
+                <button onclick="chiudiListaSpesa()" class="w-full py-3 bg-gray-800 text-white font-black rounded-xl uppercase text-[10px] tracking-widest">Chiudi</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // STEP 3: Funzioni JavaScript per la Lista Spesa
+        function apriListaSpesa() {
+            const modal = document.getElementById('modalListaSpesa');
+            const contenitore = document.getElementById('contenutoListaSpesa');
+            
+            // Filtriamo le chiamate usando la tua variabile globale: chiamateGlobali
+            const chiamateMancanti = chiamateGlobali.filter(c => 
+                c.materiali && c.materiali.some(m => !m.preso) && c.stato !== 'Completata'
+            );
+
+            if (chiamateMancanti.length === 0) {
+                contenitore.innerHTML = `<p class="text-center text-gray-500 italic py-10 text-xs font-semibold">Tutto pronto! Nessun materiale mancante.</p>`;
+            } else {
+                let html = "";
+                chiamateMancanti.forEach(c => {
+                    const daPrendere = c.materiali.filter(m => !m.preso);
+                    html += `
+                        <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+                            <p class="text-[9px] font-black text-blue-600 uppercase mb-0.5">${c.plesso || 'Sede Centrale'}</p>
+                            <p class="font-bold text-gray-900 text-xs uppercase mb-2 border-b border-gray-100 pb-1">${c.scuola}</p>
+                            <ul class="space-y-2">
+                                ${daPrendere.map(m => `
+                                    <li class="flex items-center gap-2 text-[11px] text-gray-700 font-bold bg-gray-50 p-2 rounded-lg">
+                                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full shadow-sm"></span>
+                                        ${m.testo}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `;
+                });
+                contenitore.innerHTML = html;
+            }
+            modal.classList.remove('hidden');
+        }
+
+        function chiudiListaSpesa() {
+            document.getElementById('modalListaSpesa').classList.add('hidden');
+        }
+
+        // Assicurati che le altre tue funzioni (nuovaChiamata, toggleMateriale, ecc.) siano sotto qui
+    </script>
 </body>
 </html>
+
 
 
 
