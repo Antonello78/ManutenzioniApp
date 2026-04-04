@@ -435,7 +435,7 @@
             }
         }
         
-       function calcolaManodopera() {
+function calcolaManodopera() {
     const oraInizioInput = document.getElementById('oraInizio').value;
     const oraFineInput = document.getElementById('oraFine').value;
     const numOperai = parseInt(document.getElementById('numOperai').value) || 1;
@@ -465,23 +465,30 @@
         document.getElementById('costoAggiuntivo').textContent = '---';
         document.getElementById('costoUscita').textContent = costoUscitaInput.toFixed(2).replace('.', ',') + ' €'; 
         document.getElementById('resNIntervento').textContent = nIntervento || '---';
-        document.getElementById('resData').textContent = formatDate(dataIntervento) || '---';
+        document.getElementById('resData').textContent = (typeof formatDate === "function" ? formatDate(dataIntervento) : dataIntervento) || '---';
         document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
         document.getElementById('resOrario').textContent = (oraInizioInput && oraFineInput) ? oraInizioInput + ' - ' + oraFineInput : '---';
         document.getElementById('resOperai').textContent = numOperai;
 
         // AGGIORNAMENTO PER STAMPA DESCRIZIONE:
-        // Prende il testo dalla box e lo inserisce nel campo anteprima/stampa
         if(document.getElementById('resDescrizione')) {
             document.getElementById('resDescrizione').textContent = document.getElementById('descrizioneLavori').value || '---';
+        }
+
+        // --- AGGIUNTA MATERIALI NEL RESET ---
+        if(document.getElementById('resMateriali')) {
+            document.getElementById('resMateriali').textContent = document.getElementById('materialiUtilizzati').value || '---';
         }
 
         if(document.getElementById('oreOltre60')) document.getElementById('oreOltre60').textContent = '---';
     }
 
     if (!oraInizioInput || !oraFineInput || isNaN(numOperai) || numOperai < 1) { resetResults(); return; }
-    const oraInizioMinuti = parseTime(oraInizioInput);
-    const oraFineMinuti = parseTime(oraFineInput);
+    
+    // Assicurati che le funzioni parseTime siano definite nel tuo script
+    const oraInizioMinuti = typeof parseTime === "function" ? parseTime(oraInizioInput) : 0;
+    const oraFineMinuti = typeof parseTime === "function" ? parseTime(oraFineInput) : 0;
+    
     if (oraFineMinuti <= oraInizioMinuti) { resetResults(); return; }
     
     const durataMinutiEffettiva = oraFineMinuti - oraInizioMinuti;
@@ -489,7 +496,8 @@
     const minutiFatturabili = Math.ceil(minutiManodoperaEffettivi / 15) * 15;
     
     let tariffaOraria = tariffaBaseInput; 
-    if (flagUrgenza || oraInizioMinuti < ORARIO_INIZIO_ORD || oraFineMinuti > ORARIO_FINE_ORD) {
+    // ORARIO_INIZIO_ORD e ORARIO_FINE_ORD devono essere definiti globalmente
+    if (flagUrgenza || (typeof ORARIO_INIZIO_ORD !== 'undefined' && oraInizioMinuti < ORARIO_INIZIO_ORD) || (typeof ORARIO_FINE_ORD !== 'undefined' && oraFineMinuti > ORARIO_FINE_ORD)) {
         tariffaOraria = tariffaBaseInput + 10;
     }
     
@@ -498,7 +506,6 @@
     const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
     const totaleManodopera = costoUscitaInput + costoManodoperaAggiuntiva;
 
-    // --- NUOVA LOGICA FORMATAZIONE ORE (1 + RESTO) ---
     const oreTotaliDecimali = minutiFatturabili / 60;
     let testoOreDettaglio = "";
     if (minutiFatturabili > 60) {
@@ -510,8 +517,6 @@
     // AGGIORNAMENTO DATI A VIDEO E RIEPILOGO
     document.getElementById('tariffaOraria').textContent = tariffaOraria.toFixed(2).replace('.', ',') + ' €/ora';
     document.getElementById('minutiEffettivi').textContent = durataMinutiEffettiva + ' min x ' + numOperai + ' op = ' + minutiManodoperaEffettivi + ' min/uomo';
-    
-    // Questa è la riga che volevi modificare:
     document.getElementById('minutiFatturabili').textContent = `${minutiFatturabili} min ${testoOreDettaglio}`;
     
     if(document.getElementById('oreOltre60')) {
@@ -522,16 +527,23 @@
     document.getElementById('costoAggiuntivo').textContent = costoManodoperaAggiuntiva.toFixed(2).replace('.', ',') + ' €';
     document.getElementById('totaleManodopera').textContent = totaleManodopera.toFixed(2).replace('.', ',') + ' €'; 
     document.getElementById('resNIntervento').textContent = nIntervento || 'N/A';
-    document.getElementById('resData').textContent = formatDate(dataIntervento); 
+    document.getElementById('resData').textContent = typeof formatDate === "function" ? formatDate(dataIntervento) : dataIntervento; 
     document.getElementById('resScuola').textContent = (nomeScuola || 'N/A') + (plessoEdificio ? ' / ' + plessoEdificio : '');
     document.getElementById('resOrario').textContent = oraInizioInput + ' - ' + oraFineInput;
     
     let operaiDisplay = numOperai;
     if (flagUrgenza) { operaiDisplay += ' <span class="text-red-600 font-bold">(URGENZA)</span>'; }
     document.getElementById('resOperai').innerHTML = operaiDisplay;
+
+    // AGGIORNAMENTO DESCRIZIONE E MATERIALI NEL RIEPILOGO FINALE
     if(document.getElementById('resDescrizione')) {
-    document.getElementById('resDescrizione').textContent = document.getElementById('descrizioneLavori').value || '---';
-}
+        document.getElementById('resDescrizione').textContent = document.getElementById('descrizioneLavori').value || '---';
+    }
+    
+    // --- AGGIUNTA MATERIALI NEL CALCOLO FINALE ---
+    if(document.getElementById('resMateriali')) {
+        document.getElementById('resMateriali').textContent = document.getElementById('materialiUtilizzati').value || '---';
+    }
 }
         async function caricaDatiServer() {
             try {
@@ -1617,6 +1629,7 @@ async function salvaIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
