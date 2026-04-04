@@ -1381,50 +1381,65 @@ async function salvaIntervento() {
         }
 
         async function creaInterventoDaChiamata(id) {
-            // 1. Troviamo la chiamata
-            const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
-            if (!chiamata) return;
+    // 1. Troviamo la chiamata nel registro globale
+    const chiamata = chiamateGlobali.find(c => String(c.id) === String(id));
+    if (!chiamata) return;
 
-            // 2. Compiliamo i campi dell'Intervento Corrente
-            const campoScuola = document.getElementById('nomeScuola');
-            const campoPlesso = document.getElementById('plessoEdificio');
-            const campoDesc = document.getElementById('descrizioneLavori');
-            const campoData = document.getElementById('dataIntervento');
-            const campoOraInizio = document.getElementById('oraInizio');
+    // 2. Puntiamo ai campi del modulo Intervento
+    const campoScuola = document.getElementById('nomeScuola');
+    const campoPlesso = document.getElementById('plessoEdificio');
+    const campoDesc = document.getElementById('descrizioneLavori');
+    const campoData = document.getElementById('dataIntervento');
+    const campoOraInizio = document.getElementById('oraInizio');
+    const campoMateriali = document.getElementById('materialiUtilizzati');
 
-            campoScuola.value = (chiamata.scuola || '').toUpperCase();
-            campoPlesso.value = (chiamata.plesso || '').toUpperCase();
-            campoDesc.value = chiamata.note || '';
-    
-            if (chiamata.data) campoData.value = chiamata.data;
-            if (chiamata.ora) campoOraInizio.value = chiamata.ora.trim().slice(0, 5);
+    // 3. Popoliamo i campi con i dati della chiamata
+    campoScuola.value = (chiamata.scuola || '').toUpperCase();
+    campoPlesso.value = (chiamata.plesso || '').toUpperCase();
+    campoDesc.value = chiamata.note || '';
 
-            // --- NOVITÀ: Attiviamo i calcoli ---
-            // Lanciamo manualmente l'evento 'input' così il sistema legge i nuovi testi
-            campoScuola.dispatchEvent(new Event('input'));
-            campoPlesso.dispatchEvent(new Event('input'));
-    
-            // Eseguiamo la funzione che calcola i totali
-            if (typeof calcolaManodopera === "function") {
-                calcolaManodopera();
-            }
+    // --- LOGICA MATERIALI ---
+    if (chiamata.materiali && chiamata.materiali.length > 0) {
+        // Creiamo la lista testuale (es: - Lampadina\n- Reattore)
+        const listaMat = chiamata.materiali.map(m => `- ${m.nome}`).join('\n');
+        campoMateriali.value = listaMat;
+    } else {
+        campoMateriali.value = '';
+    }
+    // -------------------------
 
-            // 3. Aggiorniamo lo stato sul server (Storico)
-            try {
-                await fetch('/api/chiamate', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...chiamata, stato: 'Completata' })
-                });
-                await caricaChiamate();
-            } catch (e) {
-                console.error("Errore nello spostamento allo storico:", e);
-            }
+    if (chiamata.data) campoData.value = chiamata.data;
+    if (chiamata.ora) campoOraInizio.value = chiamata.ora.trim().slice(0, 5);
 
-            // 4. Chiudiamo il registro e torniamo in alto
-            toggleRegistroChiamate();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+    // 4. Attiviamo gli eventi di input per aggiornare l'interfaccia e l'anteprima
+    campoScuola.dispatchEvent(new Event('input'));
+    campoPlesso.dispatchEvent(new Event('input'));
+    campoMateriali.dispatchEvent(new Event('input')); // Aggiorna resMateriali
+
+    // Eseguiamo il ricalcolo totale e aggiornamento riepilogo
+    if (typeof calcolaManodopera === "function") {
+        calcolaManodopera();
+    }
+
+    // 5. Aggiorniamo lo stato della chiamata sul server (la spostiamo nello storico)
+    try {
+        await fetch('/api/chiamate', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...chiamata, stato: 'Completata' })
+        });
+        // Ricarichiamo la lista del registro per riflettere il cambio stato
+        if (typeof caricaChiamate === "function") {
+            await caricaChiamate();
         }
+    } catch (e) {
+        console.error("Errore nello spostamento allo storico:", e);
+    }
+
+    // 6. Chiudiamo il registro e torniamo alla schermata principale
+    toggleRegistroChiamate();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
         async function toggleAppuntamento(id) {
             try {
@@ -1602,6 +1617,7 @@ async function salvaIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
