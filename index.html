@@ -620,14 +620,19 @@ async function salvaIntervento() {
     let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
     
-    // CREAZIONE OGGETTO CON DESCRIZIONE LAVORI
+    // CREAZIONE OGGETTO CON TUTTI I DATI (INCLUSI MATERIALI)
     const interventoObj = {
         id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
         nIntervento: nInterventoCompleto,
         dataIntervento: document.getElementById('dataIntervento').value, 
         nomeScuola: document.getElementById('nomeScuola').value,
         plessoEdificio: document.getElementById('plessoEdificio').value,
-        descrizioneLavori: document.getElementById('descrizioneLavori').value, // <--- Salvataggio descrizione
+        descrizioneLavori: document.getElementById('descrizioneLavori').value,
+        
+        // --- AGGIUNTA MATERIALI PER IL DATABASE ---
+        materialiUtilizzati: document.getElementById('materialiUtilizzati').value, 
+        // ------------------------------------------
+
         oraInizio: document.getElementById('oraInizio').value,
         oraFine: document.getElementById('oraFine').value,
         numOperai: parseInt(document.getElementById('numOperai').value),
@@ -640,7 +645,7 @@ async function salvaIntervento() {
 
     try {
         const response = await fetch('/api/saveIntervento', { 
-            method: 'POST',
+            method: 'POST', 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 numeroIntervento: numeroCorrenteSequenziale,
@@ -669,14 +674,21 @@ async function salvaIntervento() {
         
         localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
         
-        // Reset dei campi dopo il salvataggio
+        // --- RESET DEI CAMPI DOPO IL SALVATAGGIO ---
         document.getElementById('nomeScuola').value = '';
         document.getElementById('plessoEdificio').value = '';
         
+        // Svuota Materiali
+        const campoMat = document.getElementById('materialiUtilizzati');
+        if (campoMat) {
+            campoMat.value = '';
+            campoMat.readOnly = false;
+        }
+
         const desc = document.getElementById('descrizioneLavori');
         if (desc) {
             desc.value = '';
-            desc.readOnly = false; // Sblocca per il prossimo inserimento
+            desc.readOnly = false;
             desc.style.backgroundColor = "#ffffff";
         }
 
@@ -1629,6 +1641,7 @@ async function salvaIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
