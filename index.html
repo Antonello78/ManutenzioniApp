@@ -1422,10 +1422,14 @@ async function salvaIntervento() {
     campoPlesso.value = (chiamata.plesso || '').toUpperCase();
     campoDesc.value = chiamata.note || '';
 
-    // --- LOGICA MATERIALI ---
+    // --- LOGICA MATERIALI CORRETTA ---
     if (chiamata.materiali && chiamata.materiali.length > 0) {
-        // Creiamo la lista testuale (es: - Lampadina\n- Reattore)
-        const listaMat = chiamata.materiali.map(m => `- ${m.nome}`).join('\n');
+        // Proviamo a prendere 'nome' oppure 'testo' o l'oggetto stesso
+        const listaMat = chiamata.materiali.map(m => {
+            const nomePulito = m.nome || m.testo || m; // Prova diverse proprietà
+            return `- ${nomePulito}`;
+        }).join('\n');
+        
         campoMateriali.value = listaMat;
     } else {
         campoMateriali.value = '';
@@ -1641,6 +1645,7 @@ async function salvaIntervento() {
     </script>
 </body>
 </html>
+
 
 
 
