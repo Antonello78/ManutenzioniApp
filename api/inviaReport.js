@@ -11,6 +11,7 @@ export default async function handler(req, res) {
         
         const { 
             nIntervento, dataIntervento, nomeScuola, plessoEdificio, descrizioneLavori, 
+            materialiUtilizzati, // <--- AGGIUNTO QUESTO
             orario, operai, tariffa, minutiFatturabili, 
             costoUscita, costoAggiuntivo, totale, destinatario 
         } = reportData;
@@ -23,8 +24,8 @@ export default async function handler(req, res) {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: process.env.GMAIL_USER, // La tua email Gmail
-                pass: process.env.GMAIL_APP_PASSWORD // La "Password per le App" (NON la password normale)
+                user: process.env.GMAIL_USER, 
+                pass: process.env.GMAIL_APP_PASSWORD 
             }
         });
 
@@ -34,54 +35,66 @@ export default async function handler(req, res) {
             <head>
                 <style>
                     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                    .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
-                    .header { background-color: #1e40af; color: white; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; }
-                    .details, .summary { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
-                    .detail-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted #eee; }
-                    .summary { background-color: #dbeafe; font-size: 1.2em; font-weight: bold; text-align: center; padding: 10px 0; }
-                    .total { font-size: 1.5em; color: #1e40af; }
-                    .logo-container { text-align: center; margin-bottom: 20px; }
+                    .container { width: 100%; max-width: 650px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 10px; }
+                    .header { background: #1d4ed8; color: #fff; padding: 15px; border-radius: 8px 8px 0 0; text-align: center; }
+                    .section { margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee; }
+                    .section-title { font-weight: bold; font-size: 11px; text-transform: uppercase; color: #666; margin-bottom: 5px; border-bottom: 1px solid #ddd; padding-bottom: 3px; }
+                    .value { font-size: 15px; color: #111; font-weight: 500; }
+                    .italic-val { font-style: italic; white-space: pre-wrap; font-size: 14px; }
+                    .details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+                    .detail-row { border-bottom: 1px dashed #eee; padding: 5px 0; display: flex; justify-content: space-between; }
+                    .summary { margin-top: 20px; background: #fffde7; padding: 15px; border: 2px solid #fbc02d; border-radius: 8px; text-align: center; }
+                    .total { font-size: 24px; font-weight: bold; color: #d32f2f; }
                 </style>
             </head>
             <body>
                 <div class="container">
-                    <div class="logo-container">
-                        <img src="https://raw.githubusercontent.com/Antonello78/ManutenzioniApp/6d4ebdefb301ca8a1fe41627af387efd5b142665/LOGO%20ANTONELLO.png" 
-                             alt="Logo Aziendale" width="200" style="display: block; width: 200px; max-width: 200px; height: auto;">
-                    </div>
                     <div class="header">
-                        <h2>Riepilogo Dati di Fatturazione Manodopera</h2>
+                        <h2 style="margin: 0;">Riepilogo Intervento</h2>
+                        <p style="margin: 5px 0 0 0;">N° ${nIntervento} — ${dataIntervento}</p>
                     </div>
-                    <h3>Dettagli Intervento</h3>
-                    <div class="details">
-                        <div class="detail-row"><span>N° Intervento:</span><strong>${nIntervento}</strong></div>
-                        <div class="detail-row"><span>Data:</span><strong>${dataIntervento}</strong></div>
-                        <div class="detail-row"><span>Scuola:</span><strong>${nomeScuola}</strong></div>
-                        <div class="detail-row"><span>Plesso/Edificio:</span><strong>${plessoEdificio || 'N/A'}</strong></div>
-                        <div style="margin-top: 10px; padding: 10px; background-color: #f8fafc; border-radius: 4px; border: 1px solid #e2e8f0;">
-    <span style="font-size: 0.8em; color: #1e40af; font-weight: bold; text-transform: uppercase;">Descrizione Lavori:</span><br>
-    <div style="margin-top: 5px; white-space: pre-wrap; font-size: 0.95em;">${descrizioneLavori || 'Nessun dettaglio inserito.'}</div>
-</div>
-                        <div class="detail-row"><span>Orario Lavorato:</span><strong>${orario}</strong></div>
-                        <div class="detail-row"><span>Operai:</span><strong>${operai}</strong></div>
+
+                    <div style="margin-top: 20px;">
+                        <div class="section">
+                            <div class="section-title">Ente / Scuola</div>
+                            <div class="value">${nomeScuola}</div>
+                            ${plessoEdificio ? `<div class="value" style="font-size: 13px; color: #666;">Plesso: ${plessoEdificio}</div>` : ''}
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">Descrizione Lavori</div>
+                            <div class="italic-val">${descrizioneLavori || '---'}</div>
+                        </div>
+
+                        <div class="section" style="border-left: 4px solid #1d4ed8;">
+                            <div class="section-title" style="color: #1d4ed8;">Materiali Utilizzati</div>
+                            <div class="italic-val">${materialiUtilizzati || 'Nessun materiale specificato'}</div>
+                        </div>
+                        <div class="section">
+                            <div class="section-title">Dettagli Tecnici</div>
+                            <div class="detail-row"><span>Orario:</span><strong>${orario}</strong></div>
+                            <div class="detail-row"><span>Personale:</span><strong>${operai} Operaio/i</strong></div>
+                            <div class="detail-row"><span>Tariffa Oraria:</span><strong>${tariffa}</strong></div>
+                            <div class="detail-row"><span>Minuti Fatturabili:</span><strong>${minutiFatturabili}</strong></div>
+                        </div>
+
+                        <div class="section">
+                            <div class="section-title">Costi</div>
+                            <div class="detail-row"><span>Costo Uscita (1ª Ora):</span><strong>${costoUscita}</strong></div>
+                            <div class="detail-row"><span>Manodopera Aggiuntiva:</span><strong>${costoAggiuntivo}</strong></div>
+                        </div>
                     </div>
-                    <h3>Dettagli Calcolo</h3>
-                    <div class="details">
-                        <div class="detail-row"><span>Tariffa Oraria Applicata:</span><strong>${tariffa}</strong></div>
-                        <div class="detail-row"><span>Tempo Fatturabile:</span><strong>${minutiFatturabili}</strong></div>
-                        <div class="detail-row"><span>Costo di Uscita (Incl. 1ª Ora):</span><strong>${costoUscita}</strong></div>
-                        <div class="detail-row"><span>Manodopera Aggiuntiva:</span><strong>${costoAggiuntivo}</strong></div>
-                    </div>
+                    
                     <div class="summary">
-                        <p>TOTALE MANODOPERA:</p> 
+                        <p style="margin: 0; font-weight: bold;">TOTALE MANODOPERA:</p> 
                         <span class="total">${totale}</span>
                     </div>
 
-                    <p style="margin-top: 30px; font-size: 0.8em; color: #666; text-align: center; border-top: 1px solid #eee; pt-4;">
+                    <p style="margin-top: 30px; font-size: 0.8em; color: #666; text-align: center; border-top: 1px solid #eee; padding-top: 15px;">
                         Email inviata tramite sistema automatico Ditta D'Angelo Antonello.<br>
                         <span style="font-size: 0.9em; font-weight: bold;">v1.4.0 (Release 2026)</span>
                     </p>
-                    </div>
+                </div>
             </body>
             </html>
         `;
@@ -98,16 +111,6 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('Errore inviaReport:', error);
-        return res.status(500).json({ 
-            message: 'Errore interno del server durante l\'invio.', 
-            error: error.message 
-        });
+        return res.status(500).json({ message: 'Errore durante l\'invio dell\'email.' });
     }
 }
-
-
-
-
-
-
-
