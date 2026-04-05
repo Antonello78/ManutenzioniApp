@@ -27,6 +27,9 @@ export default async function handler(req, res) {
         };
 
         const dataItaliana = formatDateIT(dataIntervento);
+        
+        // Prepariamo la stringa dell'istituto con il plesso per il testo di accompagnamento
+        const istitutoCompleto = plessoEdificio ? `${nomeScuola} - Plesso: ${plessoEdificio}` : nomeScuola;
 
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -44,11 +47,9 @@ export default async function handler(req, res) {
                     body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.4; color: #334155; background-color: #f1f5f9; margin: 0; padding: 15px; }
                     .letter-container { max-width: 650px; margin: 0 auto; background: #ffffff; padding: 30px; border-radius: 8px; }
                     
-                    /* Intro: Ripristinato testo originale lungo */
                     .intro-section { margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; }
-                    .intro-section p { font-size: 15px; margin: 10px 0; color: #1e293b; }
+                    .intro-section p { font-size: 15px; margin: 8px 0; color: #1e293b; }
                     
-                    /* Box Documento compatto */
                     .document-box { border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; background: #fff; }
                     .document-header { background: #1e40af; color: #ffffff; padding: 8px; text-align: center; }
                     .document-header h3 { margin: 0; font-size: 16px; text-transform: uppercase; }
@@ -79,7 +80,7 @@ export default async function handler(req, res) {
                     
                     <div class="intro-section">
                         <p>Alla c.a. del <strong>D.S.G.A.</strong>,</p>
-                        <p>con la presente si trasmette formalmente il riepilogo tecnico relativo all'intervento di manutenzione <strong>N° ${nIntervento}</strong>, eseguito in data <strong>${dataItaliana}</strong> presso l'Istituto <strong>${nomeScuola}</strong>.</p>
+                        <p>con la presente si trasmette formalmente il riepilogo tecnico relativo all'intervento di manutenzione <strong>N° ${nIntervento}</strong>, eseguito in data <strong>${dataItaliana}</strong> presso l'Istituto <strong>${istitutoCompleto}</strong>.</p>
                         <p>Il dettaglio completo delle lavorazioni, dei materiali e dei costi è riportato nel prospetto informativo sottostante.</p>
                         <p>Restiamo a disposizione per ogni eventuale necessità.<br>Cordiali saluti.</p>
                         <p><strong>Ditta D'Angelo Antonello</strong></p>
@@ -108,7 +109,6 @@ export default async function handler(req, res) {
                                 <tr class="doc-row"><td class="doc-label">Operai</td><td class="doc-value">${operai}</td></tr>
                                 <tr class="doc-row"><td class="doc-label">Tempo Fatturabile</td><td class="doc-value">${minutiFatturabili}</td></tr>
                                 <tr class="doc-row"><td class="doc-label">Costo Uscita</td><td class="doc-value">${costoUscita}</td></tr>
-                                <tr class="doc-row"><td class="doc-label">Quota Extra</td><td class="doc-value">${costoAggiuntivo}</td></tr>
                             </table>
 
                             <div class="total-badge">
