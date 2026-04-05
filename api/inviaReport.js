@@ -91,9 +91,9 @@ export default async function handler(req, res) {
                     <div class="intro-section">
                         <p>Alla c.a. del <strong>D.S.G.A.</strong>,</p>
                         <p>con la presente si trasmette il riepilogo tecnico dell'intervento <strong>N° ${nIntervento}</strong>, eseguito in data <strong>${dataItaliana}</strong> presso l'Istituto <strong>${istitutoCompleto}</strong>.</p>
-                        <p>Il dettaglio delle lavorazioni e dei costi è riportato nel prospetto sottostante.</p>
+                        <p>Il dettaglio delle lavorazioni e dei costi della sola manodopera è riportato nel prospetto sottostante.</p>
                         <p>Restiamo a disposizione per ogni necessità.<br>Cordiali saluti.</p>
-                        <p><strong>Ditta D'Angelo Antonello</strong></p>
+                        <p><strong>D'Angelo Antonello</strong></p>
                     </div>
 
                     <div class="document-box">
