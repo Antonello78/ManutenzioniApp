@@ -19,7 +19,6 @@ export default async function handler(req, res) {
              return res.status(400).json({ message: 'Indirizzo email di destinazione mancante.' });
         }
 
-        // Funzione interna per formattare la data in formato italiano (GG/MM/AAAA)
         const formatDateIT = (dateStr) => {
             if (!dateStr) return '';
             const parts = dateStr.split('-');
@@ -42,30 +41,42 @@ export default async function handler(req, res) {
             <html>
             <head>
                 <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #334155; background-color: #f1f5f9; margin: 0; padding: 20px; }
-                    .letter-container { max-width: 650px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+                    /* Riduzione margini generali per la stampa */
+                    body { font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.4; color: #334155; background-color: #f1f5f9; margin: 0; padding: 10px; }
+                    .letter-container { max-width: 650px; margin: 0 auto; background: #ffffff; padding: 25px; border-radius: 8px; }
                     
-                    .intro-section { margin-bottom: 40px; border-bottom: 2px solid #f1f5f9; padding-bottom: 30px; }
-                    .intro-section p { font-size: 16px; margin: 10px 0; color: #1e293b; }
+                    /* Sezione intro più compatta */
+                    .intro-section { margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; }
+                    .intro-section p { font-size: 15px; margin: 5px 0; color: #1e293b; }
                     
-                    .document-box { border: 2px solid #e2e8f0; border-radius: 6px; overflow: hidden; background: #fff; }
-                    .document-header { background: #1e40af; color: #ffffff; padding: 15px; text-align: center; }
-                    .document-header h3 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
+                    /* Box Documento con meno spazio interno */
+                    .document-box { border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; background: #fff; }
+                    .document-header { background: #1e40af; color: #ffffff; padding: 10px; text-align: center; }
+                    .document-header h3 { margin: 0; font-size: 16px; text-transform: uppercase; }
                     
-                    .document-body { padding: 25px; }
-                    .doc-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-                    .doc-row { border-bottom: 1px solid #f1f5f9; }
-                    .doc-label { padding: 10px 0; font-size: 12px; color: #64748b; font-weight: bold; width: 40%; text-transform: uppercase; }
-                    .doc-value { padding: 10px 0; font-size: 14px; color: #0f172a; text-align: right; font-weight: 600; }
+                    .document-body { padding: 15px; }
                     
-                    .section-header { font-size: 12px; font-weight: 800; color: #1e40af; text-transform: uppercase; margin-bottom: 8px; margin-top: 20px; }
-                    .doc-longtext { background: #f8fafc; padding: 15px; border-radius: 6px; font-size: 14px; color: #334155; border: 1px solid #e2e8f0; font-style: italic; white-space: pre-wrap; margin-bottom: 20px; }
+                    .doc-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+                    .doc-row { border-bottom: 1px solid #f8fafc; }
+                    .doc-label { padding: 6px 0; font-size: 11px; color: #64748b; font-weight: bold; width: 40%; text-transform: uppercase; }
+                    .doc-value { padding: 6px 0; font-size: 13px; color: #0f172a; text-align: right; font-weight: 600; }
                     
-                    .total-badge { background: #1e40af; color: white; padding: 25px; text-align: center; margin-top: 25px; border-radius: 6px; }
-                    .total-badge span { display: block; font-size: 11px; text-transform: uppercase; opacity: 0.9; letter-spacing: 1px; margin-bottom: 5px; }
-                    .total-badge strong { font-size: 32px; font-weight: 800; }
+                    /* Box testi lunghi ristretti */
+                    .section-header { font-size: 11px; font-weight: 800; color: #1e40af; text-transform: uppercase; margin-bottom: 4px; margin-top: 12px; }
+                    .doc-longtext { background: #f8fafc; padding: 10px; border-radius: 4px; font-size: 13px; color: #334155; border: 1px solid #f1f5f9; font-style: italic; white-space: pre-wrap; margin-bottom: 10px; }
+                    
+                    /* Badge totale più sottile */
+                    .total-badge { background: #1e40af; color: white; padding: 15px; text-align: center; margin-top: 15px; border-radius: 4px; }
+                    .total-badge span { display: block; font-size: 10px; text-transform: uppercase; opacity: 0.9; margin-bottom: 2px; }
+                    .total-badge strong { font-size: 24px; font-weight: 800; }
 
-                    .footer { text-align: center; font-size: 11px; color: #94a3b8; margin-top: 40px; }
+                    .footer { text-align: center; font-size: 10px; color: #94a3b8; margin-top: 20px; }
+                    
+                    /* Regola specifica per la stampa */
+                    @media print {
+                        body { padding: 0; background: white; }
+                        .letter-container { box-shadow: none; border: none; width: 100%; padding: 10px; }
+                    }
                 </style>
             </head>
             <body>
@@ -73,10 +84,8 @@ export default async function handler(req, res) {
                     
                     <div class="intro-section">
                         <p>Alla c.a. del <strong>D.S.G.A.</strong>,</p>
-                        <p>con la presente si trasmette il riepilogo tecnico relativo all'intervento di manutenzione <strong>N° ${nIntervento}</strong>, eseguito in data <strong>${dataItaliana}</strong> presso l'Istituto <strong>${nomeScuola}</strong>.</p>
-                        <p>Il dettaglio completo delle lavorazioni, dei materiali e dei costi è riportato nel prospetto informativo sottostante.</p>
-                        <p>Restiamo a disposizione per ogni eventuale necessità.<br>Cordiali saluti.</p>
-                        <p><strong>Ditta D'Angelo Antonello</strong></p>
+                        <p>Invio rapporto tecnico <strong>N° ${nIntervento}</strong> del <strong>${dataItaliana}</strong> - Ist. <strong>${nomeScuola}</strong>.</p>
+                        <p>Cordiali saluti, <strong>Ditta D'Angelo Antonello</strong></p>
                     </div>
 
                     <div class="document-box">
@@ -91,18 +100,17 @@ export default async function handler(req, res) {
                             </table>
 
                             <div class="section-header">Descrizione Lavorazioni</div>
-                            <div class="doc-longtext">${descrizioneLavori || 'Nessuna descrizione fornita.'}</div>
+                            <div class="doc-longtext">${descrizioneLavori || '-'}</div>
 
                             <div class="section-header">Materiali Utilizzati</div>
-                            <div class="doc-longtext">${materialiUtilizzati || 'Nessun materiale utilizzato.'}</div>
+                            <div class="doc-longtext">${materialiUtilizzati || '-'}</div>
 
                             <div class="section-header">Dettaglio Manodopera</div>
                             <table class="doc-table">
                                 <tr class="doc-row"><td class="doc-label">Orario</td><td class="doc-value">${orario}</td></tr>
-                                <tr class="doc-row"><td class="doc-label">Operai</td><td class="doc-value">${operai}</td></tr>
                                 <tr class="doc-row"><td class="doc-label">Tempo Fatturabile</td><td class="doc-value">${minutiFatturabili}</td></tr>
                                 <tr class="doc-row"><td class="doc-label">Costo Uscita</td><td class="doc-value">${costoUscita}</td></tr>
-                                <tr class="doc-row"><td class="doc-label">Manodopera Extra</td><td class="doc-value">${costoAggiuntivo}</td></tr>
+                                <tr class="doc-row"><td class="doc-label">Extra</td><td class="doc-value">${costoAggiuntivo}</td></tr>
                             </table>
 
                             <div class="total-badge">
@@ -113,8 +121,7 @@ export default async function handler(req, res) {
                     </div>
 
                     <div class="footer">
-                        <strong>Ditta D'Angelo Antonello</strong><br>
-                        Sistema Automatico Notifiche — v1.4.0 (2026)
+                        Ditta D'Angelo Antonello — Sistema Report v1.4.0
                     </div>
                 </div>
             </body>
