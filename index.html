@@ -1310,7 +1310,7 @@ function caricaIntervento(id) {
         }
 
         // QUESTA FUNZIONE ORA INVIA IL REPORT PROFESSIONALE TRAMITE API
-        async function inviaReport() {
+async function inviaReport() {
             // Recupero i dati dai nuovi ID corretti presenti nel tuo HTML
             const reportData = {
                 nIntervento: document.getElementById('nIntervento').value,
@@ -1318,14 +1318,19 @@ function caricaIntervento(id) {
                 nomeScuola: document.getElementById('nomeScuola').value,
                 plessoEdificio: document.getElementById('plessoEdificio').value,
                 descrizioneLavori: document.getElementById('descrizioneLavori').value,
+                
+                // --- AGGIUNTA FONDAMENTALE: ---
+                materialiUtilizzati: document.getElementById('materialiUtilizzati').value, 
+                // ------------------------------
+
                 orario: `${document.getElementById('oraInizio').value} - ${document.getElementById('oraFine').value}`,
-                operai: document.getElementById('numOperai').value, // Corretto da numeroOperai
-                tariffa: document.getElementById('tariffaOraria').innerText, // Corretto .innerText
-                minutiFatturabili: document.getElementById('minutiFatturabili').innerText, // Corretto ID
+                operai: document.getElementById('numOperai').value, 
+                tariffa: document.getElementById('tariffaOraria').innerText, 
+                minutiFatturabili: document.getElementById('minutiFatturabili').innerText, 
                 costoUscita: document.getElementById('costoUscita').innerText,
                 costoAggiuntivo: document.getElementById('costoAggiuntivo').innerText,
-                totale: document.getElementById('totaleManodopera').innerText, // Corretto ID
-                destinatario: document.getElementById('emailDestinatario').value || prompt("A quale email vuoi inviare il report?", "manutenzione@scuola.it")
+                totale: document.getElementById('totaleManodopera').innerText, 
+                destinatario: document.getElementById('emailDestinatario')?.value || prompt("A quale email vuoi inviare il report?", "manutenzione@scuola.it")
             };
 
             if (!reportData.destinatario) {
