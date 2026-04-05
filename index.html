@@ -1427,15 +1427,14 @@ function caricaIntervento(id) {
     campoPlesso.value = (chiamata.plesso || '').toUpperCase();
     campoDesc.value = chiamata.note || '';
 
-    // --- LOGICA MATERIALI CORRETTA ---
+    // --- LOGICA MATERIALI: ELENCO CONTINUO ---
     if (chiamata.materiali && chiamata.materiali.length > 0) {
-        // Proviamo a prendere 'nome' oppure 'testo' o l'oggetto stesso
-        const listaMat = chiamata.materiali.map(m => {
-            const nomePulito = m.nome || m.testo || m; // Prova diverse proprietà
-            return `- ${nomePulito}`;
-        }).join('\n');
-        
-        campoMateriali.value = listaMat;
+        // Uniamo i nomi dei materiali separandoli con " - "
+        const listaMatContinua = chiamata.materiali
+            .map(m => (m.nome || m.testo || m)) // Prende il nome del materiale
+            .join(' - ');                      // Li unisce con un trattino
+            
+        campoMateriali.value = listaMatContinua;
     } else {
         campoMateriali.value = '';
     }
