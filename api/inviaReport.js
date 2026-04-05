@@ -126,7 +126,7 @@ export default async function handler(req, res) {
 
                     <div class="footer">
                         <strong>Ditta D'Angelo Antonello</strong> - Manutenzioni Generali<br>
-                        Sistema Automatico Notifiche — v1.4.1
+                        Sistema Automatico Notifiche — v1.5.0
                     </div>
                 </div>
             </body>
