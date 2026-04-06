@@ -579,7 +579,7 @@ function nuovoIntervento() {
     document.getElementById('nomeScuola').value = '';
     document.getElementById('plessoEdificio').value = '';
     
-    // CORRETTO: Svuota e sblocca
+    // CORRETTO: Svuota e sblocca Descrizione
     const desc = document.getElementById('descrizioneLavori');
     if (desc) {
         desc.value = '';
@@ -587,20 +587,37 @@ function nuovoIntervento() {
         desc.disabled = false;
         desc.style.backgroundColor = "#ffffff"; // Forza il bianco
     }
+
+    // AGGIUNTA: Svuota e sblocca Materiali
+    const mat = document.getElementById('materialiUtilizzati');
+    if (mat) {
+        mat.value = '';
+        mat.readOnly = false;
+        mat.disabled = false;
+        mat.style.backgroundColor = "#ffffff"; // Forza il bianco
+    }
+
+    // Reset dei testi nel riepilogo visivo (Dettaglio Calcolo e Totale)
+    if (document.getElementById('resDescrizione')) document.getElementById('resDescrizione').innerText = '---';
+    if (document.getElementById('resMateriali')) document.getElementById('resMateriali').innerText = '---';
     
-    // ... resto del codice (orari, operai, ecc.) rimane uguale ...
+    // Reset orari, operai e opzioni
     document.getElementById('oraInizio').value = '09:00';
     document.getElementById('oraFine').value = '10:15';
     document.getElementById('numOperai').value = '1';
     document.getElementById('flagUrgenza').checked = false;
 
+    // Reset tariffe predefinite
     if (document.getElementById('inputCostoUscita')) document.getElementById('inputCostoUscita').value = 75;
     if (document.getElementById('inputTariffaBase')) document.getElementById('inputTariffaBase').value = 38;
 
+    // Re-inizializza i calcoli e gli input
     if (typeof initializeInputs === "function") initializeInputs();
     if (typeof calcolaManodopera === "function") calcolaManodopera();
     
     showMessage('success', 'Nuova scheda pronta');
+    
+    // Torna in alto nella pagina
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
