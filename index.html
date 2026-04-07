@@ -650,7 +650,7 @@ async function salvaIntervento() {
     let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
     
-    // CREAZIONE OGGETTO CON TUTTI I DATI (INCLUSI MATERIALI)
+    // CREAZIONE OGGETTO CON TUTTI I DATI
     const interventoObj = {
         id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
         nIntervento: nInterventoCompleto,
@@ -658,10 +658,11 @@ async function salvaIntervento() {
         nomeScuola: document.getElementById('nomeScuola').value,
         plessoEdificio: document.getElementById('plessoEdificio').value,
         descrizioneLavori: document.getElementById('descrizioneLavori').value,
-        
-        // --- AGGIUNTA MATERIALI PER IL DATABASE ---
         materialiUtilizzati: document.getElementById('materialiUtilizzati').value, 
-        // ------------------------------------------
+        
+        // --- AGGIUNTA FONDAMENTALE: SALVATAGGIO IMPORTO EURO (€) ---
+        costoMateriali: parseFloat(document.getElementById('costoMateriali').value) || 0,
+        // -----------------------------------------------------------
 
         oraInizio: document.getElementById('oraInizio').value,
         oraFine: document.getElementById('oraFine').value,
@@ -708,11 +709,17 @@ async function salvaIntervento() {
         document.getElementById('nomeScuola').value = '';
         document.getElementById('plessoEdificio').value = '';
         
-        // Svuota Materiali
+        // Svuota Materiali (Testo e Prezzo)
         const campoMat = document.getElementById('materialiUtilizzati');
         if (campoMat) {
             campoMat.value = '';
             campoMat.readOnly = false;
+        }
+        
+        const campoCostoMat = document.getElementById('costoMateriali');
+        if (campoCostoMat) {
+            campoCostoMat.value = '0'; // Resetta a zero l'importo materiali
+            campoCostoMat.readOnly = false;
         }
 
         const desc = document.getElementById('descrizioneLavori');
