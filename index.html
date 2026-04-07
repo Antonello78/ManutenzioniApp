@@ -168,8 +168,6 @@
                 class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-sm outline-none transition-all resize-none text-gray-900" 
                 placeholder="I materiali verranno caricati dal registro chiamate o inseriti qui..."></textarea>
             </div>
-    
-            </div>
 
             <div class="border-t border-gray-200 pt-4 mt-4"></div>
 
@@ -211,7 +209,7 @@
 
             <div class="mt-8 pt-6 border-t border-gray-200">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4 no-print">Dettaglio Calcolo e Totale</h2>
-                            
+                                            
                 <div class="print-avoid-break">
                     <div id="riepilogoDati" class="space-y-2 text-gray-700 p-4 border rounded-lg bg-gray-50 mb-4">
                         <h3 class="text-xl font-bold mb-2 border-b pb-1 text-blue-700">Dati Intervento</h3>
@@ -243,17 +241,17 @@
                     </div>
 
                     <div class="mb-4 p-4 border rounded-lg bg-gray-50 text-gray-700">
-    <div class="flex justify-between items-center mb-2 border-b pb-1">
-        <h3 class="text-xl font-bold text-blue-700">Materiali Utilizzati</h3>
-        <div class="flex items-center space-x-1">
-            <span class="text-lg font-bold text-blue-700">€</span>
-            <input type="number" id="costoMateriali" step="0.01" value="0" oninput="calcolaManodopera()" 
-                   class="w-28 px-2 py-1 border border-blue-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-right font-extrabold text-blue-800 bg-white" 
-                   placeholder="0.00" readonly>
-        </div>
-    </div>
-    <div id="resMateriali" class="text-sm italic whitespace-pre-wrap leading-relaxed">---</div>
-</div>
+                        <div class="flex justify-between items-center mb-2 border-b pb-1">
+                            <h3 class="text-xl font-bold text-blue-700">Materiali Utilizzati</h3>
+                            <div class="flex items-center space-x-1">
+                                <span class="text-lg font-bold text-blue-700">€</span>
+                                <input type="number" id="costoMateriali" step="0.01" value="0" oninput="calcolaManodopera()" 
+                                       class="w-28 px-2 py-1 border border-blue-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-right font-extrabold text-blue-800 bg-white" 
+                                       placeholder="0.00" readonly>
+                            </div>
+                        </div>
+                        <div id="resMateriali" class="text-sm italic whitespace-pre-wrap leading-relaxed">---</div>
+                    </div>
 
                     <div class="space-y-2 text-gray-700">
                         <div class="flex justify-between items-center text-lg">
@@ -287,8 +285,8 @@
                     <span class="text-xl font-bold text-blue-800">TOTALE INTERVENTO (€):</span>
                     <span id="totaleManodopera" class="text-3xl font-extrabold text-blue-800">75,00 €</span>
                 </div>
-
-            </div> </div> <div id="archivioInterventi" class="hidden mt-8 no-print border-t pt-4">
+            </div> 
+        </div> <div id="archivioInterventi" class="hidden mt-8 no-print border-t pt-4">
             <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio Interventi Salvati</h2>
             <div id="filtroAnni" class="flex flex-wrap gap-2 mb-4"></div>
             <div class="mb-4">
