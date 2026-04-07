@@ -782,25 +782,24 @@ async function salvaIntervento() {
         
 function caricaIntervento(id) {
     const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    // Cerchiamo l'intervento per ID (quello generato dal sistema)
     const intervento = interventi.find(i => i.id === id);
+
     if (intervento) {
+        // 1. Caricamento campi testo e anagrafica
         document.getElementById('nIntervento').value = intervento.nIntervento; 
         document.getElementById('dataIntervento').value = intervento.dataIntervento;
         document.getElementById('nomeScuola').value = intervento.nomeScuola || '';
         document.getElementById('plessoEdificio').value = intervento.plessoEdificio || '';
-        
-        // CARICA IL VALORE DELLA DESCRIZIONE
         document.getElementById('descrizioneLavori').value = intervento.descrizioneLavori || '';
-        
-        // CARICA IL TESTO DEI MATERIALI
         document.getElementById('materialiUtilizzati').value = intervento.materialiUtilizzati || '';
 
-        // --- AGGIUNTA FONDAMENTALE: CARICA L'IMPORTO DEI MATERIALI ---
+        // 2. Caricamento Importo Materiali (€)
         if (document.getElementById('costoMateriali')) {
-            // Se nell'oggetto salvato c'è il costo lo carica, altrimenti mette 0
             document.getElementById('costoMateriali').value = intervento.costoMateriali || 0;
         }
         
+        // 3. Caricamento dati tecnici e orari
         document.getElementById('oraInizio').value = intervento.oraInizio;
         document.getElementById('oraFine').value = intervento.oraFine;
         document.getElementById('numOperai').value = intervento.numOperai;
@@ -808,16 +807,16 @@ function caricaIntervento(id) {
         document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
         document.getElementById('flagUrgenza').checked = !!intervento.flagUrgenza;
         
-        // SBLOCCA I CAMPI per permettere modifiche e ricalcoli corretti
+        // 4. Sblocco e Ricalcolo (Fondamentale per togliere i "---")
         toggleSolaLettura(false); 
-        
-        // Esegue il calcolo per riempire il riepilogo (toglie i ---)
         calcolaManodopera(); 
         
-        // Chiude l'archivio e torna alla schermata principale
+        // 5. Gestione Interfaccia
         toggleArchivio(); 
         
-        showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
+        if (typeof showMessage === "function") {
+            showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
