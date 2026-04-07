@@ -163,14 +163,10 @@
             </div>
 
             <div class="mt-4">
-                <div class="flex justify-between items-center mb-1">
-                    <label for="materialiUtilizzati" class="block text-sm font-medium text-gray-600">Ricambi utilizzati per l'intervento</label>
-                    <div class="flex items-center space-x-1">
-                        <span class="text-sm font-bold text-gray-600">€</span>
-                        <input type="number" id="costoMateriali" step="0.01" value="0" oninput="calcolaManodopera()" 
-                               class="w-24 px-2 py-1 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-right font-bold text-blue-600" 
-                               placeholder="0.00" readonly>
-                </div>
+                <label for="materialiUtilizzati" class="block text-sm font-medium text-gray-600">Ricambi utilizzati per l'intervento</label>
+                <textarea id="materialiUtilizzati" rows="3" 
+                class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-sm outline-none transition-all resize-none text-gray-900" 
+                placeholder="I materials verranno caricati dal registro chiamate o inseriti qui..."></textarea>
             </div>
     
             <textarea id="materialiUtilizzati" rows="3" 
