@@ -801,28 +801,33 @@ function caricaIntervento(id) {
         // CARICA IL VALORE DELLA DESCRIZIONE
         document.getElementById('descrizioneLavori').value = intervento.descrizioneLavori || '';
         
-        // --- AGGIUNTA: CARICA IL VALORE DEI MATERIALI ---
+        // CARICA IL TESTO DEI MATERIALI
         document.getElementById('materialiUtilizzati').value = intervento.materialiUtilizzati || '';
-        // ------------------------------------------------
+
+        // --- AGGIUNTA FONDAMENTALE: CARICA L'IMPORTO DEI MATERIALI ---
+        if (document.getElementById('costoMateriali')) {
+            // Se nell'oggetto salvato c'è il costo lo carica, altrimenti mette 0
+            document.getElementById('costoMateriali').value = intervento.costoMateriali || 0;
+        }
         
         document.getElementById('oraInizio').value = intervento.oraInizio;
         document.getElementById('oraFine').value = intervento.oraFine;
         document.getElementById('numOperai').value = intervento.numOperai;
         document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
         document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
-        document.getElementById('flagUrgenza').checked = !intervento.flagUrgenza ? false : intervento.flagUrgenza;
+        document.getElementById('flagUrgenza').checked = !!intervento.flagUrgenza;
         
-        // Forza il ricalcolo per aggiornare l'anteprima (resMateriali, ecc.)
+        // SBLOCCA I CAMPI per permettere modifiche e ricalcoli corretti
+        toggleSolaLettura(false); 
+        
+        // Esegue il calcolo per riempire il riepilogo (toglie i ---)
         calcolaManodopera(); 
         
-        // Questa funzione chiude l'archivio e ti riporta al calcolo
+        // Chiude l'archivio e torna alla schermata principale
         toggleArchivio(); 
         
         showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        // BLOCCO DI SICUREZZA
-        toggleSolaLettura(true);
     }
 }
         
