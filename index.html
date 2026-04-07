@@ -600,7 +600,7 @@ function nuovoIntervento() {
         desc.style.backgroundColor = "#ffffff"; // Forza il bianco
     }
 
-    // AGGIUNTA: Svuota e sblocca Materiali
+    // AGGIUNTA: Svuota e sblocca Materiali (Testo)
     const mat = document.getElementById('materialiUtilizzati');
     if (mat) {
         mat.value = '';
@@ -609,9 +609,19 @@ function nuovoIntervento() {
         mat.style.backgroundColor = "#ffffff"; // Forza il bianco
     }
 
-    // Reset dei testi nel riepilogo visivo (Dettaglio Calcolo e Totale)
+    // --- NUOVA AGGIUNTA: AZZERA IL CAMPO COSTO MATERIALI (€) ---
+    const costoMat = document.getElementById('costoMateriali');
+    if (costoMat) {
+        costoMat.value = '0'; 
+        costoMat.readOnly = false;
+        costoMat.disabled = false;
+    }
+    // ----------------------------------------------------------
+
+    // Reset dei testi nel riepilogo visivo
     if (document.getElementById('resDescrizione')) document.getElementById('resDescrizione').innerText = '---';
     if (document.getElementById('resMateriali')) document.getElementById('resMateriali').innerText = '---';
+    if (document.getElementById('resCostoMaterialiVisuale')) document.getElementById('resCostoMaterialiVisuale').innerText = '0,00 €';
     
     // Reset orari, operai e opzioni
     document.getElementById('oraInizio').value = '09:00';
