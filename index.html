@@ -48,58 +48,87 @@
     }
 
     @media print {
-        .no-print,
-        #input-section > div:not(.border-t),
-        #modalPreventivo,
-        .sticky-actions { 
-            display: none !important;
-        }
-        
-        #input-section {
-            display: block !important;
-        }
-        
-        body {
-            padding: 0;
-            background-color: white;
-            margin: 0; 
-        }
-        #app {
-            box-shadow: none !important;
-            border: none !important;
-            max-width: none !important;
-            margin: 0 !important; 
-            padding: 0.5rem !important; 
-            width: 210mm; 
-            transform: scale(0.82); 
-            transform-origin: top left; 
-            page-break-inside: avoid !important; 
-        }
-        
-        #unified-header {
-             display: block !important; 
-             padding-bottom: 0.5rem;
-             margin-bottom: 1rem;
-             border-bottom: 2px solid #ccc; 
-        }
-
-        .print-avoid-break,
-        .print-avoid-break *,
-        .flex {
-            page-break-inside: avoid !important;
-        }
-
-        .text-red-600 {
-            color: #dc2626 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-        @page {
-            size: A4 portrait; 
-            margin: 0.5cm !important; 
-        }
+    /* 1. Impostazione Foglio A4 e Margini */
+    @page {
+        size: A4;
+        margin: 8mm 10mm; /* Ridotto per far entrare tutto */
     }
+
+    /* 2. Pulizia Elementi Inutili */
+    body { 
+        background: white !important; 
+        margin: 0 !important; 
+        padding: 0 !important; 
+    }
+    .no-print, button, #navbar, .fixed, .nav-tabs, footer, .mb-20 { 
+        display: none !important; 
+    }
+    
+    /* 3. Contenitore Principale (occupa tutto il foglio) */
+    .max-w-2xl { 
+        max-w-full !important; 
+        width: 100% !important; 
+        margin: 0 !important; 
+        box-shadow: none !important; 
+        border: none !important; 
+    }
+
+    /* 4. Intestazione Professionale e Compatta */
+    h2 { 
+        font-size: 16pt !important; 
+        color: #1e40af !important; 
+        border-bottom: 2px solid #1e40af; 
+        margin-top: 0 !important;
+        margin-bottom: 12px !important; 
+        padding-bottom: 5px;
+        display: flex; 
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* 5. Griglia Dati Intervento: Forza 2 colonne per risparmiare altezza */
+    .grid { 
+        display: grid !important; 
+        grid-template-columns: 1fr 1fr !important; 
+        gap: 4px !important; 
+        margin-bottom: 8px !important;
+    }
+
+    /* 6. Blocchi Dati (Sottili e puliti) */
+    .bg-gray-50, .bg-blue-50, .bg-white { 
+        background-color: #f8fafc !important; 
+        border: 1px solid #e2e8f0 !important; 
+        padding: 4px 8px !important; 
+        margin-bottom: 2px !important;
+        border-radius: 4px !important;
+    }
+
+    /* 7. Font Ottimizzato (9.5pt è lo standard tecnico) */
+    span, p, label, div { 
+        font-size: 9.5pt !important; 
+        line-height: 1.1 !important; 
+        color: black !important; 
+    }
+    .text-blue-800 { 
+        color: #1e40af !important; 
+        font-weight: bold !important; 
+    }
+
+    /* 8. Riquadro Totale Finale (Chiaro, senza sfondo blu pesante) */
+    .bg-blue-900 { 
+        background-color: #f1f5f9 !important; 
+        color: black !important; 
+        border: 1.5px solid #1e40af !important;
+        padding: 8px !important;
+        margin-top: 5px !important;
+    }
+    .bg-blue-900 * { color: black !important; }
+    
+    /* 9. Evita tagli a metà pagina */
+    .break-inside-avoid { 
+        page-break-inside: avoid; 
+    }
+}
 </style>
 </head>
 <body class="p-4 sm:p-8">
