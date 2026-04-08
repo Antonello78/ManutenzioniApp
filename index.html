@@ -907,12 +907,16 @@ function copiaRigaPreventivo(id) {
     const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
     const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    // 1. Lista ricambi con trattino iniziale, a capo, e tutto in grassetto
+    // 1. Lista ricambi: Trattino all'inizio, a capo, tutto in grassetto
     const materialiHtml = `<b>- Ricambi utilizzati per l'intervento:</b><br><b>${i.materialiUtilizzati || 'Nessuno'}</b>\n\n`;
     
-    // 2. Importo ricambi (formattato come richiesto)
-    const importoRicambi = i.costoMateriali ? i.costoMateriali.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0,00";
-    const rigaCostoMateriali = `Importo ricambi utilizzati: <b>€ ${importoRicambi}</b>\n\n`;
+    // 2. Importo ricambi
+    const importoRicambiVal = parseFloat(i.costoMateriali || 0);
+    const importoRicambiFormattato = importoRicambiVal.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const rigaCostoMateriali = `Importo ricambi utilizzati: <b>€ ${importoRicambiFormattato}</b>\n\n`;
+
+    // 3. Calcolo Totale Finale (Manodopera + Materiali)
+    const totaleIntervento = (parseFloat(i.totaleManodopera.replace(',', '.')) + importoRicambiVal).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     let testoHtml = "";
     if (i.flagUrgenza) {
@@ -922,7 +926,7 @@ function copiaRigaPreventivo(id) {
                     `Quantità ore oltre la prima: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
                     materialiHtml + 
                     rigaCostoMateriali +
-                    `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
+                    `Importo totale intervento: <b>€ ${totaleIntervento}</b>`;
     } else {
         testoHtml = `<b>- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
@@ -930,7 +934,7 @@ function copiaRigaPreventivo(id) {
                     `Quantità: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
                     materialiHtml + 
                     rigaCostoMateriali +
-                    `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
+                    `Importo totale intervento: <b>€ ${totaleIntervento}</b>`;
     }
     
     document.getElementById('testoPreventivoModal').innerHTML = testoHtml;
