@@ -48,86 +48,41 @@
     }
 
     @media print {
-    /* 1. Impostazione Foglio A4 e Margini */
-    @page {
-        size: A4;
-        margin: 8mm 10mm; /* Ridotto per far entrare tutto */
+    /* 1. Nascondi TUTTO di base */
+    body * {
+        visibility: hidden;
     }
 
-    /* 2. Pulizia Elementi Inutili */
-    body { 
-        background: white !important; 
-        margin: 0 !important; 
-        padding: 0 !important; 
+    /* 2. Mostra SOLO il contenitore del riepilogo e i suoi figli */
+    /* Nota: Devi assicurarti che il div del riepilogo abbia l'id="sezioneRiepilogo" o simile */
+    #sezioneRiepilogo, #sezioneRiepilogo * {
+        visibility: visible;
     }
-    .no-print, button, #navbar, .fixed, .nav-tabs, footer, .mb-20 { 
-        display: none !important; 
+
+    /* 3. Posiziona il riepilogo in cima alla pagina */
+    #sezioneRiepilogo {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
+
+    /* 4. Applica le correzioni di stile che abbiamo visto prima */
+    @page { size: A4; margin: 10mm; }
     
-    /* 3. Contenitore Principale (occupa tutto il foglio) */
-    .max-w-2xl { 
-        max-w-full !important; 
-        width: 100% !important; 
-        margin: 0 !important; 
-        box-shadow: none !important; 
-        border: none !important; 
-    }
-
-    /* 4. Intestazione Professionale e Compatta */
-    h2 { 
-        font-size: 16pt !important; 
-        color: #1e40af !important; 
-        border-bottom: 2px solid #1e40af; 
-        margin-top: 0 !important;
-        margin-bottom: 12px !important; 
-        padding-bottom: 5px;
-        display: flex; 
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    /* 5. Griglia Dati Intervento: Forza 2 colonne per risparmiare altezza */
-    .grid { 
-        display: grid !important; 
-        grid-template-columns: 1fr 1fr !important; 
-        gap: 4px !important; 
-        margin-bottom: 8px !important;
-    }
-
-    /* 6. Blocchi Dati (Sottili e puliti) */
+    .grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 5px !important; }
     .bg-gray-50, .bg-blue-50, .bg-white { 
         background-color: #f8fafc !important; 
         border: 1px solid #e2e8f0 !important; 
-        padding: 4px 8px !important; 
-        margin-bottom: 2px !important;
-        border-radius: 4px !important;
+        padding: 5px !important; 
+        margin-bottom: 3px !important; 
     }
-
-    /* 7. Font Ottimizzato (9.5pt è lo standard tecnico) */
-    span, p, label, div { 
-        font-size: 9.5pt !important; 
-        line-height: 1.1 !important; 
-        color: black !important; 
-    }
-    .text-blue-800 { 
-        color: #1e40af !important; 
-        font-weight: bold !important; 
-    }
-
-    /* 8. Riquadro Totale Finale (Chiaro, senza sfondo blu pesante) */
-    .bg-blue-900 { 
-        background-color: #f1f5f9 !important; 
-        color: black !important; 
-        border: 1.5px solid #1e40af !important;
-        padding: 8px !important;
-        margin-top: 5px !important;
-    }
-    .bg-blue-900 * { color: black !important; }
     
-    /* 9. Evita tagli a metà pagina */
-    .break-inside-avoid { 
-        page-break-inside: avoid; 
-    }
+    /* Nascondi i tasti che potrebbero essere dentro il riepilogo */
+    .no-print, button, .nav-tabs { display: none !important; }
+}
 }
 </style>
 </head>
