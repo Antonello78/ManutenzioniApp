@@ -886,15 +886,26 @@ function caricaIntervento(id) {
         document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
         document.getElementById('flagUrgenza').checked = !!intervento.flagUrgenza;
         
-        // 4. Sblocco e Ricalcolo (Fondamentale per togliere i "---")
-        toggleSolaLettura(false); 
+        // 4. Calcolo e Blocco Campi (Modalità Consultazione)
         calcolaManodopera(); 
         
-        // 5. Gestione Interfaccia
+        // Blocchiamo i campi subito dopo il caricamento
+        const inputs = document.querySelectorAll('#input-section input, #input-section textarea, #input-section select');
+        inputs.forEach(input => input.disabled = true);
+        
+        // 5. Gestione Interfaccia e Tasto Modifica
+        isEditMode = false; // Reset dello stato
+        const btn = document.getElementById('modificaInterventoBtn');
+        if (btn) {
+            btn.textContent = "✏️ Modifica Intervento";
+            // Applichiamo la classe arancione definita nel CSS del Passo 1
+            btn.className = "w-full py-4 rounded-xl text-white font-bold shadow-lg transition-all btn-modifica";
+        }
+
         toggleArchivio(); 
         
         if (typeof showMessage === "function") {
-            showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
+            showMessage('success', `Intervento N° ${intervento.nIntervento} caricato in sola lettura.`);
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
