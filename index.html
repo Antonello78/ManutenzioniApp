@@ -966,14 +966,14 @@ function copiaRigaPreventivo(id) {
                     `<b>- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
                     `Quantità ore oltre la prima: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
                     materialiHtml + // <--- SPOSTATO DOPO QUANTITÀ
-                    `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
+                    `Importo totale intervento: € ${i.totaleManodopera}`;
     } else {
         testoHtml = `<b>- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
                     `<b>- Manodopera aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
                     `Quantità: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
                     materialiHtml + // <--- SPOSTATO DOPO QUANTITÀ
-                    `Importo totale (chiamata + ore aggiuntive): € ${i.totaleManodopera}`;
+                    `Importo totale intervento: € ${i.totaleManodopera}`;
     }
     
     document.getElementById('testoPreventivoModal').innerHTML = testoHtml;
