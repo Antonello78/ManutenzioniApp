@@ -858,25 +858,30 @@ function caricaIntervento(id) {
         document.getElementById('flagUrgenza').checked = !!intervento.flagUrgenza;
         
         // --- MODIFICA AGGIORNAMENTO: BLOCCO E GESTIONE PULSANTE ---
+        
         // 4. Blocchiamo i campi (Sola Lettura)
+        // Il primo 'true' blocca, il secondo 'true' impedisce al numero di cambiare
         initializeInputs(true, true); 
         
-        // 5. Trasformiamo il tasto in "Modifica" (Arancione)
+        // 5. Configurazione Pulsante (deve diventare "Modifica" arancione)
         const btn = document.getElementById('btnSalva');
         if (btn) {
             btn.innerText = "Modifica";
-            // Rimuoviamo il verde e aggiungiamo l'arancione di Tailwind
+            // Rimuoviamo il verde e mettiamo l'arancione
             btn.classList.remove('bg-green-600', 'hover:bg-green-700');
             btn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+            
+            // FONDAMENTALE: Gli diciamo cosa fare quando viene cliccato
+            btn.onclick = (e) => gestisciAzionePulsante(e);
         }
 
         calcolaManodopera(); 
         
-        // Gestione Interfaccia
+        // 6. Chiudiamo l'archivio per mostrare la scheda
         toggleArchivio(); 
         
         if (typeof showMessage === "function") {
-            showMessage('success', `Intervento N° ${intervento.nIntervento} caricato in sola lettura.`);
+            showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
