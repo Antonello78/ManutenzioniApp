@@ -779,7 +779,7 @@ async function salvaIntervento() {
             btn.classList.add('bg-green-600', 'hover:bg-green-700');
         }
 
-        initializeInputs(false); // Sblocca i campi per il prossimo intervento
+        initializeInputs(false, false); // Sblocca i campi per il prossimo intervento
         calcolaManodopera(); 
         renderArchivio();
         window.scrollTo({ top: 0, behavior: 'smooth' });
