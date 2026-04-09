@@ -62,54 +62,68 @@
         display: block !important;
     }
         
-        body {
-            padding: 0;
-            background-color: white;
-            margin: 0; 
-        }
-        #app {
-            box-shadow: none !important;
-            border: none !important;
-            max-width: none !important;
-            margin: 0 !important; 
-            padding: 0.5rem !important; 
-            width: 210mm; 
-            transform: scale(0.82); 
-            transform-origin: top left; 
-            page-break-inside: avoid !important; 
-        }
-        
-        #unified-header {
-            display: block !important; 
-            padding-bottom: 0 !important;
-            margin-bottom: 0 !important; /* Spazio azzerato */
-            border-bottom: none !important; 
-        }
-
-        /* Toglie la riga sopra "Dati Intervento" e stringe lo spazio */
-        .border-t {
-            border-top: none !important;
-            margin-top: 0 !important;
-            padding-top: 0 !important;
-        }
-
-        .print-avoid-break,
-        .print-avoid-break *,
-        .flex {
-            page-break-inside: avoid !important;
-        }
-
-        .text-red-600 {
-            color: #dc2626 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-
-        @page {
-            size: A4 portrait; 
-            margin: 0.5cm !important; 
-        }
+    body {
+        padding: 0;
+        background-color: white;
+        margin: 0; 
     }
+
+    #app {
+        box-shadow: none !important;
+        border: none !important;
+        max-width: none !important;
+        margin: 0 !important; 
+        padding: 0.5rem !important; 
+        width: 210mm; 
+        transform: scale(0.82); 
+        transform-origin: top left; 
+        page-break-inside: avoid !important; 
+    }
+        
+    #unified-header {
+        display: block !important; 
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important; /* Spazio azzerato */
+        border-bottom: none !important; 
+    }
+
+    /* Toglie la riga sopra "Dati Intervento" e stringe lo spazio */
+    .border-t {
+        border-top: none !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Gestione Footer: unisce nota orario e versione senza righe */
+    .footer-stampa {
+        border-top: none !important;
+        margin-top: 2px !important;
+        padding-top: 0 !important;
+    }
+
+    /* Assicura che il blocco finale non si spacchi tra due pagine */
+    .print\:mt-4 {
+        page-break-inside: avoid !important;
+        margin-top: 0.5rem !important;
+    }
+
+    .print-avoid-break,
+    .print-avoid-break *,
+    .flex {
+        page-break-inside: avoid !important;
+    }
+
+    .text-red-600 {
+        color: #dc2626 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    @page {
+        size: A4 portrait; 
+        margin: 0.5cm !important; 
+    }
+}
 </style>
 </head>
 <body class="p-4 sm:p-8">
