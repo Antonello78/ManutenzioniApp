@@ -851,7 +851,6 @@ async function salvaIntervento() {
         
 function caricaIntervento(id) {
     const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-    // Cerchiamo l'intervento per ID (quello generato dal sistema)
     const intervento = interventi.find(i => i.id === id);
 
     if (intervento) {
@@ -863,7 +862,7 @@ function caricaIntervento(id) {
         document.getElementById('descrizioneLavori').value = intervento.descrizioneLavori || '';
         document.getElementById('materialiUtilizzati').value = intervento.materialiUtilizzati || '';
 
-        // 2. Caricamento Importo Materiali (€)
+        // 2. Caricamento Importo Materiali
         if (document.getElementById('costoMateriali')) {
             document.getElementById('costoMateriali').value = intervento.costoMateriali || 0;
         }
@@ -879,17 +878,25 @@ function caricaIntervento(id) {
         // 4. Calcolo e Blocco Campi (Modalità Consultazione)
         calcolaManodopera(); 
         
-        // Blocchiamo i campi subito dopo il caricamento
+        // Blocchiamo fisicamente tutti i campi
         const inputs = document.querySelectorAll('#input-section input, #input-section textarea, #input-section select');
-        inputs.forEach(input => input.disabled = true);
+        inputs.forEach(input => {
+            input.disabled = true;
+            input.style.backgroundColor = "#f3f4f6"; // Grigio chiaro per indicare il blocco
+        });
         
-        // 5. Gestione Interfaccia e Tasto Modifica
-        isEditMode = false; // Reset dello stato
+        // 5. GESTIONE TASTO (FORZA ARANCIONE)
+        isEditMode = false; // Reset dello stato su sola lettura
         const btn = document.getElementById('modificaInterventoBtn');
         if (btn) {
             btn.textContent = "✏️ Modifica Intervento";
-            // Applichiamo la classe arancione definita nel CSS del Passo 1
+            
+            // Pulizia classi precedenti e applicazione classe arancione
+            btn.classList.remove('btn-salva', 'bg-green-600', 'bg-emerald-600');
             btn.className = "w-full py-4 rounded-xl text-white font-bold shadow-lg transition-all btn-modifica";
+            
+            // Rimuoviamo eventuali stili di colore messi a mano dal vecchio codice
+            btn.style.backgroundColor = ""; 
         }
 
         toggleArchivio(); 
