@@ -361,6 +361,24 @@
             // TORNA A METTERE DATA E ORA DI ADESSO
             impostaDataOraAttuale(); 
         }
+        function gestisciAzionePulsante() {
+    const btn = document.getElementById('btnSalva');
+    
+    if (btn.innerText === "Modifica") {
+        // Se siamo in modalità visualizzazione, sblocchiamo
+        initializeInputs(false);
+        
+        // Trasformiamo il tasto in "Salva" (Verde)
+        btn.innerText = "Salva";
+        btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+        btn.classList.add('bg-green-600', 'hover:bg-green-700');
+        
+        showMessage('success', "Modalità modifica attivata. Ora puoi editare i campi.");
+    } else {
+        // Se il testo è "Salva", procediamo con la funzione che abbiamo già
+        salvaIntervento();
+    }
+}
         function toggleFiltroChiamate() {
             filtroChiamateCompletate = !filtroChiamateCompletate;
     
