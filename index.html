@@ -939,27 +939,31 @@ function copiaRigaPreventivo(id) {
         }
 
         function toggleArchivio() {
-            const archivio = document.getElementById('archivioInterventi');
-            const inputSection = document.getElementById('input-section');
-            const btn = document.getElementById('btnToggleArchivio');
-            const actionButtons = document.getElementById('action-buttons');
-            const isHidden = archivio.classList.contains('hidden');
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-            
-            if (isHidden) {
-                archivio.classList.remove('hidden');
-                inputSection.classList.add('hidden');
-                btn.textContent = 'Torna al Calcolo';
-                actionButtons.classList.add('hidden'); // Nasconde pulsanti salva/stampa in archivio
-                renderArchivio();
-            } else {
-                archivio.classList.add('hidden');
-                inputSection.classList.remove('hidden');
-                btn.textContent = 'Gestione Archivio';
-                actionButtons.classList.remove('hidden'); // Mostra pulsanti salva/stampa in calcolo
-            }
-        }
+    const archivio = document.getElementById('archivioInterventi');
+    const inputSezione = document.getElementById('input-section');
+    const riepilogoSezione = document.getElementById('sezioneRiepilogo');
+    const footerEmail = document.getElementById('footer-options');
+    const btn = document.getElementById('btnToggleArchivio');
+
+    if (archivio.classList.contains('hidden')) {
+        // MOSTRA ARCHIVIO, NASCONDI TUTTO IL RESTO
+        archivio.classList.remove('hidden');
+        inputSezione.classList.add('hidden');
+        riepilogoSezione.classList.add('hidden');
+        footerEmail.classList.add('hidden');
+        btn.innerText = "Chiudi Archivio";
+        btn.classList.replace('bg-gray-600', 'bg-red-600');
+        renderArchivio();
+    } else {
+        // TORNA ALLA COMPILAZIONE
+        archivio.classList.add('hidden');
+        inputSezione.classList.remove('hidden');
+        riepilogoSezione.classList.remove('hidden');
+        footerEmail.classList.remove('hidden');
+        btn.innerText = "Gestione Archivio";
+        btn.classList.replace('bg-red-600', 'bg-gray-600');
+    }
+}
 
         function stampaRiepilogo() {
             const nIntervento = document.getElementById('nIntervento').value.replace(/\//g, '-');
