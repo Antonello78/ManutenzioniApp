@@ -840,15 +840,26 @@ function caricaIntervento(id) {
         document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
         document.getElementById('flagUrgenza').checked = !!intervento.flagUrgenza;
         
-        // 4. Sblocco e Ricalcolo (Fondamentale per togliere i "---")
-        toggleSolaLettura(false); 
+        // --- MODIFICA AGGIORNAMENTO: BLOCCO E GESTIONE PULSANTE ---
+        // 4. Blocchiamo i campi (Sola Lettura)
+        initializeInputs(true); 
+        
+        // 5. Trasformiamo il tasto in "Modifica" (Arancione)
+        const btn = document.getElementById('btnSalva');
+        if (btn) {
+            btn.innerText = "Modifica";
+            // Rimuoviamo il verde e aggiungiamo l'arancione di Tailwind
+            btn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            btn.classList.add('bg-orange-500', 'hover:bg-orange-600');
+        }
+
         calcolaManodopera(); 
         
-        // 5. Gestione Interfaccia
+        // Gestione Interfaccia
         toggleArchivio(); 
         
         if (typeof showMessage === "function") {
-            showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
+            showMessage('success', `Intervento N° ${intervento.nIntervento} caricato in sola lettura.`);
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
