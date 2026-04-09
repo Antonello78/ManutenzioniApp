@@ -828,18 +828,6 @@ async function salvaIntervento() {
                 }
             });
 
-            const btnSalva = document.getElementById('btnSalva');
-            if (readonly) {
-                btnSalva.textContent = 'Modifica';
-                btnSalva.classList.remove('bg-green-600', 'hover:bg-green-700');
-                btnSalva.classList.add('bg-orange-500', 'hover:bg-orange-600');
-                btnSalva.onclick = () => toggleSolaLettura(false);
-            } else {
-                btnSalva.textContent = 'Salva';
-                btnSalva.classList.remove('bg-orange-500', 'hover:bg-orange-600');
-                btnSalva.classList.add('bg-green-600', 'hover:bg-green-700');
-                btnSalva.onclick = salvaIntervento;
-            }
         }
         
 function caricaIntervento(id) {
