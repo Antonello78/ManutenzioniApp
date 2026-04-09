@@ -441,32 +441,54 @@
         function generateId() { return Date.now().toString(); }
         function getYearCounterKey(year) { return 'numeroIntervento_' + year; }
 
-        function initializeInputs(keepNIntervento = false) {
-            const dataInput = document.getElementById('dataIntervento');
-            if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
-            
-            const numOperaiInput = document.getElementById('numOperai');
-            if (parseInt(numOperaiInput.value) < 1 || isNaN(parseInt(numOperaiInput.value))) { numOperaiInput.value = '1'; }
-            
-            document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
-            
-            const nInterventoInput = document.getElementById('nIntervento');
-            const dataCorrente = new Date();
-            const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
-            const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
+        function initializeInputs(lock = false, keepNIntervento = false) {
+    // 1. GESTIONE VALORI PREDEFINITI
+    const dataInput = document.getElementById('dataIntervento');
+    if (!dataInput.value) { dataInput.valueAsDate = new Date(); }
+    
+    const numOperaiInput = document.getElementById('numOperai');
+    if (parseInt(numOperaiInput.value) < 1 || isNaN(parseInt(numOperaiInput.value))) { 
+        numOperaiInput.value = '1'; 
+    }
+    
+    document.getElementById('emailDestinatario').value = localStorage.getItem(EMAIL_KEY) || '';
+    
+    const nInterventoInput = document.getElementById('nIntervento');
+    const dataCorrente = new Date();
+    const CURRENT_YEAR = dataCorrente.getFullYear().toString().substring(2); 
+    const COUNTER_KEY_YEARLY = getYearCounterKey(CURRENT_YEAR);
 
-            if (!keepNIntervento) {
-                let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY));
-                
-                if (isNaN(ultimoNumero)) {
-                    ultimoNumero = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0;
-                    localStorage.setItem(COUNTER_KEY_YEARLY, ultimoNumero.toString());
-                }
-                
-                let prossimoNumero = ultimoNumero + 1;
-                nInterventoInput.value = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
-            }
+    if (!keepNIntervento) {
+        let ultimoNumero = parseInt(localStorage.getItem(COUNTER_KEY_YEARLY));
+        if (isNaN(ultimoNumero)) {
+            ultimoNumero = (CURRENT_YEAR === '25') ? INIZIO_2025 : 0;
+            localStorage.setItem(COUNTER_KEY_YEARLY, ultimoNumero.toString());
         }
+        let prossimoNumero = ultimoNumero + 1;
+        nInterventoInput.value = prossimoNumero.toString().padStart(3, '0') + '/' + CURRENT_YEAR;
+    }
+
+    // 2. NUOVA LOGICA: BLOCCO/SBLOCCO CAMPI (SOLA LETTURA)
+    // Se lock è true, i campi diventano non modificabili. Se è false, tornano scrivibili.
+    const campiDaGestire = [
+        'nomeScuola', 'plessoEdificio', 'descrizioneLavori', 
+        'materialiUtilizzati', 'costoMateriali', 'oraInizio', 
+        'oraFine', 'numOperai', 'inputCostoUscita', 'inputTariffaBase'
+    ];
+
+    campiDaGestire.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.readOnly = lock;
+            // Per i campi bloccati cambiamo leggermente lo sfondo per far capire che sono chiusi
+            el.style.backgroundColor = lock ? "#f3f4f6" : "#ffffff";
+        }
+    });
+
+    // Gestione speciale per checkbox e select (usano disabled invece di readOnly)
+    const flagUrgenza = document.getElementById('flagUrgenza');
+    if (flagUrgenza) flagUrgenza.disabled = lock;
+}
         
 function calcolaManodopera() {
     // 1. Recupero Input
