@@ -957,7 +957,7 @@ function copiaRigaPreventivo(id) {
     const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     // Stringa per i materiali formattata come richiesto
-    const materialiHtml = `<b>- Ricambi utilizzati per l'intervento: <b>${i.materialiUtilizzati || 'Nessuno'}</b></b>\n\n`;
+    const materialiHtml = `<b>- Ricambi utilizzati per l'intervento:\n<b>${i.materialiUtilizzati || 'Nessuno'}</b></b>\n\n`;
 
     let testoHtml = "";
     if (i.flagUrgenza) {
