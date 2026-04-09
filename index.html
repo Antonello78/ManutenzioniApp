@@ -363,19 +363,22 @@
         }
         function gestisciAzionePulsante() {
     const btn = document.getElementById('btnSalva');
-    
-    if (btn.innerText === "Modifica") {
-        // Se siamo in modalità visualizzazione, sblocchiamo
-        initializeInputs(false, true);
+    const testoPulsante = btn.innerText.trim();
+
+    if (testoPulsante === "Modifica") {
+        // --- PASSAGGIO CRITICO ---
+        // Sblocchiamo i campi (false) ma diciamo ASSOLUTAMENTE 
+        // di non toccare il numero intervento (true)
+        initializeInputs(false, true); 
         
         // Trasformiamo il tasto in "Salva" (Verde)
         btn.innerText = "Salva";
         btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
         btn.classList.add('bg-green-600', 'hover:bg-green-700');
         
-        showMessage('success', "Modalità modifica attivata. Ora puoi editare i campi.");
+        showMessage('success', "Modalità modifica attiva: i campi sono sbloccati.");
     } else {
-        // Se il testo è "Salva", procediamo con la funzione che abbiamo già
+        // Se il testo è già "Salva", esegue la funzione di salvataggio
         salvaIntervento();
     }
 }
