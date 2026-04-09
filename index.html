@@ -385,17 +385,17 @@
                 Gestione Archivio
             </button>
             <div id="action-buttons" class="flex flex-row space-x-2">
-                <button onclick="nuovoIntervento()" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Nuovo
-                </button>
-                <button onclick="salvaIntervento()" id="btnSalva" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Salva
-                </button>
-                <button onclick="stampaRiepilogo()" id="btnStampa" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Stampa
-                </button>
-                <button id="btnInviaReport" onclick="inviaReport()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Email
+    <button onclick="nuovoIntervento()" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
+        Nuovo
+    </button>
+    <button id="modificaInterventoBtn" onclick="gestisciAzioneTasto()" class="flex-1 btn-salva text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
+        Salva
+    </button>
+    <button onclick="stampaRiepilogo()" id="btnStampa" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
+        Stampa
+    </button>
+    <button id="btnInviaReport" onclick="inviaReport()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
+        Email
                 </button>
             </div>
         </div>
