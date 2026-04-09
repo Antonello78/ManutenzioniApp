@@ -911,6 +911,28 @@ function caricaIntervento(id) {
     }
 }
         
+let isEditMode = false; 
+
+    function toggleModifica() {
+        const btn = document.getElementById('modificaInterventoBtn');
+        const inputs = document.querySelectorAll('#input-section input, #input-section textarea, #input-section select');
+        
+        isEditMode = !isEditMode;
+
+        if (isEditMode) {
+            // Sblocca per modificare
+            inputs.forEach(input => input.disabled = false);
+            btn.textContent = "💾 Salva Modifiche";
+            btn.className = "w-full py-4 rounded-xl text-white font-bold shadow-lg transition-all btn-salva";
+        } else {
+            // Salva e blocca
+            salvaIntervento(true); 
+            inputs.forEach(input => input.disabled = true);
+            btn.textContent = "✏️ Modifica Intervento";
+            btn.className = "w-full py-4 rounded-xl text-white font-bold shadow-lg transition-all btn-modifica";
+        }
+    }
+        
         function cancellaIntervento(id) {
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             const intervento = interventi.find(i => i.id === id);
