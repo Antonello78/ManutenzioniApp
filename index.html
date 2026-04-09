@@ -644,67 +644,57 @@ function calcolaManodopera() {
              showMessage('success', 'Email di destinazione salvata.');
         }
 function nuovoIntervento() {
-    // Sblocca i campi se erano in sola lettura
-    if (typeof toggleSolaLettura === "function") {
-        toggleSolaLettura(false);
+    // 1. Sblocca tutti i campi e resetta lo sfondo
+    const allInputs = document.querySelectorAll('#input-section input, #input-section textarea, #input-section select');
+    allInputs.forEach(input => {
+        input.disabled = false;
+        input.style.backgroundColor = "#ffffff"; // Forza lo sfondo bianco
+    });
+
+    // 2. Reset dello stato del tasto (Torna Verde/Salva)
+    isEditMode = true; 
+    const btn = document.getElementById('modificaInterventoBtn');
+    if (btn) {
+        btn.textContent = "💾 Salva Intervento";
+        btn.className = "w-full py-4 rounded-xl text-white font-bold shadow-lg transition-all btn-salva";
     }
-    
-    // Reset dei campi descrittivi
+
+    // 3. Reset dei campi anagrafica
     document.getElementById('nomeScuola').value = '';
     document.getElementById('plessoEdificio').value = '';
     
-    // CORRETTO: Svuota e sblocca Descrizione
+    // 4. Reset campi descrittivi e materiali
     const desc = document.getElementById('descrizioneLavori');
-    if (desc) {
-        desc.value = '';
-        desc.readOnly = false;
-        desc.disabled = false;
-        desc.style.backgroundColor = "#ffffff"; // Forza il bianco
-    }
+    if (desc) desc.value = '';
 
-    // AGGIUNTA: Svuota e sblocca Materiali (Testo)
     const mat = document.getElementById('materialiUtilizzati');
-    if (mat) {
-        mat.value = '';
-        mat.readOnly = false;
-        mat.disabled = false;
-        mat.style.backgroundColor = "#ffffff"; // Forza il bianco
-    }
+    if (mat) mat.value = '';
 
-    // --- NUOVA AGGIUNTA: AZZERA IL CAMPO COSTO MATERIALI (€) ---
     const costoMat = document.getElementById('costoMateriali');
-    if (costoMat) {
-        costoMat.value = '0'; 
-        costoMat.readOnly = false;
-        costoMat.disabled = false;
-    }
-    // ----------------------------------------------------------
+    if (costoMat) costoMat.value = '0';
 
-    // Reset dei testi nel riepilogo visivo
+    // 5. Reset testi nel riepilogo visivo (i campi con "---")
     if (document.getElementById('resDescrizione')) document.getElementById('resDescrizione').innerText = '---';
     if (document.getElementById('resMateriali')) document.getElementById('resMateriali').innerText = '---';
     if (document.getElementById('resCostoMaterialiVisuale')) document.getElementById('resCostoMaterialiVisuale').innerText = '0,00 €';
     
-    // Reset orari, operai e opzioni
+    // 6. Reset orari e parametri tecnici
     document.getElementById('oraInizio').value = '09:00';
     document.getElementById('oraFine').value = '10:15';
     document.getElementById('numOperai').value = '1';
     document.getElementById('flagUrgenza').checked = false;
 
-    // Reset tariffe predefinite
+    // 7. Reset tariffe predefinite
     if (document.getElementById('inputCostoUscita')) document.getElementById('inputCostoUscita').value = 75;
     if (document.getElementById('inputTariffaBase')) document.getElementById('inputTariffaBase').value = 38;
 
-    // Re-inizializza i calcoli e gli input
-    if (typeof initializeInputs === "function") initializeInputs();
+    // 8. Ricalcolo immediato (pulisce i totali precedenti)
     if (typeof calcolaManodopera === "function") calcolaManodopera();
     
-    showMessage('success', 'Nuova scheda pronta');
-    
-    // Torna in alto nella pagina
+    // Messaggio di conferma e scroll in alto
+    if (typeof showMessage === "function") showMessage('success', 'Nuova scheda pronta');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 async function salvaIntervento() { 
     calcolaManodopera(); 
     const nInterventoCompleto = document.getElementById('nIntervento').value.trim();
