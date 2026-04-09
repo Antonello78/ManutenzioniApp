@@ -114,197 +114,135 @@
             
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label for="nIntervento" class="block text-sm font-medium text-gray-600">N° Intervento</label>
-                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Es. 075/26">
+                    <label class="block text-sm font-medium text-gray-600">N° Intervento</label>
+                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg" placeholder="Es. 075/26">
                 </div>
                 <div>
-                    <label for="dataIntervento" class="block text-sm font-medium text-gray-600">Data</label>
-                    <input type="date" id="dataIntervento" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+                    <label class="block text-sm font-medium text-gray-600">Data</label>
+                    <input type="date" id="dataIntervento" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg">
                 </div>
             </div>
 
             <div class="mt-4">
-                <label for="nomeScuola" class="block text-sm font-medium text-gray-600">Nome Scuola</label>
-                <input type="text" id="nomeScuola" oninput="this.value = this.value.toUpperCase(); calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg uppercase" placeholder="ISTITUTO COMPRENSIVO G. PASCOLI">
+                <label class="block text-sm font-medium text-gray-600">Nome Scuola</label>
+                <input type="text" id="nomeScuola" oninput="this.value = this.value.toUpperCase(); calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg uppercase">
             </div>
 
             <div class="mt-4">
-                <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso / Edificio</label>
-                <input type="text" id="plessoEdificio" oninput="this.value = this.value.toUpperCase(); calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg uppercase" placeholder="ES. SEDE CENTRALE">
+                <label class="block text-sm font-medium text-gray-600">Plesso / Edificio</label>
+                <input type="text" id="plessoEdificio" oninput="this.value = this.value.toUpperCase(); calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-lg uppercase">
             </div>
 
             <div class="mt-4">
-                <label for="descrizioneLavori" class="block text-sm font-medium text-gray-600">Descrizione Lavori (eseguiti / richiesti)</label>
-                <textarea id="descrizioneLavori" rows="3" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-sm outline-none transition-all resize-none text-gray-900" placeholder="Descrivi l'intervento effettuato..."></textarea>
+                <label class="block text-sm font-medium text-gray-600">Descrizione Lavori</label>
+                <textarea id="descrizioneLavori" rows="3" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-sm resize-none"></textarea>
             </div>
 
             <div class="mt-4">
-                <label for="materialiUtilizzati" class="block text-sm font-medium text-gray-600">Ricambi utilizzati per l'intervento</label>
-                <textarea id="materialiUtilizzati" rows="3" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-sm outline-none transition-all resize-none text-gray-900" placeholder="I materiali verranno caricati dal registro chiamate o inseriti qui..."></textarea>
-            </div>
-
-            <div class="border-t border-gray-200 pt-4 mt-4"></div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label for="oraInizio" class="block text-sm font-medium text-gray-600">Ora Inizio</label>
-                    <input type="time" id="oraInizio" value="09:00" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
-                </div>
-                <div>
-                    <label for="oraFine" class="block text-sm font-medium text-gray-600">Ora Fine</label>
-                    <input type="time" id="oraFine" value="10:15" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <label for="numOperai" class="block text-sm font-medium text-gray-600">Numero Operai</label>
-                <input type="number" id="numOperai" value="1" min="1" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+                <label class="block text-sm font-medium text-gray-600">Ricambi utilizzati</label>
+                <textarea id="materialiUtilizzati" rows="3" oninput="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg text-sm resize-none"></textarea>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mt-4">
                 <div>
-                    <label for="inputCostoUscita" class="block text-sm font-medium text-gray-600">Costo Uscita (€)</label>
-                    <input type="number" id="inputCostoUscita" value="75" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+                    <label class="block text-sm font-medium text-gray-600">Ora Inizio</label>
+                    <input type="time" id="oraInizio" value="09:00" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg">
                 </div>
                 <div>
-                    <label for="inputTariffaBase" class="block text-sm font-medium text-gray-600">Tariffa Oraria (€/h)</label>
-                    <input type="number" id="inputTariffaBase" value="38" step="0.01" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg">
+                    <label class="block text-sm font-medium text-gray-600">Ora Fine</label>
+                    <input type="time" id="oraFine" value="10:15" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg">
                 </div>
             </div>
 
-            <div class="flex items-center pt-2 mt-4">
-                <input id="flagUrgenza" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-red-600 border-gray-300 rounded">
-                <label for="flagUrgenza" class="ml-3 block text-base font-medium text-red-700">
-                    Marca come "Urgenza Immediata" (+10 €/h)
-                </label>
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-600">Operai</label>
+                <input type="number" id="numOperai" value="1" min="1" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg">
             </div>
 
-            <div id="errorMsg" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden no-print" role="alert"></div>
-            <div id="successMsg" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg hidden no-print" role="alert"></div>
+            <div class="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Uscita (€)</label>
+                    <input type="number" id="inputCostoUscita" value="75" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600">Tariffa (€/h)</label>
+                    <input type="number" id="inputTariffaBase" value="38" onchange="calcolaManodopera()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg">
+                </div>
+            </div>
+
+            <div class="flex items-center mt-4">
+                <input id="flagUrgenza" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-red-600 border-gray-300 rounded">
+                <label for="flagUrgenza" class="ml-3 text-red-700 font-medium">Urgenza Immediata (+10 €/h)</label>
+            </div>
+            
+            <div id="errorMsg" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg hidden" role="alert"></div>
+            <div id="successMsg" class="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg hidden" role="alert"></div>
         </div>
 
         <div id="sezioneRiepilogo" class="mt-8 pt-6 border-t border-gray-200 print:border-none print:mt-0">
-            <h2 class="text-2xl font-bold text-gray-700 mb-4 print:text-blue-800">Dettaglio Intervento</h2>
-            
-            <div id="riepilogoDati" class="space-y-2 text-gray-700 p-4 border rounded-lg bg-gray-50 mb-4 print:bg-white">
-                <h3 class="text-xl font-bold mb-2 border-b pb-1 text-blue-700">Dati Generali</h3>
-                <div class="flex justify-between text-base">
-                    <span class="font-medium">N° Intervento:</span>
-                    <span id="resNIntervento" class="font-semibold text-gray-800">---</span>
-                </div>
-                <div class="flex justify-between text-base">
-                    <span class="font-medium">Data:</span>
-                    <span id="resData" class="font-semibold text-gray-800">---</span>
-                </div>
-                <div class="flex justify-between text-base">
-                    <span class="font-medium">Scuola/Plesso:</span>
-                    <span id="resScuola" class="font-semibold text-gray-800 text-right max-w-[60%]">---</span>
-                </div>
-                <div class="flex justify-between text-base">
-                    <span class="font-medium">Orario Lavorato:</span>
-                    <span id="resOrario" class="font-semibold text-gray-800">---</span>
-                </div>
-                <div class="flex justify-between text-base">
-                    <span class="font-medium">Operai:</span>
-                    <span id="resOperai" class="font-semibold text-gray-800">---</span>
-                </div>
-            </div> 
-
-            <div class="mb-4 p-4 border rounded-lg bg-gray-50 text-gray-700 print:bg-white">
-                <p class="font-bold text-blue-700 text-sm mb-1 border-b pb-1">Descrizione Lavori (Eseguiti / Richiesti)</p>
-                <div id="resDescrizione" class="text-sm italic whitespace-pre-wrap leading-relaxed">---</div>
+            <h2 class="text-xl font-bold text-gray-700 mb-4 no-print">Dettaglio Calcolo e Totale</h2>
+            <div id="riepilogoDati" class="space-y-2 p-4 border rounded-lg bg-gray-50 mb-4 print:bg-white">
+                <h3 class="text-lg font-bold border-b pb-1 text-blue-700">Dati Intervento</h3>
+                <div class="flex justify-between text-sm"><span>N°:</span> <span id="resNIntervento" class="font-bold">---</span></div>
+                <div class="flex justify-between text-sm"><span>Data:</span> <span id="resData" class="font-bold">---</span></div>
+                <div class="flex justify-between text-sm"><span>Scuola:</span> <span id="resScuola" class="font-bold text-right max-w-[60%]">---</span></div>
+                <div class="flex justify-between text-sm"><span>Orario:</span> <span id="resOrario" class="font-bold">---</span></div>
+                <div class="flex justify-between text-sm"><span>Operai:</span> <span id="resOperai" class="font-bold">---</span></div>
             </div>
 
-            <div class="mb-4 p-4 border rounded-lg bg-gray-50 text-gray-700 print:bg-white">
-                <div class="flex justify-between items-center mb-2 border-b pb-1">
-                    <h3 class="text-sm font-bold text-blue-700">Materiali Utilizzati</h3>
-                    <div class="no-print">
-                        <span class="text-xs font-bold text-blue-700">€</span>
-                        <input type="number" id="costoMateriali" step="any" value="0" oninput="calcolaManodopera()" class="w-20 border rounded px-1 text-right text-xs">
-                    </div>
-                </div>
-                <div id="resMateriali" class="text-sm italic whitespace-pre-wrap leading-relaxed">---</div>
+            <div class="mb-4 p-4 border rounded-lg bg-gray-50 print:bg-white">
+                <p class="font-bold text-blue-700 text-xs border-b mb-1">Descrizione Lavori</p>
+                <div id="resDescrizione" class="text-sm italic whitespace-pre-wrap">---</div>
             </div>
 
-            <div class="space-y-1 text-gray-700 px-2">
-                <div class="flex justify-between text-sm">
-                    <span>Tariffa Oraria Applicata:</span>
-                    <span id="tariffaOraria" class="font-semibold">---</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span>Tempo Fatturabile (Arrotondato):</span>
-                    <span id="minutiFatturabili" class="font-semibold">---</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span>Costo Uscita (Incl. 1ª Ora):</span>
-                    <span id="costoUscita" class="font-semibold">---</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span>Costo Manodopera Aggiuntiva:</span>
-                    <span id="costoAggiuntivo" class="font-semibold">---</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span>Costo Materiali:</span>
-                    <span id="resCostoMaterialiVisuale" class="font-semibold">---</span>
-                </div>
-            </div> 
+            <div class="mb-4 p-4 border rounded-lg bg-gray-50 print:bg-white text-sm">
+                <div class="flex justify-between border-b mb-1"><span class="font-bold text-blue-700">Materiali</span> <span id="resCostoMaterialiVisuale" class="font-bold">0,00 €</span></div>
+                <div id="resMateriali" class="italic whitespace-pre-wrap">---</div>
+            </div>
 
-            <div class="mt-6 p-4 bg-blue-100 border-2 border-blue-400 rounded-xl flex justify-between items-center print:bg-blue-50">
-                <span class="text-lg font-bold text-blue-800">TOTALE INTERVENTO (€):</span>
+            <div class="space-y-1 text-xs px-2 text-gray-600">
+                <div class="flex justify-between"><span>Tariffa:</span> <span id="tariffaOraria">---</span></div>
+                <div class="flex justify-between"><span>Tempo Fatturabile:</span> <span id="minutiFatturabili">---</span></div>
+                <div class="flex justify-between"><span>Uscita:</span> <span id="costoUscita">---</span></div>
+                <div class="flex justify-between"><span>Manodopera Aggiuntiva:</span> <span id="costoAggiuntivo">---</span></div>
+            </div>
+
+            <div class="mt-4 p-4 bg-blue-100 border-2 border-blue-400 rounded-xl flex justify-between items-center print:bg-blue-50">
+                <span class="text-lg font-bold text-blue-800">TOTALE (€):</span>
                 <span id="totaleManodopera" class="text-2xl font-extrabold text-blue-800">---</span>
             </div>
-        </div> 
+        </div>
 
-        <div id="archivioInterventi" class="hidden mt-8 no-print border-t pt-4">
-            <h2 class="text-2xl font-bold text-gray-700 mb-4">📂 Archivio Interventi Salvati</h2>
+        <div id="archivioInterventi" class="hidden no-print border-t border-blue-200 mt-6 pt-6 bg-gray-50 p-4 rounded-xl">
+            <h2 class="text-xl font-bold text-gray-700 mb-4">📂 Archivio Interventi</h2>
             <div id="filtroAnni" class="flex flex-wrap gap-2 mb-4"></div>
-            <div class="mb-4">
-                <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca scuola..." class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm" />
-            </div>
-            <div id="listaInterventi" class="space-y-3">
-                <p class="text-gray-500">Nessun intervento salvato.</p>
-            </div>
-        </div> 
-
-        <div class="border-t border-gray-200 mt-6 pt-4 no-print">
-            <h3 class="text-lg font-semibold text-gray-700">Opzioni Report e Archivio</h3>
-            <div class="mt-2">
-                <label for="emailDestinatario" class="block text-sm font-medium text-gray-600">Email di Destinazione</label>
-                <input type="email" id="emailDestinatario" onchange="salvaEmail()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-lg" placeholder="amministrazione@scuola.it">
+            <input type="text" id="cercaIntervento" onkeyup="renderArchivio()" placeholder="Cerca scuola..." class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4">
+            <div id="listaInterventi" class="space-y-3 max-h-96 overflow-y-auto">
+                <p class="text-gray-500">Caricamento...</p>
             </div>
         </div>
 
-        <div class="mt-8 border-t pt-4">
-            <p class="text-[10px] text-gray-400 text-center italic leading-tight">
-                Orario Ordinario: 08:00 - 17:00. Il calcolo arrotonda i minuti di manodopera per eccesso al quarto d'ora superiore.
-            </p>
-            <div class="footer-stampa text-center text-gray-400 text-[10px] mt-2">
-                Ditta D'Angelo Antonello — v1.5.0 (Release 2026)
-            </div>
+        <div id="footer-options" class="mt-8 border-t pt-4 no-print">
+            <label class="block text-sm font-medium text-gray-600">Email Destinatario</label>
+            <input type="email" id="emailDestinatario" onchange="salvaEmail()" class="w-full px-4 py-2 border border-gray-300 rounded-lg" placeholder="amministrazione@scuola.it">
         </div>
 
-        <div class="h-20 no-print"></div>
+        <div class="mt-4 text-[10px] text-gray-400 text-center italic">
+            Ditta D'Angelo Antonello — v1.5.0
+        </div>
+        <div class="h-28 no-print"></div>
+    </div>
 
-    </div> 
-
-    <div class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md p-4 border-t no-print z-40">
-        <div class="max-w-xl mx-auto flex flex-col space-y-3">
-            <button onclick="toggleArchivio()" id="btnToggleArchivio" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-150 w-full text-sm">
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md p-4 border-t no-print z-40">
+        <div class="max-w-xl mx-auto flex flex-col space-y-2">
+            <button onclick="toggleArchivio()" id="btnToggleArchivio" class="bg-gray-600 text-white font-bold py-2 rounded-lg text-sm shadow">
                 Gestione Archivio
             </button>
-            <div id="action-buttons" class="flex flex-row space-x-2">
-                <button onclick="nuovoIntervento()" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Nuovo
-                </button>
-                <button onclick="salvaIntervento()" id="btnSalva" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Salva
-                </button>
-                <button onclick="window.print()" id="btnStampa" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Stampa
-                </button>
-                <button id="btnInviaReport" onclick="inviaReport()" class="flex-1 bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-2 rounded-lg shadow-md transition duration-150 text-sm">
-                    Email
-                </button>
+            <div class="flex space-x-2">
+                <button onclick="nuovoIntervento()" class="flex-1 bg-sky-500 text-white font-bold py-3 rounded-lg text-xs">Nuovo</button>
+                <button onclick="salvaIntervento()" id="btnSalva" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg text-xs">Salva</button>
+                <button onclick="window.print()" class="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-lg text-xs">Stampa</button>
+                <button onclick="inviaReport()" class="flex-1 bg-yellow-600 text-white font-bold py-3 rounded-lg text-xs">Email</button>
             </div>
         </div>
     </div>
