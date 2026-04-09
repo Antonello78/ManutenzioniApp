@@ -48,44 +48,72 @@
     }
 
     @media print {
+        /* Impostazioni pagina: rimuoviamo lo scale e usiamo margini reali */
+        @page {
+            size: A4 portrait;
+            margin: 0.8cm !important;
+        }
+
+        /* Nascondiamo quello che non serve */
         .no-print,
         #input-section > div:not(.border-t),
         #modalPreventivo,
-        .sticky-actions { 
+        .sticky-actions,
+        nav { 
             display: none !important;
-        }
-        
-        #input-section {
-            display: block !important;
         }
         
         body {
             padding: 0;
-            background-color: white;
+            background-color: white !important;
             margin: 0; 
         }
+
+        /* Contenitore principale: via lo scale, usiamo tutta la larghezza */
         #app {
             box-shadow: none !important;
             border: none !important;
-            max-width: none !important;
+            max-width: 100% !important;
+            width: 100% !important;
             margin: 0 !important; 
-            padding: 0.5rem !important; 
-            width: 210mm; 
-            transform: scale(0.82); 
-            transform-origin: top left; 
-            page-break-inside: avoid !important; 
+            padding: 0 !important; 
+            transform: none !important; /* Rimosso scale che creava la seconda pagina */
         }
         
+        /* Header: lo rendiamo più compatto in orizzontale */
         #unified-header {
-             display: block !important; 
-             padding-bottom: 0.5rem;
-             margin-bottom: 1rem;
-             border-bottom: 2px solid #ccc; 
+             display: flex !important; /* Forza il logo a stare di fianco ai dati ditta */
+             flex-direction: row !important;
+             justify-content: space-between !important;
+             align-items: center !important;
+             padding-bottom: 5px;
+             margin-bottom: 10px;
+             border-bottom: 2px solid #eee; 
         }
 
-        .print-avoid-break,
-        .print-avoid-break *,
-        .flex {
+        /* Riduciamo leggermente il logo solo in stampa */
+        #unified-header img {
+            max-height: 75px !important;
+            width: auto !important;
+        }
+
+        /* Dati intervento su due colonne per risparmiare altezza */
+        #riepilogoDati {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 10px !important;
+            margin-bottom: 10px !important;
+        }
+
+        /* Ottimizzazione sezioni Descrizione e Materiali */
+        .bg-gray-50, .bg-blue-50 {
+            padding: 10px !important;
+            margin-bottom: 10px !important;
+            border: 1px solid #e5e7eb !important;
+        }
+
+        /* Evitiamo che il totale venga spezzato */
+        .print-avoid-break, .flex {
             page-break-inside: avoid !important;
         }
 
@@ -95,10 +123,26 @@
             print-color-adjust: exact;
         }
 
-        @page {
-            size: A4 portrait; 
-            margin: 0.5cm !important; 
+        /* Visualizzazione Firme solo in stampa */
+        .area-firme {
+            display: flex !important;
+            justify-content: space-between;
+            margin-top: 40px;
+            padding-top: 10px;
         }
+        .blocco-firma {
+            width: 45%;
+            border-top: 1px solid #000;
+            text-align: center;
+            font-size: 0.85rem;
+            padding-top: 5px;
+            font-weight: bold;
+        }
+    }
+
+    /* Stile Firme (nascosto a video) */
+    .area-firme {
+        display: none;
     }
 </style>
 </head>
