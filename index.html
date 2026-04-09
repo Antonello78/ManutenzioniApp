@@ -957,8 +957,11 @@ function copiaRigaPreventivo(id) {
     const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     // Stringa per i materiali formattata come richiesto
-    const materialiHtml = `<b>- Ricambi utilizzati per l'intervento:\n<b>${i.materialiUtilizzati || 'Nessuno'}</b></b>\n\n`;
-
+    const importoRicambiFormattato = parseFloat(i.costoMateriali || 0).toFixed(2).replace('.', ',');
+    
+    const materialiHtml = `<b>- Ricambi utilizzati per l'intervento:</b><br>` +
+                          `<b>${i.materialiUtilizzati || 'Nessuno'}</b>\n\n` +
+                          `Importo ricambi: <b>€ ${importoRicambiFormattato}</b>\n\n`;
     let testoHtml = "";
     if (i.flagUrgenza) {
         testoHtml = `<b>- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
