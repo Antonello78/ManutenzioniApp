@@ -48,16 +48,19 @@
     }
 
     @media print {
-        .no-print,
-        #input-section > div:not(.border-t),
-        #modalPreventivo,
-        .sticky-actions { 
-            display: none !important;
-        }
-        
-        #input-section {
-            display: block !important;
-        }
+    /* Nasconde gli elementi che non devono finire nel PDF */
+    .no-print,
+    #input-section > div:not(.border-t),
+    #modalPreventivo,
+    .sticky-actions,
+    button.fixed, 
+    #backToTop { 
+        display: none !important;
+    }
+    
+    #input-section {
+        display: block !important;
+    }
         
         body {
             padding: 0;
