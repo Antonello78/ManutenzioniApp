@@ -361,24 +361,29 @@
             // TORNA A METTERE DATA E ORA DI ADESSO
             impostaDataOraAttuale(); 
         }
-        function gestisciAzionePulsante() {
+        function gestisciAzionePulsante(event) {
+    if (event) event.preventDefault(); // Blocca refresh accidentali
+
     const btn = document.getElementById('btnSalva');
     const testoPulsante = btn.innerText.trim();
 
     if (testoPulsante === "Modifica") {
-        // --- PASSAGGIO CRITICO ---
-        // Sblocchiamo i campi (false) ma diciamo ASSOLUTAMENTE 
-        // di non toccare il numero intervento (true)
+        // --- SALVATAGGIO DI SICUREZZA DEL NUMERO ---
+        const numeroCorrente = document.getElementById('nIntervento').value;
+
+        // Sblocca i campi (false) e chiedi di mantenere il numero (true)
         initializeInputs(false, true); 
         
-        // Trasformiamo il tasto in "Salva" (Verde)
+        // Forza il numero salvato (nel caso initializeInputs facesse i capricci)
+        document.getElementById('nIntervento').value = numeroCorrente;
+
+        // Cambia il pulsante in "Salva" (Verde)
         btn.innerText = "Salva";
         btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
         btn.classList.add('bg-green-600', 'hover:bg-green-700');
         
-        showMessage('success', "Modalità modifica attiva: i campi sono sbloccati.");
+        showMessage('success', "Modalità modifica attiva.");
     } else {
-        // Se il testo è già "Salva", esegue la funzione di salvataggio
         salvaIntervento();
     }
 }
