@@ -1771,17 +1771,18 @@ async function inviaReport() {
 
         // --- FUNZIONE AGGIUNTA PER IL PUNTO 2 (SALVATAGGIO) ---
         async function toggleMateriale(idChiamata, index) {
-            const llamada = chiamateGlobali.find(c => c.id == idChiamata);
-            if (!llamada) return;
+            const chiamata = chiamateGlobali.find(c => c.id == idChiamata);
+            if (!chiamata) return;
 
-            llamada.materiali[index].preso = !llamada.materiali[index].preso;
+            chiamata.materiali[index].preso = !chiamata.materiali[index].preso;
 
             try {
                 await fetch('/api/chiamate', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(llamada)
+                    body: JSON.stringify(chiamata)
                 });
+                // Ricarica la lista per il Punto 1 (grafica) e Punto 3 (Lista spesa)
                 caricaChiamate(); 
             } catch (err) {
                 console.error("Errore salvataggio materiale:", err);
@@ -1795,7 +1796,7 @@ async function inviaReport() {
             const bottone = document.getElementById('btnDrivePdf');
             
             if (!inputNumero || !inputNumero.includes('/')) {
-                container.classList.add('hidden');
+                if (container) container.classList.add('hidden');
                 return;
             }
             
@@ -1808,20 +1809,18 @@ async function inviaReport() {
                 const data = await response.json();
                 
                 if (data.trovato && data.link) {
-                    bottone.href = data.link;
-                    container.classList.remove('hidden');
+                    if (bottone) bottone.href = data.link;
+                    if (container) container.classList.remove('hidden');
                 } else {
-                    container.classList.add('hidden');
+                    if (container) container.classList.add('hidden');
                 }
             } catch (err) {
                 console.error("Errore controllo PDF su Google Drive:", err);
-                container.classList.add('hidden');
+                if (container) container.classList.add('hidden');
             }
         }
 
-        // Qui sotto incolla le tue funzioni originali: caricaChiamate, nuovaChiamata, ecc.
-        // Ricorda di controllare che in caricaChiamate il blocco dei materiali sia così:
-        // <span class="${m.preso ? 'line-through text-gray-400 font-normal' : 'text-gray-800 font-bold'}">${m.testo}</span>
+        // Qui sotto rimangono memorizzate ed intatte le tue funzioni originali del file.
     </script>
 </body>
 </html>
