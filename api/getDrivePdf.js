@@ -36,7 +36,7 @@ export default async function handler(req, res) {
 
         // 2. Prepariamo la query di ricerca per trovare il file (es: name starts with '117_26' e si trova nella cartella specifica)
         const prefissoFile = `${numero}_${anno}`;
-        const q = `'${folderId}' in parents and name contains '${prefissoFile}' and mimeType = 'application/pdf' and trashed = false`;
+        const q = "name contains '" + prefissoFile + "' and mimeType = 'application/pdf' and trashed = false";
 
         // 3. Interroghiamo Google Drive
         const response = await drive.files.list({
