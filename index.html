@@ -154,7 +154,7 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label for="nIntervento" class="block text-sm font-medium text-gray-600">N° Intervento</label>
-                    <input type="text" id="nIntervento" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Es. 075/26">
+                    <input type="text" id="nIntervento" oninput="if(typeof controllaPdfSuDrive === 'function') controllaPdfSuDrive()" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg" placeholder="Es. 075/26">
                 </div>
                 <div>
                     <label for="dataIntervento" class="block text-sm font-medium text-gray-600">Data</label>
@@ -915,6 +915,7 @@ function caricaIntervento(id) {
         if (typeof showMessage === "function") {
             showMessage('success', `Intervento N° ${intervento.nIntervento} caricato.`);
         }
+        if (typeof controllaPdfSuDrive === "function") controllaPdfSuDrive();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
