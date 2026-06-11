@@ -706,6 +706,7 @@ function nuovoIntervento() {
     // Re-inizializza i calcoli e gli input
     if (typeof initializeInputs === "function") initializeInputs();
     if (typeof calcolaManodopera === "function") calcolaManodopera();
+    if (document.getElementById('containerDrivePdf')) document.getElementById('containerDrivePdf').classList.add('hidden');
     
     showMessage('success', 'Nuova scheda pronta');
     
