@@ -1771,21 +1771,51 @@ async function inviaReport() {
 
         // --- FUNZIONE AGGIUNTA PER IL PUNTO 2 (SALVATAGGIO) ---
         async function toggleMateriale(idChiamata, index) {
-            const chiamata = chiamateGlobali.find(c => c.id == idChiamata);
-            if (!chiamata) return;
+            const llamada = chiamateGlobali.find(c => c.id == idChiamata);
+            if (!llamada) return;
 
-            chiamata.materiali[index].preso = !chiamata.materiali[index].preso;
+            llamada.materiali[index].preso = !llamada.materiali[index].preso;
 
             try {
                 await fetch('/api/chiamate', {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(chiamata)
+                    body: JSON.stringify(llamada)
                 });
-                // Ricarica la lista per il Punto 1 (grafica) e Punto 3 (Lista spesa)
                 caricaChiamate(); 
             } catch (err) {
                 console.error("Errore salvataggio materiale:", err);
+            }
+        }
+
+        // --- FUNZIONE PER CONTROLLARE SE ESISTE IL PDF SU GOOGLE DRIVE ---
+        async function controllaPdfSuDrive() {
+            const inputNumero = document.getElementById('nIntervento').value.trim();
+            const container = document.getElementById('containerDrivePdf');
+            const bottone = document.getElementById('btnDrivePdf');
+            
+            if (!inputNumero || !inputNumero.includes('/')) {
+                container.classList.add('hidden');
+                return;
+            }
+            
+            const parti = inputNumero.split('/');
+            const numero = parti[0];
+            const anno = parti[1];
+            
+            try {
+                const response = await fetch(`/api/getDrivePdf?numero=${numero}&anno=${anno}`);
+                const data = await response.json();
+                
+                if (data.trovato && data.link) {
+                    bottone.href = data.link;
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
+            } catch (err) {
+                console.error("Errore controllo PDF su Google Drive:", err);
+                container.classList.add('hidden');
             }
         }
 
@@ -1795,6 +1825,7 @@ async function inviaReport() {
     </script>
 </body>
 </html>
+
 
 
 
