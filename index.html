@@ -256,7 +256,16 @@
                             <span class="font-medium">Operai:</span>
                             <span id="resOperai" class="font-semibold text-gray-800">---</span>
                         </div>
-                    </div> 
+                    </div>
+                    
+                    <div id="containerDrivePdf" class="mb-4 no-print hidden">
+                        <a id="btnDrivePdf" href="#" target="_blank" class="w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition duration-150">
+                            <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9v-2h2v2zm0-4H9V7h2v5zm4 4h-2v-5h2v5zm0-6h-2V7h2v3z"/>
+                            </svg>
+                            <span>📄 APRI REPORT SCANSIONATO (DRIVE)</span>
+                        </a>
+                    </div>
                     
                     <div class="mb-4 p-4 border rounded-lg bg-gray-50 text-gray-700 hidden print:block">
                         <p class="print:text-xl print:font-bold print:text-blue-700 print:normal-case font-bold text-gray-500 uppercase text-[10px] mb-1 border-b pb-1">Descrizione Lavori (Eseguiti / Richiesti)</p>
@@ -1786,6 +1795,7 @@ async function inviaReport() {
     </script>
 </body>
 </html>
+
 
 
 
