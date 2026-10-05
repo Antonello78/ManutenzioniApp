@@ -1830,6 +1830,147 @@ async function inviaReport() {
 
         // Qui sotto rimangono memorizzate ed intatte le tue funzioni originali del file.
     </script>
+
+    <!-- MODALE CIRCOLARI E DATE UTILI -->
+<div id="modalCircolari" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div class="p-4 border-b flex justify-between items-center bg-amber-50">
+            <div>
+                <h2 class="font-bold text-amber-900 uppercase">Monitor Circolari & Date Utili</h2>
+                <p class="text-[10px] text-amber-700 font-semibold uppercase">Consultazione Istituti</p>
+            </div>
+            <button onclick="toggleModalCircolari()" class="text-2xl text-gray-500">&times;</button>
+        </div>
+
+        <div class="p-4 bg-gray-50 border-b space-y-2">
+            <span class="text-xs font-bold text-gray-700 uppercase">Aggiungi Nuovo Istituto</span>
+            <input type="text" id="circolareNomeScuola" placeholder="NOME SCUOLA (Es. LICEO ARISTOTELE)" class="w-full p-2 border rounded text-sm uppercase">
+            <input type="url" id="circolareUrlScuola" placeholder="LINK PAGINA CIRCOLARI (https://...)" class="w-full p-2 border rounded text-sm">
+            <button onclick="aggiungiScuolaCircolare()" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-2 rounded font-bold uppercase text-xs">Salva Scuola</button>
+        </div>
+
+        <div class="p-4 flex-1 overflow-y-auto space-y-4">
+            <div>
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Scuole Salvate</h3>
+                <div id="listaScuoleCircolari" class="space-y-1 text-sm text-gray-600">Caricamento...</div>
+            </div>
+
+            <hr class="border-gray-200">
+
+            <div>
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-bold text-amber-800 uppercase">Risultati Ricerca</h3>
+                    <button onclick="avviaRicercaCircolari()" id="btnVerificaCircolari" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded font-bold uppercase text-[10px]">
+                        🔄 Verifica Ora
+                    </button>
+                </div>
+                <div id="listaRisultatiCircolari" class="space-y-2 text-sm">
+                    <p class="text-gray-400 italic text-xs">Premere "Verifica Ora" per avviare la ricerca sui siti.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleModalCircolari() {
+        const modal = document.getElementById('modalCircolari');
+        if (modal) {
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                caricaScuoleCircolari();
+            }
+        }
+    }
+
+    async function caricaScuoleCircolari() {
+        const container = document.getElementById('listaScuoleCircolari');
+        try {
+            const res = await fetch('/api/scuoleCircolari');
+            const scuole = await res.json();
+            if (!scuole || scuole.length === 0) {
+                container.innerHTML = '<p class="italic text-xs text-gray-400">Nessuna scuola inserita.</p>';
+                return;
+            }
+            container.innerHTML = scuole.map(s => `
+                <div class="flex justify-between items-center bg-gray-100 p-2 rounded">
+                    <div class="truncate mr-2">
+                        <span class="font-bold text-gray-800 text-xs">${s.nome}</span>
+                        <a href="${s.url}" target="_blank" class="block text-[10px] text-blue-600 truncate">${s.url}</a>
+                    </div>
+                    <button onclick="eliminaScuolaCircolare('${s.id}')" class="text-red-600 font-bold text-xs bg-white px-2 py-1 rounded border">Elimina</button>
+                </div>
+            `).join('');
+        } catch (e) {
+            container.innerHTML = '<p class="text-red-500 text-xs">Errore nel caricamento.</p>';
+        }
+    }
+
+    async function aggiungiScuolaCircolare() {
+        const nome = document.getElementById('circolareNomeScuola').value;
+        const url = document.getElementById('circolareUrlScuola').value;
+        if (!nome || !url) {
+            alert("Inserire sia il nome che il link della pagina circolari.");
+            return;
+        }
+        try {
+            const res = await fetch('/api/scuoleCircolari', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, url })
+            });
+            if (res.ok) {
+                document.getElementById('circolareNomeScuola').value = '';
+                document.getElementById('circolareUrlScuola').value = '';
+                caricaScuoleCircolari();
+            }
+        } catch (e) {
+            alert("Errore durante il salvataggio.");
+        }
+    }
+
+    async function eliminaScuolaCircolare(id) {
+        if (!confirm("Vuoi rimuovere questa scuola dal monitoraggio?")) return;
+        try {
+            await fetch(`/api/scuoleCircolari?id=${id}`, { method: 'DELETE' });
+            caricaScuoleCircolari();
+        } catch (e) {
+            alert("Errore durante l'eliminazione.");
+        }
+    }
+
+    async function avviaRicercaCircolari() {
+        const container = document.getElementById('listaRisultatiCircolari');
+        const btn = document.getElementById('btnVerificaCircolari');
+        btn.disabled = true;
+        btn.innerText = "Ricerca in corso...";
+        container.innerHTML = '<p class="text-xs text-gray-500 italic">Lettura delle pagine web in corso...</p>';
+
+        try {
+            const res = await fetch('/api/scansionaCircolari', { method: 'POST' });
+            const data = await res.json();
+            btn.disabled = false;
+            btn.innerText = "🔄 Verifica Ora";
+
+            if (!data.dateTrovate || data.dateTrovate.length === 0) {
+                container.innerHTML = '<p class="text-xs text-gray-500 italic">Nessuna circolare di interesse trovata al momento.</p>';
+                return;
+            }
+
+            container.innerHTML = data.dateTrovate.map(r => `
+                <div class="p-2 border rounded bg-amber-50 border-amber-200">
+                    <span class="text-[10px] font-bold text-amber-800 uppercase block">${r.scuola}</span>
+                    <a href="${r.link}" target="_blank" class="text-xs font-semibold text-gray-800 hover:underline leading-tight block">${r.titolo}</a>
+                </div>
+            `).join('');
+        } catch (e) {
+            btn.disabled = false;
+            btn.innerText = "🔄 Verifica Ora";
+            container.innerHTML = '<p class="text-xs text-red-500">Errore durante la scansione.</p>';
+        }
+    }
+</script>
+    
 </body>
 </html>
 
