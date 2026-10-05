@@ -17,6 +17,16 @@ export default async function handler(req, res) {
             'sciopero', 'disinfestazione'
         ];
 
+        const mesi = {
+            'gennaio': 0, 'febbraio': 1, 'marzo': 2, 'aprile': 3, 'maggio': 4, 'giugno': 5,
+            'luglio': 6, 'agosto': 7, 'settembre': 8, 'ottobre': 9, 'novembre': 10, 'dicembre': 11
+        };
+
+        const oggi = new Date();
+        // Limite retroattivo: massimo 15 giorni fa
+        const dataLimitePassato = new Date();
+        dataLimitePassato.setDate(oggi.getDate() - 15);
+
         let risultatiTotali = [];
 
         for (const scuola of scuole) {
@@ -29,9 +39,9 @@ export default async function handler(req, res) {
                 
                 const htmlText = await response.text();
                 
-                // Estrazione semplice dei blocchi di testo / link contenenti notizie
                 const regexTag = /<a[^>]*href=["']([^"']+)["'][^>]*>(.*?)<\/a>/gi;
                 let match;
+                let indiceRisultato = 0;
                 
                 while ((match = regexTag.exec(htmlText)) !== null) {
                     const link = match[1];
@@ -42,12 +52,55 @@ export default async function handler(req, res) {
 
                     const trovata = paroleChiave.some(kw => testoLower.includes(kw));
                     if (trovata) {
-                        // Verifica se contiene un riferimento temporale/data
-                        risultatiTotali.push({
-                            scuola: scuola.nome,
-                            titolo: testoIncolore,
-                            link: link.startsWith('http') ? link : new URL(link, scuola.url).href
-                        });
+                        indiceRisultato++;
+                        let dataCircolare = null;
+
+                        // 1. Cerca data numerica (es. 15/10/2026, 15-10-26, 15.10.2026)
+                        const matchDataNum = testoLower.match(/(\d{1,2})[\/\.\-](\d{1,2})[\/\.\-](\d{2,4})/);
+                        if (matchDataNum) {
+                            let giorno = parseInt(matchDataNum[1], 10);
+                            let mese = parseInt(matchDataNum[2], 10) - 1;
+                            let anno = parseInt(matchDataNum[3], 10);
+                            if (anno < 100) anno += 2000;
+                            dataCircolare = new Date(anno, mese, giorno);
+                        } 
+                        // 2. Cerca data in lettere (es. 15 ottobre 2026 oppure 15 ottobre)
+                        else {
+                            for (const [nomeMese, numMese] of Object.entries(mesi)) {
+                                if (testoLower.includes(nomeMese)) {
+                                    const matchGiorno = testoLower.match(new RegExp(`(\\d{1,2})\\s+${nomeMese}`));
+                                    if (matchGiorno) {
+                                        let giorno = parseInt(matchGiorno[1], 10);
+                                        let annoCorrente = oggi.getFullYear();
+                                        dataCircolare = new Date(annoCorrente, numMese, giorno);
+                                    }
+                                    break;
+                                }
+                            }
+                        }
+
+                        // 3. Verifica della data o della posizione nella pagina
+                        let daIncludere = false;
+
+                        if (dataCircolare && !isNaN(dataCircolare.getTime())) {
+                            // Includi se la data è futura oppure non più vecchia di 15 giorni
+                            if (dataCircolare >= dataLimitePassato) {
+                                daIncludere = true;
+                            }
+                        } else {
+                            // Se la data non è estratta, includi solo se si trova tra i primi 5 risultati recenti della pagina
+                            if (indiceRisultato <= 5) {
+                                daIncludere = true;
+                            }
+                        }
+
+                        if (daIncludere) {
+                            risultatiTotali.push({
+                                scuola: scuola.nome,
+                                titolo: testoIncolore,
+                                link: link.startsWith('http') ? link : new URL(link, scuola.url).href
+                            });
+                        }
                     }
                 }
             } catch (errScuola) {
