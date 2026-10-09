@@ -551,14 +551,19 @@ function calcolaManodopera() {
     const nomeScuola = document.getElementById('nomeScuola').value;
     const plessoEdificio = document.getElementById('plessoEdificio').value;
 
-    // 2. Logica Costo Uscita (Automatismo Urgenza)
-    if (flagUrgenza && campoCostoUscita.value == "75") {
-        campoCostoUscita.value = "85";
-    } else if (!flagUrgenza && campoCostoUscita.value == "85") {
-        campoCostoUscita.value = "75";
+    // 2. Logica Costo Uscita (Automatismo Urgenza e Prosieguo)
+    if (flagProsieguo) {
+        campoCostoUscita.value = "0";
+        campoCostoUscita.disabled = true; // disabilita il campo uscita per evitare errori
+    } else {
+        campoCostoUscita.disabled = false;
+        if (flagUrgenza && campoCostoUscita.value == "75") {
+            campoCostoUscita.value = "85";
+        } else if (!flagUrgenza && (campoCostoUscita.value == "85" || campoCostoUscita.value == "0")) {
+            campoCostoUscita.value = "75";
+        }
     }
     const costoUscitaInput = parseFloat(campoCostoUscita.value) || 0;
-
     // 3. Funzione Reset (se i dati sono incompleti)
     function resetResults() {
         const ids = ['totaleManodopera', 'tariffaOraria', 'minutiEffettivi', 'minutiFatturabili', 'costoAggiuntivo', 'oreOltre60'];
@@ -596,8 +601,10 @@ function calcolaManodopera() {
         tariffaOraria = tariffaBaseInput + 10;
     }
 
-    const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
-    const oreAggiuntiveDecimali = minutiOltre60 / 60;
+    // Se è un prosieguo, si paga la manodopera dal 1° minuto (tutti i minuti fatturabili)
+    // Se è un intervento standard (1° giorno), si calcolano solo i minuti oltre i 60.
+    const minutiManodoperaDaPagare = flagProsieguo ? minutiFatturabili : Math.max(0, minutiFatturabili - 60);
+    const oreAggiuntiveDecimali = minutiManodoperaDaPagare / 60;
     const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
 
     // 6. Logica Materiali (€)
