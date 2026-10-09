@@ -713,6 +713,7 @@ function nuovoIntervento() {
     document.getElementById('oraFine').value = '10:15';
     document.getElementById('numOperai').value = '1';
     document.getElementById('flagUrgenza').checked = false;
+    if (document.getElementById('flagProsieguo')) document.getElementById('flagProsieguo').checked = false;
 
     // Reset tariffe predefinite
     if (document.getElementById('inputCostoUscita')) document.getElementById('inputCostoUscita').value = 75;
@@ -775,6 +776,7 @@ async function salvaIntervento() {
         costoUscita: document.getElementById('inputCostoUscita').value,
         tariffaBase: document.getElementById('inputTariffaBase').value,
         flagUrgenza: document.getElementById('flagUrgenza').checked,
+        flagProsieguo: document.getElementById('flagProsieguo') ? document.getElementById('flagProsieguo').checked : false,
         tariffaOraria: document.getElementById('tariffaOraria').textContent,
         totaleManodopera: document.getElementById('totaleManodopera').textContent
     };
