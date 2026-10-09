@@ -535,6 +535,8 @@
     // Gestione speciale per checkbox e select (usano disabled invece di readOnly)
     const flagUrgenza = document.getElementById('flagUrgenza');
     if (flagUrgenza) flagUrgenza.disabled = lock;
+    const flagProsieguo = document.getElementById('flagProsieguo');
+    if (flagProsieguo) flagProsieguo.disabled = lock;        
 }
         
 function calcolaManodopera() {
@@ -906,6 +908,9 @@ function caricaIntervento(id) {
         document.getElementById('inputCostoUscita').value = intervento.costoUscita || 75;
         document.getElementById('inputTariffaBase').value = intervento.tariffaBase || 38;
         document.getElementById('flagUrgenza').checked = !!intervento.flagUrgenza;
+        if (document.getElementById('flagProsieguo')) {
+            document.getElementById('flagProsieguo').checked = !!intervento.flagProsieguo;
+        }
         
         // --- MODIFICA AGGIORNAMENTO: BLOCCO E GESTIONE PULSANTE ---
         
