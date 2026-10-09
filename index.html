@@ -545,6 +545,7 @@ function calcolaManodopera() {
     const campoCostoUscita = document.getElementById('inputCostoUscita');
     const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
     const flagUrgenza = document.getElementById('flagUrgenza').checked;
+    const flagProsieguo = document.getElementById('flagProsieguo') ? document.getElementById('flagProsieguo').checked : false;
     const nIntervento = document.getElementById('nIntervento').value; 
     const dataIntervento = document.getElementById('dataIntervento').value;
     const nomeScuola = document.getElementById('nomeScuola').value;
