@@ -1009,29 +1009,38 @@ function copiaRigaPreventivo(id) {
     const oraFineMin = parseTime(i.oraFine);
     const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * i.numOperai;
     const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
-    const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
-    const oreOltre60 = (minutiOltre60 / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+    // Se è un prosieguo, si fatturano tutti i minuti dal 1° minuto. Se standard, solo quelli oltre i 60.
+    const minutiDaPagare = i.flagProsieguo ? minutiFatturabili : Math.max(0, minutiFatturabili - 60);
+    const oreDaPagare = (minutiDaPagare / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    // Stringa per i materiali formattata come richiesto
     const importoRicambiFormattato = parseFloat(i.costoMateriali || 0).toFixed(2).replace('.', ',');
     
     const materialiHtml = `<b>- Ricambi utilizzati per l'intervento:</b><br>` +
                           `<b>${i.materialiUtilizzati || 'Nessuno'}</b>\n\n` +
                           `Importo ricambi: <b>€ ${importoRicambiFormattato}</b>\n\n`;
     let testoHtml = "";
-    if (i.flagUrgenza) {
+    
+    if (i.flagProsieguo) {
+        // Testo specifico per il Prosieguo / Giorni Successivi
+        testoHtml = `<b>- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
+                    `<b>- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi, Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
+                    `Quantità: <b>${oreDaPagare} ore</b> x ${i.tariffaOraria}\n\n` +
+                    materialiHtml +
+                    `Importo totale intervento: € ${i.totaleManodopera}`;
+    } else if (i.flagUrgenza) {
         testoHtml = `<b>- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
-                    `<b>- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiOltre60} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
-                    `Quantità ore oltre la prima: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
-                    materialiHtml + // <--- SPOSTATO DOPO QUANTITÀ
+                    `<b>- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiDaPagare} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
+                    `Quantità ore oltre la prima: <b>${oreDaPagare} ore</b> x ${i.tariffaOraria}\n\n` +
+                    materialiHtml +
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     } else {
         testoHtml = `<b>- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
-                    `<b>- Manodopera aggiuntiva (${minutiOltre60} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
-                    `Quantità: <b>${oreOltre60} ore</b> x ${i.tariffaOraria}\n\n` +
-                    materialiHtml + // <--- SPOSTATO DOPO QUANTITÀ
+                    `<b>- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
+                    `Quantità: <b>${oreDaPagare} ore</b> x ${i.tariffaOraria}\n\n` +
+                    materialiHtml +
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     }
     
