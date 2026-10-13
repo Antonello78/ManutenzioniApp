@@ -83,14 +83,13 @@ export default async function handler(req, res) {
                         let daIncludere = false;
 
                         if (dataCircolare && !isNaN(dataCircolare.getTime())) {
-                            // Includi se la data è futura oppure non più vecchia di 15 giorni
                             if (dataCircolare >= dataLimitePassato) {
                                 daIncludere = true;
                             }
                         } else {
-                            // Se la data non è estratta, includi solo se si trova tra i primi 5 risultati recenti della pagina
                             if (indiceRisultato <= 5) {
                                 daIncludere = true;
+                                dataCircolare = oggi; // Se la data non è esplicita, assume la data corrente
                             }
                         }
 
@@ -98,7 +97,8 @@ export default async function handler(req, res) {
                             risultatiTotali.push({
                                 scuola: scuola.nome,
                                 titolo: testoIncolore,
-                                link: link.startsWith('http') ? link : new URL(link, scuola.url).href
+                                link: link.startsWith('http') ? link : new URL(link, scuola.url).href,
+                                timestamp: dataCircolare ? dataCircolare.getTime() : 0
                             });
                         }
                     }
@@ -113,7 +113,13 @@ export default async function handler(req, res) {
             index === self.findIndex((t) => t.scuola === item.scuola && t.titolo === item.titolo)
         );
 
-        return res.status(200).json({ dateTrovate: risultatiUnici });
+        // Ordina in modo DECRESCENTE per data (le novità/future in alto)
+        risultatiUnici.sort((a, b) => b.timestamp - a.timestamp);
+
+        // Pulizia del campo tecnico prima di restituire il JSON
+        const risultatiFinali = risultatiUnici.map(({ timestamp, ...rest }) => rest);
+
+        return res.status(200).json({ dateTrovate: risultatiFinali });
 
     } catch (error) {
         console.error('Errore durante la ricerca circolari:', error);
