@@ -1090,6 +1090,11 @@ function copiaRigaPreventivo(id) {
             const listaDiv = document.getElementById('listaInterventi');
             const filtroAnniDiv = document.getElementById('filtroAnni');
             const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
+            
+            // Lettura filtri aggiuntivi (Punto 5)
+            const filtroTipo = document.getElementById('filtroTipoArchivio') ? document.getElementById('filtroTipoArchivio').value : 'TUTTI';
+            const filtroMese = document.getElementById('filtroMeseArchivio') ? document.getElementById('filtroMeseArchivio').value : 'TUTTI';
+
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             
             const anniPresenti = [...new Set(interventi.map(i => i.nIntervento.split('/')[1]))].sort((a, b) => b - a);
@@ -1110,13 +1115,26 @@ function copiaRigaPreventivo(id) {
                 const matchRicerca = i.nIntervento.toLowerCase().includes(termineRicerca) ||
                                     (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termineRicerca)) ||
                                     (i.plessoEdificio && i.plessoEdificio.toLowerCase().includes(termineRicerca));
-                return matchAnno && matchRicerca;
+                
+                // --- CONTROLLO FILTRO TIPOLOGIA ---
+                let matchTipo = true;
+                if (filtroTipo === 'URGENTE') matchTipo = !!i.flagUrgenza;
+                if (filtroTipo === 'PROSIEVO') matchTipo = !!i.flagProsieguo;
+
+                // --- CONTROLLO FILTRO MESE ---
+                let matchMese = true;
+                if (filtroMese !== 'TUTTI' && i.dataIntervento) {
+                    const meseData = i.dataIntervento.split('-')[1]; // Es. da "2026-03-15" estrae "03"
+                    matchMese = (meseData === filtroMese);
+                }
+
+                return matchAnno && matchRicerca && matchTipo && matchMese;
             });
 
             interventiFiltrati.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
             
             if (interventiFiltrati.length === 0) {
-                listaDiv.innerHTML = `<p class="text-gray-500 text-center py-8 border-2 border-dashed rounded-lg">Nessun intervento per l'anno 20${annoSelezionato}.</p>`;
+                listaDiv.innerHTML = `<p class="text-gray-500 text-center py-8 border-2 border-dashed rounded-lg">Nessun intervento trovato per i filtri selezionati.</p>`;
                 return;
             }
             
