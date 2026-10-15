@@ -1385,6 +1385,13 @@ function copiaRigaPreventivo(id) {
                 inputSection.classList.add('hidden');
                 btn.textContent = 'Torna al Calcolo';
                 actionButtons.classList.add('hidden'); // Nasconde pulsanti salva/stampa in archivio
+
+                // --- RESET FILTRI AUTOMATICO ALL'APERTURA ---
+                if (document.getElementById('cercaIntervento')) document.getElementById('cercaIntervento').value = '';
+                if (document.getElementById('filtroTipoArchivio')) document.getElementById('filtroTipoArchivio').value = 'TUTTI';
+                if (document.getElementById('filtroMeseArchivio')) document.getElementById('filtroMeseArchivio').value = 'TUTTI';
+                // ---------------------------------------------
+
                 renderArchivio();
             } else {
                 archivio.classList.add('hidden');
