@@ -814,21 +814,29 @@ async function salvaIntervento() {
         
         localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
         
-        // --- RESET DEI CAMPI DOPO IL SALVATAGGIO ---
+        // --- RESET COMPLETO DEI CAMPI DOPO IL SALVATAGGIO ---
         document.getElementById('nomeScuola').value = '';
         document.getElementById('plessoEdificio').value = '';
         
-        // Svuota Materiali e Descrizione (già presente nel tuo codice)
         const campoMat = document.getElementById('materialiUtilizzati');
-        if (campoMat) { campoMat.value = ''; campoMat.readOnly = false; }
+        if (campoMat) { campoMat.value = ''; campoMat.readOnly = false; campoMat.style.backgroundColor = "#ffffff"; }
         
         const campoCostoMat = document.getElementById('costoMateriali');
-        if (campoCostoMat) { campoCostoMat.value = '0'; campoCostoMat.readOnly = false; }
+        if (campoCostoMat) { campoCostoMat.value = '0'; campoCostoMat.readOnly = false; campoCostoMat.style.backgroundColor = "#ffffff"; }
 
         const desc = document.getElementById('descrizioneLavori');
         if (desc) { desc.value = ''; desc.readOnly = false; desc.style.backgroundColor = "#ffffff"; }
 
-        // --- AGGIUNTA FONDAMENTALE: RIPRISTINO PULSANTE ---
+        // Reset orari e operai ai valori di default
+        document.getElementById('oraInizio').value = '09:00';
+        document.getElementById('oraFine').value = '10:15';
+        document.getElementById('numOperai').value = '1';
+
+        // Reset delle checkbox (Urgenza e Prosieguo)
+        document.getElementById('flagUrgenza').checked = false;
+        if (document.getElementById('flagProsieguo')) document.getElementById('flagProsieguo').checked = false;
+
+        // Ripristino del pulsante
         const btn = document.getElementById('btnSalva');
         if (btn) {
             btn.innerText = "Salva";
@@ -838,6 +846,10 @@ async function salvaIntervento() {
 
         initializeInputs(false, false); // Sblocca i campi per il prossimo intervento
         calcolaManodopera(); 
+        
+        // Nasconde o aggiorna il pulsante del PDF su Drive per il nuovo intervento
+        if (typeof controllaPdfSuDrive === 'function') controllaPdfSuDrive();
+        
         renderArchivio();
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
