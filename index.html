@@ -1142,6 +1142,87 @@ function copiaRigaPreventivo(id) {
             });
         }
 
+        function esportaArchivioCSV() {
+        let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
+
+        // Filtra gli interventi per anno e termine di ricerca
+        let interventiFiltrati = interventi.filter(i => {
+            const annoIntervento = i.nIntervento.split('/')[1];
+            const matchAnno = annoIntervento === annoSelezionato;
+            const matchRicerca = i.nIntervento.toLowerCase().includes(termineRicerca) ||
+                                (i.nomeScuola && i.nomeScuola.toLowerCase().includes(termineRicerca)) ||
+                                (i.plessoEdificio && i.plessoEdificio.toLowerCase().includes(termineRicerca));
+            return matchAnno && matchRicerca;
+        });
+
+        if (interventiFiltrati.length === 0) {
+            alert("Nessun intervento da esportare per l'anno o il filtro selezionato.");
+            return;
+        }
+
+        // Ordina dal più recente al più vecchio
+        interventiFiltrati.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
+
+        // Intestazioni colonne Excel
+        const headers = [
+            "N. Intervento",
+            "Data",
+            "Scuola",
+            "Plesso",
+            "Descrizione Lavori",
+            "Ricambi Utilizzati",
+            "Costo Ricambi (€)",
+            "Orario",
+            "Operai",
+            "Urgenza",
+            "Prosieguo",
+            "Totale (€)"
+        ];
+
+        const pulisciTesto = (testo) => {
+            if (!testo) return '""';
+            let t = String(testo).replace(/"/g, '""').replace(/\n/g, ' ');
+            return `"${t}"`;
+        };
+
+        let righeCSV = [headers.join(";")];
+
+        interventiFiltrati.forEach(i => {
+            const riga = [
+                pulisciTesto(i.nIntervento),
+                pulisciTesto(i.dataIntervento),
+                pulisciTesto(i.nomeScuola),
+                pulisciTesto(i.plessoEdificio),
+                pulisciTesto(i.descrizioneLavori),
+                pulisciTesto(i.materialiUtilizzati),
+                pulisciTesto(parseFloat(i.costoMateriali || 0).toFixed(2).replace('.', ',')),
+                pulisciTesto(`${i.oraInizio} - ${i.oraFine}`),
+                pulisciTesto(i.numOperai),
+                pulisciTesto(i.flagUrgenza ? "SI" : "NO"),
+                pulisciTesto(i.flagProsieguo ? "SI" : "NO"),
+                pulisciTesto(i.totaleManodopera ? i.totaleManodopera.replace(' €', '') : "0,00")
+            ];
+            righeCSV.push(riga.join(";"));
+        });
+
+        const contenutoCSV = "\uFEFF" + righeCSV.join("\n");
+        const blob = new Blob([contenutoCSV], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Interventi_20${annoSelezionato}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function cambiaAnno(anno) {
+        annoSelezionato = anno;
+        renderArchivio();
+    }
+        
         function cambiaAnno(anno) {
             annoSelezionato = anno;
             renderArchivio();
