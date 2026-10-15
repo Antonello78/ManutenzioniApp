@@ -1858,7 +1858,12 @@ async function inviaReport() {
         <div class="bg-white rounded-2xl w-full max-w-sm max-h-[80vh] flex flex-col shadow-2xl border border-gray-200">
             <div class="p-4 border-b flex justify-between items-center bg-green-600 text-white rounded-t-2xl">
                 <h3 class="font-bold uppercase text-xs tracking-widest">Materiali da acquistare</h3>
-                <button onclick="chiudiListaSpesa()" class="text-2xl font-bold leading-none">&times;</button>
+                <div class="flex items-center gap-2">
+                    <button onclick="stampaListaSpesa()" class="text-[10px] bg-white text-green-800 px-2 py-1 rounded font-black uppercase shadow-sm">
+                        🖨️ Stampa
+                    </button>
+                    <button onclick="chiudiListaSpesa()" class="text-2xl font-bold leading-none">&times;</button>
+                </div>
             </div>
             <div id="contenutoListaSpesa" class="p-4 overflow-y-auto flex-1 bg-gray-50 space-y-3 text-left">
             </div>
