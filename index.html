@@ -1142,6 +1142,109 @@ function copiaRigaPreventivo(id) {
             });
         }
 
+        function stampaRegistroChiamate() {
+            const titolo = filtroChiamateCompletate ? "STORICO CHIAMATE COMPLETATE" : "REGISTRO CHIAMATE ATTIVE";
+            const chiamateMancanti = chiamateGlobali.filter(c => 
+                filtroChiamateCompletate ? c.stato === 'Completata' : c.stato !== 'Completata'
+            );
+
+            if (chiamateMancanti.length === 0) {
+                alert("Nessuna chiamata presente da stampare.");
+                return;
+            }
+
+            let contenutoHtml = `
+                <html>
+                <head>
+                    <title>${titolo}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; color: #1e293b; }
+                        h1 { font-size: 18px; text-transform: uppercase; border-bottom: 2px solid #1e40af; padding-bottom: 5px; color: #1e40af; }
+                        .card { border: 1px solid #cbd5e1; padding: 10px; margin-bottom: 10px; border-radius: 6px; page-break-inside: avoid; }
+                        .scuola { font-weight: bold; font-size: 14px; text-transform: uppercase; }
+                        .plesso { font-size: 12px; color: #2563eb; font-weight: bold; font-style: italic; text-transform: uppercase; }
+                        .note { font-size: 12px; font-style: italic; margin-top: 5px; }
+                        .materiali { font-size: 11px; color: #047857; margin-top: 5px; font-weight: bold; }
+                        .meta { font-size: 10px; color: #64748b; margin-top: 4px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>D'ANGELO ANTONELLO — ${titolo} (${new Date().toLocaleDateString('it-IT')})</h1>
+            `;
+
+            chiamateMancanti.forEach(c => {
+                const matText = c.materiali && c.materiali.length > 0 
+                    ? c.materiali.map(m => m.testo || m).join(', ') 
+                    : '';
+                contenutoHtml += `
+                    <div class="card">
+                        <div class="scuola">${c.scuola || 'N.A.'} ${c.plesso ? `<span class="plesso"> — ${c.plesso}</span>` : ''}</div>
+                        <div class="note">"${c.note || 'Nessuna nota'}"</div>
+                        ${matText ? `<div class="materiali">📦 Materiali: ${matText}</div>` : ''}
+                        <div class="meta">Priorità: ${c.priorita || 'Bassa'} | Data: ${c.data ? c.data : 'N.D.'}</div>
+                    </div>
+                `;
+            });
+        
+            contenutoHtml += `</body></html>`;
+        
+            const win = window.open('', '_blank');
+            win.document.write(contenutoHtml);
+            win.document.close();
+            win.focus();
+            setTimeout(() => { win.print(); win.close(); }, 500);
+        }
+
+        function stampaListaSpesa() {
+            const chiamateMancanti = chiamateGlobali.filter(c => 
+                c.materiali && c.materiali.some(m => !m.preso) && c.stato !== 'Completata'
+            );
+        
+            if (chiamateMancanti.length === 0) {
+                alert("Nessun materiale da acquistare presente nella lista.");
+                return;
+            }
+        
+            let contenutoHtml = `
+                <html>
+                <head>
+                    <title>LISTA MATERIALI DA ACQUISTARE</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; color: #1e293b; }
+                        h1 { font-size: 18px; text-transform: uppercase; border-bottom: 2px solid #16a34a; padding-bottom: 5px; color: #16a34a; }
+                        .box { border: 1px solid #cbd5e1; padding: 10px; margin-bottom: 12px; border-radius: 6px; page-break-inside: avoid; }
+                        .scuola { font-weight: bold; font-size: 13px; text-transform: uppercase; }
+                        .plesso { font-size: 11px; color: #2563eb; font-weight: bold; text-transform: uppercase; }
+                        ul { margin: 5px 0 0 15px; padding: 0; font-size: 12px; }
+                        li { margin-bottom: 3px; font-weight: bold; }
+                    </style>
+                </head>
+                <body>
+                    <h1>D'ANGELO ANTONELLO — MATERIALI DA ACQUISTARE (${new Date().toLocaleDateString('it-IT')})</h1>
+            `;
+        
+            chiamateMancanti.forEach(c => {
+                const daPrendere = c.materiali.filter(m => !m.preso);
+                contenutoHtml += `
+                    <div class="box">
+                        <div class="scuola">${c.scuola}</div>
+                        <div class="plesso">${c.plesso || 'Sede Centrale'}</div>
+                        <ul>
+                            ${daPrendere.map(m => `<li>[  ] ${m.testo}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+        
+            contenutoHtml += `</body></html>`;
+        
+            const win = window.open('', '_blank');
+            win.document.write(contenutoHtml);
+            win.document.close();
+            win.focus();
+            setTimeout(() => { win.print(); win.close(); }, 500);
+        }
+        
         function esportaArchivioCSV() {
         let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
