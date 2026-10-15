@@ -334,6 +334,28 @@
                     📊 Esporta Excel (CSV)
                 </button>
             </div>
+            <div class="mb-4 grid grid-cols-2 gap-2">
+                <select id="filtroTipoArchivio" onchange="renderArchivio()" class="px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-xs font-semibold text-gray-700 bg-white">
+                    <option value="TUTTI">Tutte le tipologie</option>
+                    <option value="URGENTE">Solo Urgenze</option>
+                    <option value="PROSIEVO">Solo Prosieguo</option>
+                </select>
+                <select id="filtroMeseArchivio" onchange="renderArchivio()" class="px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-xs font-semibold text-gray-700 bg-white">
+                    <option value="TUTTI">Tutti i mesi</option>
+                    <option value="01">Gennaio</option>
+                    <option value="02">Febbraio</option>
+                    <option value="03">Marzo</option>
+                    <option value="04">Aprile</option>
+                    <option value="05">Maggio</option>
+                    <option value="06">Giugno</option>
+                    <option value="07">Luglio</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Settembre</option>
+                    <option value="10">Ottobre</option>
+                    <option value="11">Novembre</option>
+                    <option value="12">Dicembre</option>
+                </select>
+            </div>
             <div id="listaInterventi" class="space-y-3">
                 <p class="text-gray-500">Nessun intervento salvato.</p>
             </div>
