@@ -967,8 +967,11 @@ function caricaIntervento(id) {
         // --- MODIFICA AGGIORNAMENTO: BLOCCO E GESTIONE PULSANTE ---
         
         // 4. Blocchiamo i campi (Sola Lettura)
-        // Il primo 'true' blocca, il secondo 'true' impedisce al numero di cambiare
         initializeInputs(true, true); 
+        
+        // Disabilitiamo il pulsante Selezione da Listino in Sola Lettura
+        const btnListino = document.getElementById('btnSelezionaListino');
+        if (btnListino) btnListino.disabled = true;
         
         // 5. Configurazione Pulsante (deve diventare "Modifica" arancione)
         const btn = document.getElementById('btnSalva');
