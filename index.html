@@ -2362,14 +2362,26 @@ async function inviaReport() {
     let listinoMaterialiGlobali = [];
 
     function toggleModalListino() {
-        const modal = document.getElementById('modalListino');
-        if (modal) {
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                caricaListinoMateriali();
-            }
+    const modal = document.getElementById('modalListino');
+    if (modal) {
+        modal.classList.toggle('hidden');
+        
+        if (!modal.classList.contains('hidden')) {
+            // Blocca lo scroll del body
+            document.body.style.overflow = 'hidden';
+            
+            // Ferma la propagazione della rotella del mouse fuori dal modale
+            modal.onwheel = function(e) {
+                e.stopPropagation();
+            };
+            
+            caricaListinoMateriali();
+        } else {
+            document.body.style.overflow = '';
+            modal.onwheel = null;
         }
     }
+}
 
     function calcolaPrezzoVenditaDaRicarico() {
         const costoAcquisto = parseFloat(document.getElementById('matPrezzoAcquisto').value) || 0;
