@@ -2268,6 +2268,261 @@ async function inviaReport() {
         }
     }
 </script>
+
+<!-- MODALE LISTINO PREZZI MATERIALI -->
+<div id="modalListino" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div class="p-4 border-b flex justify-between items-center bg-emerald-700 text-white">
+            <div>
+                <h2 class="font-bold text-lg uppercase">Listino Prezzi Materiali</h2>
+                <p class="text-[10px] text-emerald-200 font-semibold uppercase">Gestione Interna Ricarichi & Prezzi</p>
+            </div>
+            <button onclick="toggleModalListino()" class="text-2xl font-bold">&times;</button>
+        </div>
+
+        <div class="p-4 bg-gray-50 border-b space-y-3">
+            <input type="hidden" id="matId">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <input type="text" id="matNome" placeholder="NOME MATERIALE / CODICE" class="p-2 border rounded text-sm uppercase">
+                <select id="matCategoria" class="p-2 border rounded text-sm">
+                    <option value="Generale">Categoria: Generale</option>
+                    <option value="Elettrico">Elettrico</option>
+                    <option value="Serrature/Ferramenta">Serrature / Ferramenta</option>
+                    <option value="Idraulica">Idraulica</option>
+                    <option value="Falegnameria">Falegnameria</option>
+                    <option value="Tapparelle/Avvolgibili">Tapparelle / Avvolgibili</option>
+                </select>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Costo Acquisto (€)</label>
+                    <input type="number" id="matPrezzoAcquisto" step="0.01" min="0" oninput="calcolaPrezzoVenditaDaRicarico()" placeholder="0.00" class="w-full p-2 border rounded text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Ricarico (%)</label>
+                    <input type="number" id="matPercentualeRicarico" step="1" value="30" oninput="calcolaPrezzoVenditaDaRicarico()" placeholder="30" class="w-full p-2 border rounded text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-emerald-700 uppercase">Prezzo Vendita (€)</label>
+                    <input type="number" id="matPrezzoVendita" step="0.01" min="0" oninput="calcolaRicaricoDaPrezzoVendita()" placeholder="0.00" class="w-full p-2 border border-emerald-500 rounded text-sm font-extrabold text-emerald-800 bg-emerald-50">
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button id="btnSalvaMateriale" onclick="salvaMaterialeListino()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded font-bold uppercase text-xs shadow">
+                    💾 Salva in Listino
+                </button>
+                <button id="btnResetMateriale" onclick="resetFormMateriale()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-3 py-2 rounded font-bold uppercase text-xs">
+                    Reset
+                </button>
+            </div>
+        </div>
+
+        <div class="p-4 flex-1 overflow-y-auto space-y-3">
+            <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="cercaMaterialeListino" onkeyup="renderListinoMateriali()" placeholder="Cerca materiale..." class="flex-1 p-2 border rounded text-sm">
+                <select id="filtroCategoriaListino" onchange="renderListinoMateriali()" class="p-2 border rounded text-xs font-bold text-gray-700">
+                    <option value="TUTTE">Tutte le categorie</option>
+                    <option value="Generale">Generale</option>
+                    <option value="Elettrico">Elettrico</option>
+                    <option value="Serrature/Ferramenta">Serrature / Ferramenta</option>
+                    <option value="Idraulica">Idraulica</option>
+                    <option value="Falegnameria">Falegnameria</option>
+                    <option value="Tapparelle/Avvolgibili">Tapparelle / Avvolgibili</option>
+                </select>
+            </div>
+
+            <div id="listaMaterialiContainer" class="space-y-2">
+                <p class="text-xs text-gray-400 italic text-center py-4">Caricamento listino...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let listinoMaterialiGlobali = [];
+
+    function toggleModalListino() {
+        const modal = document.getElementById('modalListino');
+        if (modal) {
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) {
+                caricaListinoMateriali();
+            }
+        }
+    }
+
+    function calcolaPrezzoVenditaDaRicarico() {
+        const costoAcquisto = parseFloat(document.getElementById('matPrezzoAcquisto').value) || 0;
+        const percentuale = parseFloat(document.getElementById('matPercentualeRicarico').value) || 0;
+        const prezzoVendita = costoAcquisto * (1 + (percentuale / 100));
+        document.getElementById('matPrezzoVendita').value = prezzoVendita.toFixed(2);
+    }
+
+    function calcolaRicaricoDaPrezzoVendita() {
+        const costoAcquisto = parseFloat(document.getElementById('matPrezzoAcquisto').value) || 0;
+        const prezzoVendita = parseFloat(document.getElementById('matPrezzoVendita').value) || 0;
+        if (costoAcquisto > 0) {
+            const perc = ((prezzoVendita - costoAcquisto) / costoAcquisto) * 100;
+            document.getElementById('matPercentualeRicarico').value = Math.round(perc);
+        }
+    }
+
+    function resetFormMateriale() {
+        document.getElementById('matId').value = '';
+        document.getElementById('matNome').value = '';
+        document.getElementById('matCategoria').value = 'Generale';
+        document.getElementById('matPrezzoAcquisto').value = '';
+        document.getElementById('matPercentualeRicarico').value = '30';
+        document.getElementById('matPrezzoVendita').value = '';
+        document.getElementById('btnSalvaMateriale').innerText = '💾 Salva in Listino';
+    }
+
+    async function caricaListinoMateriali() {
+        try {
+            const res = await fetch('/api/materiali');
+            listinoMaterialiGlobali = await res.json();
+            renderListinoMateriali();
+        } catch (err) {
+            console.error("Errore caricamento listino:", err);
+        }
+    }
+
+    function renderListinoMateriali() {
+        const container = document.getElementById('listaMaterialiContainer');
+        const ricerca = document.getElementById('cercaMaterialeListino').value.toLowerCase();
+        const catFiltro = document.getElementById('filtroCategoriaListino').value;
+
+        let filtrati = listinoMaterialiGlobali.filter(m => {
+            const matchRicerca = (m.nome && m.nome.toLowerCase().includes(ricerca)) || (m.categoria && m.categoria.toLowerCase().includes(ricerca));
+            const matchCat = catFiltro === 'TUTTE' || m.categoria === catFiltro;
+            return matchRicerca && matchCat;
+        });
+
+        if (filtrati.length === 0) {
+            container.innerHTML = '<p class="text-xs text-gray-500 italic text-center py-4">Nessun materiale presente in listino.</p>';
+            return;
+        }
+
+        container.innerHTML = filtrati.map(m => {
+            const costoAcq = parseFloat(m.prezzoAcquisto || 0).toFixed(2).replace('.', ',');
+            const prezzoVen = parseFloat(m.prezzoVendita || 0).toFixed(2).replace('.', ',');
+            const ricarico = m.percentualeRicarico || 0;
+
+            return `
+                <div class="p-3 border rounded-xl bg-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-gray-800 text-sm uppercase">${m.nome}</span>
+                            <span class="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold uppercase">${m.categoria || 'Generale'}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Acquisto: <span class="font-bold">€ ${costoAcq}</span> | Ricarico: <span class="font-bold text-amber-600">+${ricarico}%</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0">
+                        <div class="text-right">
+                            <span class="block text-[9px] font-bold text-emerald-700 uppercase">Vendita</span>
+                            <span class="text-base font-black text-emerald-700">€ ${prezzoVen}</span>
+                        </div>
+
+                        <div class="flex items-center gap-1">
+                            <button onclick="selezionaMaterialePerScheda('${m.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase px-2 py-1.5 rounded shadow" title="Aggiungi all'intervento">
+                                + Inserisci
+                            </button>
+                            <button onclick="modificaMateriale('${m.id}')" class="bg-amber-100 text-amber-700 p-1.5 rounded" title="Modifica">✏️</button>
+                            <button onclick="eliminaMaterialeListino('${m.id}')" class="bg-red-100 text-red-600 p-1.5 rounded" title="Elimina">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function salvaMaterialeListino() {
+        const id = document.getElementById('matId').value;
+        const nome = document.getElementById('matNome').value.trim();
+        const categoria = document.getElementById('matCategoria').value;
+        const prezzoAcquisto = parseFloat(document.getElementById('matPrezzoAcquisto').value) || 0;
+        const percentualeRicarico = parseFloat(document.getElementById('matPercentualeRicarico').value) || 0;
+        const prezzoVendita = parseFloat(document.getElementById('matPrezzoVendita').value) || 0;
+
+        if (!nome) {
+            alert("Inserisci un nome o un codice per il materiale.");
+            return;
+        }
+
+        const payload = { id: id || Date.now().toString(), nome, categoria, prezzoAcquisto, percentualeRicarico, prezzoVendita };
+
+        try {
+            const res = await fetch('/api/materiali', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                resetFormMateriale();
+                caricaListinoMateriali();
+            }
+        } catch (err) {
+            console.error("Errore salvataggio materiale:", err);
+        }
+    }
+
+    function modificaMateriale(id) {
+        const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
+        if (!mat) return;
+
+        document.getElementById('matId').value = mat.id;
+        document.getElementById('matNome').value = mat.nome;
+        document.getElementById('matCategoria').value = mat.categoria || 'Generale';
+        document.getElementById('matPrezzoAcquisto').value = mat.prezzoAcquisto || '';
+        document.getElementById('matPercentualeRicarico').value = mat.percentualeRicarico || '30';
+        document.getElementById('matPrezzoVendita').value = mat.prezzoVendita || '';
+        document.getElementById('btnSalvaMateriale').innerText = '✏️ Aggiorna Articolo';
+    }
+
+    async function eliminaMaterialeListino(id) {
+        if (!confirm("Sei sicuro di voler eliminare questo articolo dal listino?")) return;
+        try {
+            await fetch(`/api/materiali?id=${id}`, { method: 'DELETE' });
+            caricaListinoMateriali();
+        } catch (err) {
+            console.error("Errore eliminazione materiale:", err);
+        }
+    }
+
+    function selezionaMaterialePerScheda(id) {
+        const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
+        if (!mat) return;
+
+        const qtaStr = prompt(`Quanti pezzi/metri di "${mat.nome}" desideri aggiungere?`, "1");
+        if (!qtaStr) return;
+        const qta = parseFloat(qtaStr) || 1;
+
+        const campoTestoMat = document.getElementById('materialiUtilizzati');
+        const campoCostoMat = document.getElementById('costoMateriali');
+
+        const prezzoTotaleArticolo = (parseFloat(mat.prezzoVendita) || 0) * qta;
+        const rigaTesto = `${qta}x ${mat.nome} (€ ${prezzoTotaleArticolo.toFixed(2).replace('.', ',')})`;
+
+        if (campoTestoMat.value.trim() === '') {
+            campoTestoMat.value = rigaTesto;
+        } else {
+            campoTestoMat.value += ` - ${rigaTesto}`;
+        }
+
+        const costoAttuale = parseFloat(campoCostoMat.value) || 0;
+        campoCostoMat.value = (costoAttuale + prezzoTotaleArticolo).toFixed(2);
+
+        calcolaManodopera();
+        toggleModalListino();
+        showMessage('success', `Aggiunto: ${rigaTesto}`);
+    }
+</script>    
     
 </body>
 </html>
