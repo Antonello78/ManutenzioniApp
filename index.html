@@ -2383,6 +2383,7 @@ async function inviaReport() {
         document.getElementById('matId').value = '';
         document.getElementById('matNome').value = '';
         document.getElementById('matCategoria').value = 'Generale';
+        if (document.getElementById('matFornitore')) document.getElementById('matFornitore').value = '';
         document.getElementById('matPrezzoAcquisto').value = '';
         document.getElementById('matPercentualeRicarico').value = '30';
         document.getElementById('matPrezzoVendita').value = '';
@@ -2455,24 +2456,25 @@ async function inviaReport() {
         const id = document.getElementById('matId').value;
         const nome = document.getElementById('matNome').value.trim();
         const categoria = document.getElementById('matCategoria').value;
+        const fornitore = document.getElementById('matFornitore') ? document.getElementById('matFornitore').value.trim() : '';
         const prezzoAcquisto = parseFloat(document.getElementById('matPrezzoAcquisto').value) || 0;
         const percentualeRicarico = parseFloat(document.getElementById('matPercentualeRicarico').value) || 0;
         const prezzoVendita = parseFloat(document.getElementById('matPrezzoVendita').value) || 0;
-
+    
         if (!nome) {
             alert("Inserisci un nome o un codice per il materiale.");
             return;
         }
 
-        const payload = { id: id || Date.now().toString(), nome, categoria, prezzoAcquisto, percentualeRicarico, prezzoVendita };
-
+        const payload = { id: id || Date.now().toString(), nome, categoria, fornitore, prezzoAcquisto, percentualeRicarico, prezzoVendita };
+    
         try {
             const res = await fetch('/api/materiali', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-
+    
             if (res.ok) {
                 resetFormMateriale();
                 caricaListinoMateriali();
@@ -2481,7 +2483,6 @@ async function inviaReport() {
             console.error("Errore salvataggio materiale:", err);
         }
     }
-
     function modificaMateriale(id) {
         const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
         if (!mat) return;
