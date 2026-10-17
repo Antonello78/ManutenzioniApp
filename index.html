@@ -186,7 +186,12 @@
             </div>
 
             <div class="mt-4">
-                <label for="materialiUtilizzati" class="block text-sm font-medium text-gray-600">Ricambi utilizzati per l'intervento</label>
+                <div class="flex justify-between items-center mb-1">
+                    <label for="materialiUtilizzati" class="block text-sm font-medium text-gray-600">Ricambi utilizzati per l'intervento</label>
+                    <button type="button" onclick="toggleModalListino()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1 px-2 rounded shadow transition no-print">
+                        🏷️ Selezione da Listino
+                    </button>
+                </div>
                 <textarea id="materialiUtilizzati" rows="3" 
                 class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-1 focus:ring-gray-900 focus:border-gray-900 text-sm outline-none transition-all resize-none text-gray-900" 
                 placeholder="I materiali verranno caricati dal registro chiamate o inseriti qui..."></textarea>
