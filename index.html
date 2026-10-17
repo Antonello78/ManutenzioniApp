@@ -727,6 +727,15 @@ function nuovoIntervento() {
         desc.style.backgroundColor = "#ffffff"; // Forza il bianco
     }
 
+    // Reset costo materiali in euro
+    const costoMat = document.getElementById('costoMateriali');
+    if (costoMat) {
+        costoMat.value = '0';
+        costoMat.readOnly = false;
+        costoMat.disabled = false;
+        costoMat.style.backgroundColor = "#ffffff";
+    }
+
     // AGGIUNTA: Svuota e sblocca Materiali
     const mat = document.getElementById('materialiUtilizzati');
     if (mat) {
