@@ -2404,23 +2404,26 @@ async function inviaReport() {
         const container = document.getElementById('listaMaterialiContainer');
         const ricerca = document.getElementById('cercaMaterialeListino').value.toLowerCase();
         const catFiltro = document.getElementById('filtroCategoriaListino').value;
-
+    
         let filtrati = listinoMaterialiGlobali.filter(m => {
-            const matchRicerca = (m.nome && m.nome.toLowerCase().includes(ricerca)) || (m.categoria && m.categoria.toLowerCase().includes(ricerca));
+            const matchRicerca = (m.nome && m.nome.toLowerCase().includes(ricerca)) || 
+                                 (m.categoria && m.categoria.toLowerCase().includes(ricerca)) ||
+                                 (m.fornitore && m.fornitore.toLowerCase().includes(ricerca));
             const matchCat = catFiltro === 'TUTTE' || m.categoria === catFiltro;
             return matchRicerca && matchCat;
         });
-
+    
         if (filtrati.length === 0) {
             container.innerHTML = '<p class="text-xs text-gray-500 italic text-center py-4">Nessun materiale presente in listino.</p>';
             return;
         }
-
+    
         container.innerHTML = filtrati.map(m => {
             const costoAcq = parseFloat(m.prezzoAcquisto || 0).toFixed(2).replace('.', ',');
             const prezzoVen = parseFloat(m.prezzoVendita || 0).toFixed(2).replace('.', ',');
             const ricarico = m.percentualeRicarico || 0;
-
+            const infoFornitore = m.fornitore ? ` | Fornitore: <span class="font-bold text-gray-700">${m.fornitore}</span>` : '';
+    
             return `
                 <div class="p-3 border rounded-xl bg-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
@@ -2429,16 +2432,16 @@ async function inviaReport() {
                             <span class="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold uppercase">${m.categoria || 'Generale'}</span>
                         </div>
                         <div class="text-xs text-gray-500 mt-1">
-                            Acquisto: <span class="font-bold">€ ${costoAcq}</span> | Ricarico: <span class="font-bold text-amber-600">+${ricarico}%</span>
+                            Acquisto: <span class="font-bold">€ ${costoAcq}</span> | Ricarico: <span class="font-bold text-amber-600">+${ricarico}%</span>${infoFornitore}
                         </div>
                     </div>
-
+    
                     <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0">
                         <div class="text-right">
                             <span class="block text-[9px] font-bold text-emerald-700 uppercase">Vendita</span>
                             <span class="text-base font-black text-emerald-700">€ ${prezzoVen}</span>
                         </div>
-
+    
                         <div class="flex items-center gap-1">
                             <button onclick="selezionaMaterialePerScheda('${m.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase px-2 py-1.5 rounded shadow" title="Aggiungi all'intervento">
                                 + Inserisci
