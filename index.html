@@ -1433,11 +1433,14 @@ function copiaRigaPreventivo(id) {
             if (modal) {
                 modal.classList.toggle('hidden');
                 if (!modal.classList.contains('hidden')) {
+                    document.body.style.overflow = 'hidden'; // Blocca lo scroll sotto
                     // SE NON C'È UN ID IN MODIFICA, allora metti l'ora di adesso
                     if (!chiamataInModificaId) {
                         impostaDataOraAttuale();
                     }
                     caricaChiamate();
+                } else {
+                    document.body.style.overflow = ''; // Sblocca lo scroll alla chiusura
                 }
             }
         }
@@ -2185,7 +2188,10 @@ async function inviaReport() {
         if (modal) {
             modal.classList.toggle('hidden');
             if (!modal.classList.contains('hidden')) {
+                document.body.style.overflow = 'hidden'; // Blocca lo scroll della pagina sotto
                 caricaScuoleCircolari();
+            } else {
+                document.body.style.overflow = ''; // Sblocca lo scroll alla chiusura
             }
         }
     }
