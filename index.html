@@ -431,31 +431,35 @@
             impostaDataOraAttuale(); 
         }
         function gestisciAzionePulsante(event) {
-    if (event) event.preventDefault(); // Blocca refresh accidentali
-
-    const btn = document.getElementById('btnSalva');
-    const testoPulsante = btn.innerText.trim();
-
-    if (testoPulsante === "Modifica") {
-        // --- SALVATAGGIO DI SICUREZZA DEL NUMERO ---
-        const numeroCorrente = document.getElementById('nIntervento').value;
-
-        // Sblocca i campi (false) e chiedi di mantenere il numero (true)
-        initializeInputs(false, true); 
+            if (event) event.preventDefault(); // Blocca refresh accidentali
         
-        // Forza il numero salvato (nel caso initializeInputs facesse i capricci)
-        document.getElementById('nIntervento').value = numeroCorrente;
-
-        // Cambia il pulsante in "Salva" (Verde)
-        btn.innerText = "Salva";
-        btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
-        btn.classList.add('bg-green-600', 'hover:bg-green-700');
+            const btn = document.getElementById('btnSalva');
+            const testoPulsante = btn.innerText.trim();
         
-        showMessage('success', "Modalità modifica attiva.");
-    } else {
-        salvaIntervento();
-    }
-}
+            if (testoPulsante === "Modifica") {
+                // --- SALVATAGGIO DI SICUREZZA DEL NUMERO ---
+                const numeroCorrente = document.getElementById('nIntervento').value;
+        
+                // Sblocca i campi (false) e chiedi di mantenere il numero (true)
+                initializeInputs(false, true); 
+                
+                // Riattiva il pulsante Selezione da Listino
+                const btnListino = document.getElementById('btnSelezionaListino');
+                if (btnListino) btnListino.disabled = false;
+        
+                // Forza il numero salvato (nel caso initializeInputs facesse i capricci)
+                document.getElementById('nIntervento').value = numeroCorrente;
+        
+                // Cambia il pulsante in "Salva" (Verde)
+                btn.innerText = "Salva";
+                btn.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+                btn.classList.add('bg-green-600', 'hover:bg-green-700');
+                
+                showMessage('success', "Modalità modifica attiva.");
+            } else {
+                salvaIntervento();
+            }
+        }
         function toggleFiltroChiamate() {
             filtroChiamateCompletate = !filtroChiamateCompletate;
     
