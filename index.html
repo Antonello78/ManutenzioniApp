@@ -1020,6 +1020,7 @@ function caricaIntervento(id) {
 
         function chiudiModale() {
             document.getElementById('modalPreventivo').classList.add('hidden');
+            document.body.style.overflow = ''; // Sblocca lo scroll alla chiusura
         }
 
         function copiaEChiudi() {
@@ -1097,6 +1098,7 @@ function copiaRigaPreventivo(id) {
     }
     
     document.getElementById('testoPreventivoModal').innerHTML = testoHtml;
+    document.body.style.overflow = 'hidden'; // <--- BLACCA LO SCROLL DI SFONDO
     document.getElementById('modalPreventivo').classList.remove('hidden');
 }
         
