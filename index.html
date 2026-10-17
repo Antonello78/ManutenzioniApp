@@ -745,6 +745,12 @@ function nuovoIntervento() {
         mat.style.backgroundColor = "#ffffff"; // Forza il bianco
     }
 
+    // AGGIUNTA: Sblocca il pulsante Selezione da Listino
+    const btnListino = document.getElementById('btnSelezionaListino');
+    if (btnListino) {
+        btnListino.disabled = false;
+    }
+
     // Reset dei testi nel riepilogo visivo (Dettaglio Calcolo e Totale)
     if (document.getElementById('resDescrizione')) document.getElementById('resDescrizione').innerText = '---';
     if (document.getElementById('resMateriali')) document.getElementById('resMateriali').innerText = '---';
