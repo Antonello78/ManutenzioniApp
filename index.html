@@ -2486,10 +2486,11 @@ async function inviaReport() {
     function modificaMateriale(id) {
         const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
         if (!mat) return;
-
+    
         document.getElementById('matId').value = mat.id;
         document.getElementById('matNome').value = mat.nome;
         document.getElementById('matCategoria').value = mat.categoria || 'Generale';
+        if (document.getElementById('matFornitore')) document.getElementById('matFornitore').value = mat.fornitore || '';
         document.getElementById('matPrezzoAcquisto').value = mat.prezzoAcquisto || '';
         document.getElementById('matPercentualeRicarico').value = mat.percentualeRicarico || '30';
         document.getElementById('matPrezzoVendita').value = mat.prezzoVendita || '';
