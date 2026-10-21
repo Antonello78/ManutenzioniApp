@@ -1454,8 +1454,8 @@ function copiaRigaPreventivo(id) {
             if (isHidden) {
                 archivio.classList.remove('hidden');
                 inputSection.classList.add('hidden');
-                btn.textContent = 'Torna al Calcolo';
-                actionButtons.classList.add('hidden'); // Nasconde pulsanti salva/stampa in archivio
+                if (btn) btn.textContent = 'Torna al Calcolo';
+                if (actionButtons) actionButtons.classList.add('hidden'); // Nasconde pulsanti salva/stampa in archivio
 
                 // --- RESET FILTRI AUTOMATICO ALL'APERTURA ---
                 if (document.getElementById('cercaIntervento')) document.getElementById('cercaIntervento').value = '';
@@ -1467,8 +1467,8 @@ function copiaRigaPreventivo(id) {
             } else {
                 archivio.classList.add('hidden');
                 inputSection.classList.remove('hidden');
-                btn.textContent = 'Gestione Archivio';
-                actionButtons.classList.remove('hidden'); // Mostra pulsanti salva/stampa in calcolo
+                if (btn) btn.textContent = 'Gestione Archivio';
+                if (actionButtons) actionButtons.classList.remove('hidden'); // Mostra pulsanti salva/stampa in calcolo
             }
         }
 
