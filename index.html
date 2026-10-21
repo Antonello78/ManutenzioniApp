@@ -432,10 +432,29 @@
     </div>
 
     <script>
+        // --- FUNZIONI GESTIONE MENU TRE PUNTINI (OVERFLOW MENU) ---
+        function toggleMenuOverflow(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById('dropdownOverflowMenu');
+            if (menu) menu.classList.toggle('hidden');
+        }
+
+        function chiudiMenuOverflow() {
+            const menu = document.getElementById('dropdownOverflowMenu');
+            if (menu) menu.classList.add('hidden');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('dropdownOverflowMenu');
+            if (menu && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        });
+
         let filtroChiamateCompletate = false; // False = mostra solo le attive, True = mostra lo storico
         let chiamateGlobali = [];
-        let chiamataInModificaId = null; 
-
+        let chiamataInModificaId = null;
+        
         function resetModuloChiamata() {
             chiamataInModificaId = null;
             document.getElementById('chiamataScuola').value = '';
