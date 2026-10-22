@@ -444,6 +444,14 @@
     </div>
 
     <script>
+        // --- FUNZIONE DEBOUNCE PER LA RICERCA FLUIDA ---
+        let timerRicerca = null;
+        function gestisciRicercaFluid() {
+            clearTimeout(timerRicerca);
+            timerRicerca = setTimeout(() => {
+                renderArchivio();
+            }, 200);
+        }
         // --- FUNZIONI GESTIONE MENU TRE PUNTINI (OVERFLOW MENU) ---
         function toggleMenuOverflow(event) {
             if (event) event.stopPropagation();
