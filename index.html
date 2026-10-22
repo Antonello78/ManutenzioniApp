@@ -988,16 +988,16 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
     // 2. Salva istantaneamente nel browser (localStorage)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
 
-    // 3. SE TOOCCHIAMO PREV O FATT: invece di ricaricare tutto l'archivio, 
-    // aggiorniamo solo la visibilità dei campi N° e Data di quella specifica scheda in 0 millisecondi!
+    // 3. Aggiorna solo la parte dei campi N° e Data senza toccare la checkbox principale
     if (campo === 'prev' || campo === 'fatt') {
-        const containerCampi = document.getElementById(`campi-${campo}-${id}`);
+        const containerCampi = document.getElementById(`input-extra-${campo}-${id}`);
         if (containerCampi) {
             if (valore) {
+                const st = interventi[index].statoAmministrativo;
                 containerCampi.innerHTML = `
                     <div class="mt-1 space-y-1">
-                        <input type="text" placeholder="N° ${campo === 'prev' ? 'Prev.' : 'Fatt.'}" value="" onchange="aggiornaStatoAmministrativo('${id}', '${campo === 'prev' ? 'numPrev' : 'numFatt'}', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
-                        <input type="date" value="${campo === 'prev' ? interventi[index].statoAmministrativo.dataPrev : interventi[index].statoAmministrativo.dataFatt}" onchange="aggiornaStatoAmministrativo('${id}', '${campo === 'prev' ? 'dataPrev' : 'dataFatt'}', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                        <input type="text" placeholder="N° ${campo === 'prev' ? 'Prev.' : 'Fatt.'}" value="${campo === 'prev' ? (st.numPrev || '') : (st.numFatt || '')}" onchange="aggiornaStatoAmministrativo('${id}', '${campo === 'prev' ? 'numPrev' : 'numFatt'}', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                        <input type="date" value="${campo === 'prev' ? (st.dataPrev || '') : (st.dataFatt || '')}" onchange="aggiornaStatoAmministrativo('${id}', '${campo === 'prev' ? 'dataPrev' : 'dataFatt'}', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
                     </div>
                 `;
             } else {
@@ -1006,7 +1006,7 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
         }
     }
 
-    // 4. Sincronizzazione sul server in background (senza bloccare lo schermo)
+    // 4. Sincronizzazione sul server in background
     const nInterventoParts = interventi[index].nIntervento.split('/');
     const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
     const annoInserito = nInterventoParts[1];
