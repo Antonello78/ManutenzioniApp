@@ -975,7 +975,7 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
         };
     }
 
-    // 1. Aggiorna subito in memoria locale
+    // 1. Aggiorna subito il dato in memoria locale
     interventi[index].statoAmministrativo[campo] = valore;
 
     if (campo === 'prev' && valore === true && !interventi[index].statoAmministrativo.dataPrev) {
@@ -985,15 +985,15 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
         interventi[index].statoAmministrativo.dataFatt = new Date().toISOString().split('T')[0];
     }
 
-    // 2. Salva SUBITO in localStorage (così non si perde nulla)
+    // 2. Salva istantaneamente nel browser (localStorage)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
 
-    // 3. Se abbiamo toccato le spunte principali, ri-disegniamo solo se serve mostrare/nascondere i campi
-    if (campo === 'prev' || campo === 'fatt' || campo === 'scan' || campo === 'saldoOk') {
+    // 3. Ricarichiamo la grafica solo se tocchiamo Prev o Fatt (perché devono apparire/sparire i campi N° e Data)
+    if (campo === 'prev' || campo === 'fatt') {
         renderArchivio();
     }
 
-    // 4. Invia al server IN BACKGROUND (senza far attendere l'utente)
+    // 4. Sincronizzazione sul server in background (senza bloccare lo schermo)
     const nInterventoParts = interventi[index].nIntervento.split('/');
     const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
     const annoInserito = nInterventoParts[1];
