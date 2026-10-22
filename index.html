@@ -960,7 +960,62 @@ async function salvaIntervento() {
         showMessage('error', `Errore Server: ${error.message}`);
         return; 
     }
-}        function toggleSolaLettura(readonly) {
+}        
+// --- FUNZIONE GESTIONE STATO AMMINISTRATIVO ARCHIVIO ---
+async function aggiornaStatoAmministrativo(id, campo, valore) {
+    let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    const index = interventi.findIndex(i => i.id === id);
+    
+    if (index === -1) return;
+
+    if (!interventi[index].statoAmministrativo) {
+        interventi[index].statoAmministrativo = {
+            app: true,
+            scan: false,
+            prev: false,
+            numPrev: '',
+            dataPrev: '',
+            fatt: false,
+            numFatt: '',
+            dataFatt: '',
+            saldoOk: false
+        };
+    }
+
+    interventi[index].statoAmministrativo[campo] = valore;
+
+    if (campo === 'prev' && valore === true && !interventi[index].statoAmministrativo.dataPrev) {
+        interventi[index].statoAmministrativo.dataPrev = new Date().toISOString().split('T')[0];
+    }
+    if (campo === 'fatt' && valore === true && !interventi[index].statoAmministrativo.dataFatt) {
+        interventi[index].statoAmministrativo.dataFatt = new Date().toISOString().split('T')[0];
+    }
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
+
+    const nInterventoParts = interventi[index].nIntervento.split('/');
+    const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
+    const annoInserito = nInterventoParts[1];
+
+    try {
+        await fetch('/api/saveIntervento', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                numeroIntervento: numeroCorrenteSequenziale,
+                anno: annoInserito,
+                datiIntervento: interventi[index],
+                isUpdate: true
+            })
+        });
+    } catch (err) {
+        console.error("Errore sincronizzazione stato amministrativo:", err);
+    }
+
+    renderArchivio();
+}
+        
+        function toggleSolaLettura(readonly) {
             const fields = [
                 'nIntervento', 
                 'dataIntervento', 
