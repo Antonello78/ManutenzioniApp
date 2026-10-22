@@ -1352,30 +1352,34 @@ function copiaRigaPreventivo(id) {
                                 <span class="text-[11px] ${st.scan ? 'font-bold text-green-700' : ''}">Scan.</span>
                             </label>
 
-                            <div id="campi-prev-${i.id}" class="flex flex-col">
+                            <div class="flex flex-col">
                                 <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
                                     <input type="checkbox" ${st.prev ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'prev', this.checked)" class="h-3.5 w-3.5 text-blue-600 rounded">
                                     <span class="text-[11px] ${st.prev ? 'font-bold text-green-700' : ''}">Prev.</span>
                                 </label>
-                                ${st.prev ? `
-                                    <div class="mt-1 space-y-1">
-                                        <input type="text" placeholder="N° Prev." value="${st.numPrev || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'numPrev', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
-                                        <input type="date" value="${st.dataPrev || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'dataPrev', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
-                                    </div>
-                                ` : ''}
+                                <div id="input-extra-prev-${i.id}">
+                                    ${st.prev ? `
+                                        <div class="mt-1 space-y-1">
+                                            <input type="text" placeholder="N° Prev." value="${st.numPrev || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'numPrev', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                                            <input type="date" value="${st.dataPrev || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'dataPrev', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                                        </div>
+                                    ` : ''}
+                                </div>
                             </div>
 
-                            <div id="campi-fatt-${i.id}" class="flex flex-col">
+                            <div class="flex flex-col">
                                 <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
                                     <input type="checkbox" ${st.fatt ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'fatt', this.checked)" class="h-3.5 w-3.5 text-blue-600 rounded">
                                     <span class="text-[11px] ${st.fatt ? 'font-bold text-green-700' : ''}">Fatt.</span>
                                 </label>
-                                ${st.fatt ? `
-                                    <div class="mt-1 space-y-1">
-                                        <input type="text" placeholder="N° Fatt." value="${st.numFatt || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'numFatt', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
-                                        <input type="date" value="${st.dataFatt || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'dataFatt', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
-                                    </div>
-                                ` : ''}
+                                <div id="input-extra-fatt-${i.id}">
+                                    ${st.fatt ? `
+                                        <div class="mt-1 space-y-1">
+                                            <input type="text" placeholder="N° Fatt." value="${st.numFatt || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'numFatt', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                                            <input type="date" value="${st.dataFatt || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'dataFatt', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                                        </div>
+                                    ` : ''}
+                                </div>
                             </div>
 
                             <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
