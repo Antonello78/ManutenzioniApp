@@ -970,18 +970,12 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
 
     if (!interventi[index].statoAmministrativo) {
         interventi[index].statoAmministrativo = {
-            app: true,
-            scan: false,
-            prev: false,
-            numPrev: '',
-            dataPrev: '',
-            fatt: false,
-            numFatt: '',
-            dataFatt: '',
-            saldoOk: false
+            app: true, scan: false, prev: false, numPrev: '', dataPrev: '',
+            fatt: false, numFatt: '', dataFatt: '', saldoOk: false
         };
     }
 
+    // 1. Aggiorna subito in memoria locale
     interventi[index].statoAmministrativo[campo] = valore;
 
     if (campo === 'prev' && valore === true && !interventi[index].statoAmministrativo.dataPrev) {
@@ -991,28 +985,29 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
         interventi[index].statoAmministrativo.dataFatt = new Date().toISOString().split('T')[0];
     }
 
+    // 2. Salva SUBITO in localStorage (così non si perde nulla)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
 
+    // 3. Se abbiamo toccato le spunte principali, ri-disegniamo solo se serve mostrare/nascondere i campi
+    if (campo === 'prev' || campo === 'fatt' || campo === 'scan' || campo === 'saldoOk') {
+        renderArchivio();
+    }
+
+    // 4. Invia al server IN BACKGROUND (senza far attendere l'utente)
     const nInterventoParts = interventi[index].nIntervento.split('/');
     const numeroCorrenteSequenziale = parseInt(nInterventoParts[0]);
     const annoInserito = nInterventoParts[1];
 
-    try {
-        await fetch('/api/saveIntervento', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                numeroIntervento: numeroCorrenteSequenziale,
-                anno: annoInserito,
-                datiIntervento: interventi[index],
-                isUpdate: true
-            })
-        });
-    } catch (err) {
-        console.error("Errore sincronizzazione stato amministrativo:", err);
-    }
-
-    renderArchivio();
+    fetch('/api/saveIntervento', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            numeroIntervento: numeroCorrenteSequenziale,
+            anno: annoInserito,
+            datiIntervento: interventi[index],
+            isUpdate: true
+        })
+    }).catch(err => console.error("Errore salvataggio background:", err));
 }
         
         function toggleSolaLettura(readonly) {
