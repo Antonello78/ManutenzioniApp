@@ -1288,13 +1288,17 @@ function copiaRigaPreventivo(id) {
 
             interventiFiltrati.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
             
-            if (interventiFiltrati.length === 0) {
+            // --- OTTIMIZZAZIONE: Mostriamo solo gli ultimi 15 se non c'è una ricerca o un filtro attivo ---
+            const staCercando = termineRicerca.length > 0 || filtroTipo !== 'TUTTI' || filtroMese !== 'TUTTI' || filtroStato !== 'TUTTI';
+            const interventiDaMostrare = staCercando ? interventiFiltrati : interventiFiltrati.slice(0, 15);
+
+            if (interventiDaMostrare.length === 0) {
                 listaDiv.innerHTML = `<p class="text-gray-500 text-center py-8 border-2 border-dashed rounded-lg">Nessun intervento trovato per i filtri selezionati.</p>`;
                 return;
             }
             
             listaDiv.innerHTML = ''; 
-            interventiFiltrati.forEach(i => {
+            interventiDaMostrare.forEach(i => {
                 const badgeUrgenza = i.flagUrgenza ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200 rounded">Urgente</span>` : '';
                 
                 // Ore extra
@@ -1390,6 +1394,14 @@ function copiaRigaPreventivo(id) {
                     </div>`;
                 listaDiv.innerHTML += itemHtml;
             });
+
+            // Promemoria se ci sono altri interventi oltre i primi 15
+            if (!staCercando && interventiFiltrati.length > 15) {
+                listaDiv.innerHTML += `
+                    <div class="text-center py-3 text-xs text-gray-400 italic">
+                        Mostrati gli ultimi 15 interventi più recenti (su ${interventiFiltrati.length} totali). Usa la ricerca o i filtri per visualizzare gli altri.
+                    </div>`;
+            }
         }
 
         function stampaRegistroChiamate() {
