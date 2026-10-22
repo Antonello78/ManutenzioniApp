@@ -975,7 +975,7 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
         };
     }
 
-    // 1. Aggiorna subito il dato in memoria locale
+    // 1. Aggiorna il dato in memoria locale
     interventi[index].statoAmministrativo[campo] = valore;
 
     if (campo === 'prev' && valore === true && !interventi[index].statoAmministrativo.dataPrev) {
@@ -988,9 +988,22 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
     // 2. Salva istantaneamente nel browser (localStorage)
     localStorage.setItem(STORAGE_KEY, JSON.stringify(interventi));
 
-    // 3. Ricarichiamo la grafica solo se tocchiamo Prev o Fatt (perché devono apparire/sparire i campi N° e Data)
+    // 3. SE TOOCCHIAMO PREV O FATT: invece di ricaricare tutto l'archivio, 
+    // aggiorniamo solo la visibilità dei campi N° e Data di quella specifica scheda in 0 millisecondi!
     if (campo === 'prev' || campo === 'fatt') {
-        renderArchivio();
+        const containerCampi = document.getElementById(`campi-${campo}-${id}`);
+        if (containerCampi) {
+            if (valore) {
+                containerCampi.innerHTML = `
+                    <div class="mt-1 space-y-1">
+                        <input type="text" placeholder="N° ${campo === 'prev' ? 'Prev.' : 'Fatt.'}" value="" onchange="aggiornaStatoAmministrativo('${id}', '${campo === 'prev' ? 'numPrev' : 'numFatt'}', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                        <input type="date" value="${campo === 'prev' ? interventi[index].statoAmministrativo.dataPrev : interventi[index].statoAmministrativo.dataFatt}" onchange="aggiornaStatoAmministrativo('${id}', '${campo === 'prev' ? 'dataPrev' : 'dataFatt'}', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                    </div>
+                `;
+            } else {
+                containerCampi.innerHTML = '';
+            }
+        }
     }
 
     // 4. Sincronizzazione sul server in background (senza bloccare lo schermo)
