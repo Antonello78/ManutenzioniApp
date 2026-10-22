@@ -1229,9 +1229,10 @@ function copiaRigaPreventivo(id) {
             const filtroAnniDiv = document.getElementById('filtroAnni');
             const termineRicerca = document.getElementById('cercaIntervento').value.toLowerCase();
             
-            // Lettura filtri aggiuntivi (Punto 5)
+            // Lettura filtri
             const filtroTipo = document.getElementById('filtroTipoArchivio') ? document.getElementById('filtroTipoArchivio').value : 'TUTTI';
             const filtroMese = document.getElementById('filtroMeseArchivio') ? document.getElementById('filtroMeseArchivio').value : 'TUTTI';
+            const filtroStato = document.getElementById('filtroStatoArchivio') ? document.getElementById('filtroStatoArchivio').value : 'TUTTI';
 
             let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             
@@ -1262,11 +1263,19 @@ function copiaRigaPreventivo(id) {
                 // --- CONTROLLO FILTRO MESE ---
                 let matchMese = true;
                 if (filtroMese !== 'TUTTI' && i.dataIntervento) {
-                    const meseData = i.dataIntervento.split('-')[1]; // Es. da "2026-03-15" estrae "03"
+                    const meseData = i.dataIntervento.split('-')[1];
                     matchMese = (meseData === filtroMese);
                 }
 
-                return matchAnno && matchRicerca && matchTipo && matchMese;
+                // --- CONTROLLO FILTRO STATO AMMINISTRATIVO ---
+                let matchStato = true;
+                const st = i.statoAmministrativo || {};
+                if (filtroStato === 'NO_SCAN') matchStato = !st.scan;
+                if (filtroStato === 'NO_PREV') matchStato = !st.prev;
+                if (filtroStato === 'NO_FATT') matchStato = !st.fatt;
+                if (filtroStato === 'NO_SALDO') matchStato = !st.saldoOk;
+
+                return matchAnno && matchRicerca && matchTipo && matchMese && matchStato;
             });
 
             interventiFiltrati.sort((a, b) => parseInt(b.nIntervento.split('/')[0]) - parseInt(a.nIntervento.split('/')[0]));
@@ -1280,40 +1289,91 @@ function copiaRigaPreventivo(id) {
             interventiFiltrati.forEach(i => {
                 const badgeUrgenza = i.flagUrgenza ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200 rounded">Urgente</span>` : '';
                 
-                // --- CALCOLO ORE EXTRA IN TEMPO REALE ---
+                // Ore extra
                 const oraInizioMin = parseTime(i.oraInizio);
                 const oraFineMin = parseTime(i.oraFine);
                 const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * (i.numOperai || 1);
                 const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
                 const minutiOltre60 = Math.max(0, minutiFatturabili - 60);
                 const oreExtraCalculated = minutiOltre60 / 60;
-                // ----------------------------------------
+
+                // Stato Amministrativo di default se non ancora popolato
+                const st = i.statoAmministrativo || {
+                    app: true, scan: false, prev: false, numPrev: '', dataPrev: '',
+                    fatt: false, numFatt: '', dataFatt: '', saldoOk: false
+                };
 
                 const itemHtml = `
-                    <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex justify-between items-center flex-wrap">
-                        <div class="flex-1 min-w-[200px]">
-                            <div class="flex items-center">
-                                <span class="font-bold text-blue-700 text-lg"># ${i.nIntervento}</span>
-                                ${badgeUrgenza}
+                    <div class="p-3 border border-gray-200 rounded-lg shadow-sm bg-white flex flex-col gap-2">
+                        <div class="flex justify-between items-center flex-wrap">
+                            <div class="flex-1 min-w-[200px]">
+                                <div class="flex items-center">
+                                    <span class="font-bold text-blue-700 text-lg"># ${i.nIntervento}</span>
+                                    ${badgeUrgenza}
+                                </div>
+                                <div class="text-sm font-semibold text-gray-800">${i.nomeScuola || 'N/A'}</div>
+                                <div class="text-xs text-gray-500">${i.plessoEdificio || ''} — ${formatDate(i.dataIntervento)}</div>
+                                
+                                <div class="flex justify-between items-center mt-1 pr-4">
+                                    <div class="text-sm font-bold text-green-600">€ ${i.totaleManodopera}</div>
+                                    <div class="text-[10px] text-gray-400 font-medium italic">${oreExtraCalculated.toFixed(2).replace('.', ',')} ore extra (+1ª incl.)</div>
+                                </div>
                             </div>
-                            <div class="text-sm font-semibold text-gray-800">${i.nomeScuola || 'N/A'}</div>
-                            <div class="text-xs text-gray-500">${i.plessoEdificio || ''} — ${formatDate(i.dataIntervento)}</div>
-                            
-                            <div class="flex justify-between items-center mt-1 pr-4">
-                                <div class="text-sm font-bold text-green-600">€ ${i.totaleManodopera}</div>
-                                <div class="text-[10px] text-gray-400 font-medium italic">${oreExtraCalculated.toFixed(2).replace('.', ',')} ore extra (+1ª incl.)</div>
+                            <div class="flex space-x-2 mt-2 sm:mt-0">
+                                 <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100" title="Copia riga preventivo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+                                </button>
+                                <button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200" title="Carica/Modifica">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                </button>
+                                <button onclick="cancellaIntervento('${i.id}')" class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100" title="Elimina">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
                             </div>
                         </div>
-                        <div class="flex space-x-2 mt-2 sm:mt-0">
-                             <button onclick="copiaRigaPreventivo('${i.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100" title="Copia riga preventivo">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-                            </button>
-                            <button onclick="caricaIntervento('${i.id}')" class="p-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200" title="Carica/Modifica">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            </button>
-                            <button onclick="cancellaIntervento('${i.id}')" class="p-2 bg-red-50 text-red-600 rounded-md hover:bg-red-100" title="Elimina">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                            </button>
+
+                        <!-- RIGA STATO AMMINISTRATIVO -->
+                        <div class="border-t border-gray-100 pt-2 mt-1 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs bg-gray-50 p-2 rounded-lg">
+                            <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
+                                <input type="checkbox" checked disabled class="h-3.5 w-3.5 text-blue-600 rounded">
+                                <span class="text-[11px] font-bold text-blue-700">App.</span>
+                            </label>
+
+                            <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
+                                <input type="checkbox" ${st.scan ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'scan', this.checked)" class="h-3.5 w-3.5 text-blue-600 rounded">
+                                <span class="text-[11px] ${st.scan ? 'font-bold text-green-700' : ''}">Scan.</span>
+                            </label>
+
+                            <div class="flex flex-col">
+                                <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
+                                    <input type="checkbox" ${st.prev ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'prev', this.checked)" class="h-3.5 w-3.5 text-blue-600 rounded">
+                                    <span class="text-[11px] ${st.prev ? 'font-bold text-green-700' : ''}">Prev.</span>
+                                </label>
+                                ${st.prev ? `
+                                    <div class="mt-1 space-y-1">
+                                        <input type="text" placeholder="N° Prev." value="${st.numPrev || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'numPrev', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                                        <input type="date" value="${st.dataPrev || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'dataPrev', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <div class="flex flex-col">
+                                <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
+                                    <input type="checkbox" ${st.fatt ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'fatt', this.checked)" class="h-3.5 w-3.5 text-blue-600 rounded">
+                                    <span class="text-[11px] ${st.fatt ? 'font-bold text-green-700' : ''}">Fatt.</span>
+                                </label>
+                                ${st.fatt ? `
+                                    <div class="mt-1 space-y-1">
+                                        <input type="text" placeholder="N° Fatt." value="${st.numFatt || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'numFatt', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                                        <input type="date" value="${st.dataFatt || ''}" onchange="aggiornaStatoAmministrativo('${i.id}', 'dataFatt', this.value)" class="w-full text-[10px] p-1 border rounded bg-white">
+                                    </div>
+                                ` : ''}
+                            </div>
+
+                            <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
+                                <input type="checkbox" ${st.saldoOk ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'saldoOk', this.checked)" class="h-3.5 w-3.5 text-blue-600 rounded">
+                                <span class="text-[11px] ${st.saldoOk ? 'font-bold text-green-700' : ''}">SALDO OK</span>
+                            </label>
                         </div>
                     </div>`;
                 listaDiv.innerHTML += itemHtml;
