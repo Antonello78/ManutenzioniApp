@@ -2567,7 +2567,7 @@ async function inviaReport() {
             // Blocca lo scroll del body
             document.body.style.overflow = 'hidden';
             
-            // 1. AZZERIAMO SUBITO I FILTRI PRIMA DI CARICARE I DATI
+            // 1. AZZERIAMO SUBITO I FILTRI
             if (document.getElementById('cercaMaterialeListino')) {
                 document.getElementById('cercaMaterialeListino').value = '';
             }
@@ -2575,12 +2575,18 @@ async function inviaReport() {
                 document.getElementById('filtroCategoriaListino').value = 'TUTTE';
             }
 
+            // 2. SVUOTIAMO SUBITO IL CONTENITORE DELLA LISTA
+            const container = document.getElementById('listaMaterialiContainer');
+            if (container) {
+                container.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-6">Inizia a digitare nel campo di ricerca o seleziona una categoria per visualizzare i materiali.</p>';
+            }
+
             // Ferma la propagazione della rotella del mouse fuori dal modale
             modal.onwheel = function(e) {
                 e.stopPropagation();
             };
             
-            // 2. ORA CARICHIAMO I DATI (troverà già i filtri azzerati e partirà vuoto)
+            // 3. SCARICHIAMO I DATI AGGIORNATI DAL SERVER IN BACKGROUND
             caricaListinoMateriali();
         } else {
             document.body.style.overflow = '';
