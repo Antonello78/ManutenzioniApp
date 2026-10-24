@@ -2567,6 +2567,14 @@ async function inviaReport() {
             // Blocca lo scroll del body
             document.body.style.overflow = 'hidden';
             
+            // RESET FILTRI: Svuota la ricerca e ripristina la categoria a "TUTTE"
+            if (document.getElementById('cercaMaterialeListino')) {
+                document.getElementById('cercaMaterialeListino').value = '';
+            }
+            if (document.getElementById('filtroCategoriaListino')) {
+                document.getElementById('filtroCategoriaListino').value = 'TUTTE';
+            }
+
             // Ferma la propagazione della rotella del mouse fuori dal modale
             modal.onwheel = function(e) {
                 e.stopPropagation();
