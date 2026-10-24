@@ -1649,6 +1649,12 @@ function copiaRigaPreventivo(id) {
                 modal.classList.toggle('hidden');
                 if (!modal.classList.contains('hidden')) {
                     document.body.style.overflow = 'hidden'; // Blocca lo scroll sotto
+                    
+                    // AZZERA LA BARRA DI RICERCA ALL'APERTURA
+                    if (document.getElementById('cercaRegistroChiamate')) {
+                        document.getElementById('cercaRegistroChiamate').value = '';
+                    }
+
                     // SE NON C'È UN ID IN MODIFICA, allora metti l'ora di adesso
                     if (!chiamataInModificaId) {
                         impostaDataOraAttuale();
@@ -1683,7 +1689,17 @@ function copiaRigaPreventivo(id) {
                         return c.stato !== 'Completata';
                     }
                 });
-        
+
+                // FILTRO DI RICERCA TESTUALE
+                const testoRicerca = document.getElementById('cercaRegistroChiamate') ? document.getElementById('cercaRegistroChiamate').value.toLowerCase() : '';
+                if (testoRicerca) {
+                    chiamate = chiamate.filter(c => {
+                        return (c.scuola && c.scuola.toLowerCase().includes(testoRicerca)) ||
+                               (c.plesso && c.plesso.toLowerCase().includes(testoRicerca)) ||
+                               (c.note && c.note.toLowerCase().includes(testoRicerca));
+                    });
+                }
+                
                 if (chiamate.length === 0) {
                     container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata ${filtroChiamateCompletate ? 'completata' : 'attiva'}.</p>`;
                     return;
@@ -2201,6 +2217,11 @@ async function inviaReport() {
                     </button>
                     <button onclick="toggleRegistroChiamate()" class="text-2xl text-gray-500">&times;</button>
                 </div>
+            </div>
+
+            <div class="px-4 py-2 bg-gray-100 border-b">
+                procedi con la ricerca...
+                <input type="text" id="cercaRegistroChiamate" oninput="caricaChiamate()" placeholder="Cerca scuola, plesso, note..." class="w-full text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
             </div>
             
             <div class="p-4 bg-gray-50 border-b space-y-2">
