@@ -1669,29 +1669,15 @@ function copiaRigaPreventivo(id) {
         async function caricaChiamate() {
             const container = document.getElementById('listaChiamate');
             if (!container) return;
-
-            // 🛑 CONTROLLO: Se non c'è ricerca, la lista parte vuota
-            const inputRicerca = document.getElementById('cercaRegistroChiamate');
-            const testoRicerca = inputRicerca ? inputRicerca.value.toLowerCase() : '';
-
-            if (testoRicerca === '') {
-                container.innerHTML = `<p class="text-center text-gray-400 py-6 italic text-xs">Inizia a digitare nel campo di ricerca per visualizzare le chiamate.</p>`;
-                return;
-            }
-
             try {
                 const res = await fetch('/api/chiamate');
         
-                // LEGGIAMO I DATI UNA VOLTA SOLA
                 const datiDalServer = await res.json(); 
-                
-                // POPOLIAMO LA VARIABILE GLOBALE (Indispensabile!)
                 chiamateGlobali = datiDalServer; 
                 
-                // CREIAMO LA COPIA PER IL FILTRO
                 let chiamate = [...datiDalServer]; 
         
-                // Ora applichiamo il filtro che abbiamo deciso nel Punto 4
+                // 1. Filtro per stato (Attive / Storico)
                 chiamate = chiamate.filter(c => {
                     if (filtroChiamateCompletate) {
                         return c.stato === 'Completata';
@@ -1700,7 +1686,8 @@ function copiaRigaPreventivo(id) {
                     }
                 });
 
-                // FILTRO DI RICERCA TESTUALE
+                // 2. FILTRO DI RICERCA TESTUALE
+                const testoRicerca = document.getElementById('cercaRegistroChiamate') ? document.getElementById('cercaRegistroChiamate').value.toLowerCase() : '';
                 if (testoRicerca) {
                     chiamate = chiamate.filter(c => {
                         return (c.scuola && c.scuola.toLowerCase().includes(testoRicerca)) ||
@@ -1708,19 +1695,24 @@ function copiaRigaPreventivo(id) {
                                (c.note && c.note.toLowerCase().includes(testoRicerca));
                     });
                 }
-                
+
+                // 3. FILTRO PER PRIORITÀ / URGENZA
+                const filtroPriorita = document.getElementById('filtroPrioritaChiamate') ? document.getElementById('filtroPrioritaChiamate').value : 'TUTTE';
+                if (filtroPriorita !== 'TUTTE') {
+                    chiamate = chiamate.filter(c => c.priorita === filtroPriorita);
+                }
+        
                 if (chiamate.length === 0) {
-                    container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata ${filtroChiamateCompletate ? 'completata' : 'attiva'} trovata.</p>`;
+                    container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata trovata.</p>`;
                     return;
                 }
         
                 const ordine = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
-                chiamate.sort((a, b) => ordine[a.priorita] - ordine[b.priorita]);
+                chiamate.sort((a, b) => (ordine[a.priorita] || 3) - (ordine[b.priorita] || 3));
         
                 container.innerHTML = chiamate.map(c => {
                     let stileCard = "border-gray-300 bg-white"; 
                     
-                    // Gestione colori in base allo stato
                     if (c.stato === 'Completata') {
                         stileCard = "border-green-600 bg-green-50 opacity-75";
                     } else if (c.stato === 'In Lavorazione') {
@@ -1737,7 +1729,6 @@ function copiaRigaPreventivo(id) {
                         'Alta': 'bg-red-600', 'Media': 'bg-amber-500', 'Bassa': 'bg-green-600'
                     }[c.priorita] || 'bg-blue-600';
         
-                    // Pulizia testi per evitare errori JS nel passaggio alla funzione Copia
                     const sPulita = c.scuola.replace(/'/g, "\\'");
                     const pPulito = (c.plesso || '').replace(/'/g, "\\'");
                     const nPulite = (c.note || '').replace(/'/g, "\\'").replace(/\n/g, " ");
@@ -1762,7 +1753,6 @@ function copiaRigaPreventivo(id) {
                                         </svg>
                                     </button> 
                                             
-        
                                     <button onclick="event.stopPropagation(); toggleAppuntamento('${c.id}')" class="p-1.5 border rounded shadow-sm ${c.appuntamentoPreso ? 'bg-green-100 border-green-500 text-green-700' : 'bg-white border-gray-300 text-gray-400'}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -1834,7 +1824,6 @@ function copiaRigaPreventivo(id) {
                 container.innerHTML = 'Errore caricamento.'; 
             }
         }
-
         function impostaDataOraAttuale() {
             const adesso = new Date();
             const anno = adesso.getFullYear();
