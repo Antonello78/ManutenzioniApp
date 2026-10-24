@@ -1648,20 +1648,22 @@ function copiaRigaPreventivo(id) {
             if (modal) {
                 modal.classList.toggle('hidden');
                 if (!modal.classList.contains('hidden')) {
-                    document.body.style.overflow = 'hidden'; // Blocca lo scroll sotto
+                    document.body.style.overflow = 'hidden'; 
                     
-                    // AZZERA LA BARRA DI RICERCA ALL'APERTURA
+                    // Reset filtri all'apertura
                     if (document.getElementById('cercaRegistroChiamate')) {
                         document.getElementById('cercaRegistroChiamate').value = '';
                     }
+                    if (document.getElementById('filtroPrioritaChiamate')) {
+                        document.getElementById('filtroPrioritaChiamate').value = 'TUTTE';
+                    }
 
-                    // SE NON C'È UN ID IN MODIFICA, allora metti l'ora di adesso
                     if (!chiamataInModificaId) {
                         impostaDataOraAttuale();
                     }
                     caricaChiamate();
                 } else {
-                    document.body.style.overflow = ''; // Sblocca lo scroll alla chiusura
+                    document.body.style.overflow = ''; 
                 }
             }
         }
