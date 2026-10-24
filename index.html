@@ -2567,7 +2567,7 @@ async function inviaReport() {
             // Blocca lo scroll del body
             document.body.style.overflow = 'hidden';
             
-            // RESET FILTRI: Svuota la ricerca e ripristina la categoria a "TUTTE"
+            // 1. AZZERIAMO SUBITO I FILTRI PRIMA DI CARICARE I DATI
             if (document.getElementById('cercaMaterialeListino')) {
                 document.getElementById('cercaMaterialeListino').value = '';
             }
@@ -2580,6 +2580,7 @@ async function inviaReport() {
                 e.stopPropagation();
             };
             
+            // 2. ORA CARICHIAMO I DATI (troverà già i filtri azzerati e partirà vuoto)
             caricaListinoMateriali();
         } else {
             document.body.style.overflow = '';
@@ -2587,7 +2588,6 @@ async function inviaReport() {
         }
     }
 }
-
     function calcolaPrezzoVenditaDaRicarico() {
         const costoAcquisto = parseFloat(document.getElementById('matPrezzoAcquisto').value) || 0;
         const percentuale = parseFloat(document.getElementById('matPercentualeRicarico').value) || 0;
