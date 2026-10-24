@@ -1704,11 +1704,11 @@ function copiaRigaPreventivo(id) {
                     chiamate = chiamate.filter(c => c.priorita === filtroPriorita);
                 }
 
-                // 📊 AGGIORNA IL CONTATORE DELLE CHIAMATE VISIBILI
+                // 📊 CONTA ESATTAMENTE TUTTE LE CHIAMATE ATTIVE (NON COMPLETATE) IN GLOBALE
                 const badgeTotale = document.getElementById('totaleChiamateBadge');
                 if (badgeTotale) {
-                    const etichetta = filtroChiamateCompletate ? "Totale chiamate in storico" : "Totale chiamate attive";
-                    badgeTotale.innerText = `${etichetta}: ${chiamate.length}`;
+                    const chiamateAttiveTotali = chiamateGlobali.filter(c => c.stato !== 'Completata').length;
+                    badgeTotale.innerHTML = `Totale chiamate attive: <span class="text-red-600 font-extrabold">${chiamateAttiveTotali}</span>`;
                 }
         
                 if (chiamate.length === 0) {
