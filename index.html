@@ -1709,8 +1709,12 @@ function copiaRigaPreventivo(id) {
                     return;
                 }
         
-                const ordine = { 'Alta': 1, 'Media': 2, 'Bassa': 3 };
-                chiamate.sort((a, b) => (ordine[a.priorita] || 3) - (ordine[b.priorita] || 3));
+                // 🔄 ORDINAMENTO: Dal più recente in alto al più vecchio in basso
+                chiamate.sort((a, b) => {
+                    const idA = parseInt(a.id) || 0;
+                    const idB = parseInt(b.id) || 0;
+                    return idA - idB; 
+                });
         
                 container.innerHTML = chiamate.map(c => {
                     let stileCard = "border-gray-300 bg-white"; 
@@ -1826,6 +1830,7 @@ function copiaRigaPreventivo(id) {
                 container.innerHTML = 'Errore caricamento.'; 
             }
         }
+        
         function impostaDataOraAttuale() {
             const adesso = new Date();
             const anno = adesso.getFullYear();
