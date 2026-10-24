@@ -2752,32 +2752,40 @@ async function inviaReport() {
     }
 
     function selezionaMaterialePerScheda(id) {
-        const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
-        if (!mat) return;
+    const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
+    if (!mat) return;
 
-        const qtaStr = prompt(`Quanti pezzi/metri di "${mat.nome}" desideri aggiungere?`, "1");
-        if (!qtaStr) return;
-        const qta = parseFloat(qtaStr) || 1;
+    const qtaStr = prompt(`Quanti pezzi/metri di "${mat.nome}" desideri aggiungere?`, "1");
+    if (!qtaStr) return;
+    const qta = parseFloat(qtaStr) || 1;
 
-        const campoTestoMat = document.getElementById('materialiUtilizzati');
-        const campoCostoMat = document.getElementById('costoMateriali');
+    const campoTestoMat = document.getElementById('materialiUtilizzati');
+    const campoCostoMat = document.getElementById('costoMateriali');
 
-        const prezzoTotaleArticolo = (parseFloat(mat.prezzoVendita) || 0) * qta;
-        const rigaTesto = `${qta}x ${mat.nome} (€ ${prezzoTotaleArticolo.toFixed(2).replace('.', ',')})`;
+    const prezzoTotaleArticolo = (parseFloat(mat.prezzoVendita) || 0) * qta;
 
-        if (campoTestoMat.value.trim() === '') {
-            campoTestoMat.value = rigaTesto;
-        } else {
-            campoTestoMat.value += ` - ${rigaTesto}`;
-        }
+    // Controlliamo se la spunta è attiva
+    const includiPrezzo = document.getElementById('chkIncludiPrezzoTesto') ? document.getElementById('chkIncludiPrezzoTesto').checked : true;
 
-        const costoAttuale = parseFloat(campoCostoMat.value) || 0;
-        campoCostoMat.value = (costoAttuale + prezzoTotaleArticolo).toFixed(2);
-
-        calcolaManodopera();
-        toggleModalListino();
-        showMessage('success', `Aggiunto: ${rigaTesto}`);
+    // Prepariamo la riga di testo in base alla spunta
+    let rigaTesto = `${qta}x ${mat.nome}`;
+    if (includiPrezzo) {
+        rigaTesto += ` (€ ${prezzoTotaleArticolo.toFixed(2).replace('.', ',')})`;
     }
+
+    if (campoTestoMat.value.trim() === '') {
+        campoTestoMat.value = rigaTesto;
+    } else {
+        campoTestoMat.value += ` - ${rigaTesto}`;
+    }
+
+    const costoAttuale = parseFloat(campoCostoMat.value) || 0;
+    campoCostoMat.value = (costoAttuale + prezzoTotaleArticolo).toFixed(2);
+
+    calcolaManodopera();
+    toggleModalListino();
+    showMessage('success', `Aggiunto: ${rigaTesto}`);
+}
 </script>    
     
 </body>
