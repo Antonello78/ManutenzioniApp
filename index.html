@@ -1710,6 +1710,13 @@ function copiaRigaPreventivo(id) {
                     const chiamateAttiveTotali = chiamateGlobali.filter(c => c.stato !== 'Completata').length;
                     badgeTotale.innerHTML = `Totale chiamate attive: <span class="text-red-600 font-extrabold">${chiamateAttiveTotali}</span>`;
                 }
+
+                // 📊 AGGIORNA ANCHE IL NUMERINO SUL PULSANTE DEL MENU A TENDINA
+                const badgeMenu = document.getElementById('badgeMenuChiamate');
+                if (badgeMenu) {
+                    const chiamateAttiveTotali = chiamateGlobali.filter(c => c.stato !== 'Completata').length;
+                    badgeMenu.innerText = chiamateAttiveTotali > 0 ? `(${chiamateAttiveTotali})` : '';
+                }
         
                 if (chiamate.length === 0) {
                     container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata trovata.</p>`;
