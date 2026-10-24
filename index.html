@@ -2768,7 +2768,7 @@ async function inviaReport() {
     const prezzoTotaleArticolo = (parseFloat(mat.prezzoVendita) || 0) * qta;
 
     // Controlliamo se la spunta è attiva
-    const includiPrezzo = document.getElementById('chkIncludiPrezzoTesto') ? document.getElementById('chkIncludiPrezzoTesto').checked : true;
+    const includiPrezzo = document.getElementById('chkIncludiPrezzoTesto') ? document.getElementById('chkIncludiPrezzoTesto').checked : false;
 
     // Prepariamo la riga di testo in base alla spunta
     let rigaTesto = `${qta}x ${mat.nome}`;
