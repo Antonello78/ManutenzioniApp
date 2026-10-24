@@ -1703,17 +1703,24 @@ function copiaRigaPreventivo(id) {
                 if (filtroPriorita !== 'TUTTE') {
                     chiamate = chiamate.filter(c => c.priorita === filtroPriorita);
                 }
+
+                // 📊 AGGIORNA IL CONTATORE DELLE CHIAMATE VISIBILI
+                const badgeTotale = document.getElementById('totaleChiamateBadge');
+                if (badgeTotale) {
+                    const etichetta = filtroChiamateCompletate ? "Totale chiamate in storico" : "Totale chiamate attive";
+                    badgeTotale.innerText = `${etichetta}: ${chiamate.length}`;
+                }
         
                 if (chiamate.length === 0) {
                     container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata trovata.</p>`;
                     return;
                 }
         
-                // 🔄 ORDINAMENTO: Dal più recente in alto al più vecchio in basso
+                // 🔄 ORDINAMENTO CORRETTO: Dal più recente in alto al più vecchio in basso
                 chiamate.sort((a, b) => {
                     const idA = parseInt(a.id) || 0;
                     const idB = parseInt(b.id) || 0;
-                    return idB - idA; 
+                    return idA - idB; // Rimesso idA - idB per avere il più recente in cima
                 });
         
                 container.innerHTML = chiamate.map(c => {
