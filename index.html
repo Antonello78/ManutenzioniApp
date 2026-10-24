@@ -2641,7 +2641,7 @@ async function inviaReport() {
         return;
     }
 
-    container.innerHTML = filtrati.map(m => {
+    container.innerHTML = `<div class="space-y-2 px-1">` + filtrati.map(m => {
         const costoAcq = parseFloat(m.prezzoAcquisto || 0).toFixed(2).replace('.', ',');
         const prezzoVen = parseFloat(m.prezzoVendita || 0).toFixed(2).replace('.', ',');
         const ricarico = m.percentualeRicarico || 0;
