@@ -1713,7 +1713,7 @@ function copiaRigaPreventivo(id) {
                 chiamate.sort((a, b) => {
                     const idA = parseInt(a.id) || 0;
                     const idB = parseInt(b.id) || 0;
-                    return idA - idB; 
+                    return idB - idA; 
                 });
         
                 container.innerHTML = chiamate.map(c => {
