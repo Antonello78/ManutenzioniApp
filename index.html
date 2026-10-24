@@ -1669,6 +1669,16 @@ function copiaRigaPreventivo(id) {
         async function caricaChiamate() {
             const container = document.getElementById('listaChiamate');
             if (!container) return;
+
+            // 🛑 CONTROLLO: Se non c'è ricerca, la lista parte vuota
+            const inputRicerca = document.getElementById('cercaRegistroChiamate');
+            const testoRicerca = inputRicerca ? inputRicerca.value.toLowerCase() : '';
+
+            if (testoRicerca === '') {
+                container.innerHTML = `<p class="text-center text-gray-400 py-6 italic text-xs">Inizia a digitare nel campo di ricerca per visualizzare le chiamate.</p>`;
+                return;
+            }
+
             try {
                 const res = await fetch('/api/chiamate');
         
@@ -1691,7 +1701,6 @@ function copiaRigaPreventivo(id) {
                 });
 
                 // FILTRO DI RICERCA TESTUALE
-                const testoRicerca = document.getElementById('cercaRegistroChiamate') ? document.getElementById('cercaRegistroChiamate').value.toLowerCase() : '';
                 if (testoRicerca) {
                     chiamate = chiamate.filter(c => {
                         return (c.scuola && c.scuola.toLowerCase().includes(testoRicerca)) ||
@@ -1701,7 +1710,7 @@ function copiaRigaPreventivo(id) {
                 }
                 
                 if (chiamate.length === 0) {
-                    container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata ${filtroChiamateCompletate ? 'completata' : 'attiva'}.</p>`;
+                    container.innerHTML = `<p class="text-center text-gray-500 py-4 italic text-sm">Nessuna chiamata ${filtroChiamateCompletate ? 'completata' : 'attiva'} trovata.</p>`;
                     return;
                 }
         
