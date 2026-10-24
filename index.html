@@ -2641,17 +2641,19 @@ async function inviaReport() {
     const ricerca = document.getElementById('cercaMaterialeListino').value.toLowerCase();
     const catFiltro = document.getElementById('filtroCategoriaListino').value;
 
-    // CONTROLLO NUOVO: Se non sto cercando nulla e la categoria è "TUTTE", la lista parte vuota
-    if (ricerca === '' && catFiltro === 'TUTTE') {
+    // Mostra il messaggio iniziale solo se non c'è ricerca E la categoria non è stata selezionata
+    if (ricerca === '' && catFiltro === '') {
         container.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-6">Inizia a digitare nel campo di ricerca o seleziona una categoria per visualizzare i materiali.</p>';
         return;
     }
 
     let filtrati = listinoMaterialiGlobali.filter(m => {
-        const matchRicerca = (m.nome && m.nome.toLowerCase().includes(ricerca)) || 
+        const matchRicerca = (m.nome && m.nome.toLowerCase().includes(ricerca)) ||  
                              (m.categoria && m.categoria.toLowerCase().includes(ricerca)) ||
                              (m.fornitore && m.fornitore.toLowerCase().includes(ricerca));
-        const matchCat = catFiltro === 'TUTTE' || m.categoria === catFiltro;
+                             
+        // Se la categoria è 'TUTTE' mostra tutto, altrimenti filtra per la categoria esatta
+        const matchCat = catFiltro === '' || catFiltro === 'TUTTE' || m.categoria === catFiltro;
         return matchRicerca && matchCat;
     });
 
