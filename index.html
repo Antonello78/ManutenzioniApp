@@ -2862,39 +2862,37 @@ async function inviaReport() {
 </script>
 
 <script>
- // --- GESTIONE DOPPIO TOCCO TASTO INDIETRO PER USCIRE DA CELLULARE ---
-(function() {
-    let primoTastoIndietroPremuto = false;
-    let timerUscita = null;
+    // --- GESTIONE DOPPIO TOCCO TASTO INDIETRO PER USCIRE DA CELLULARE ---
+    (function() {
+        let primoTastoIndietroPremuto = false;
+        let timerUscita = null;
 
-    // Aggiungiamo uno stato fittizio alla cronologia all'avvio dell'app
-    history.pushState({ page: 'home' }, "", window.location.href);
+        // Inseriamo lo stato fittizio all'avvio dell'app
+        history.pushState({ page: 'home' }, "", window.location.href);
 
-    window.addEventListener('popstate', function(event) {
-        if (!primoTastoIndietroPremuto) {
-            primoTastoIndietroPremuto = true;
+        window.addEventListener('popstate', function(event) {
+            if (!primoTastoIndietroPremuto) {
+                primoTastoIndietroPremuto = true;
 
-            // Reinseriamo lo stato per non far uscire subito l'utente alla prima pressione
-            history.pushState({ page: 'home' }, "", window.location.href);
+                if (typeof showMessage === "function") {
+                    showMessage('info', 'Premi di nuovo indietro per uscire dall\'app');
+                } else {
+                    alert('Premi di nuovo indietro per uscire dall\'app');
+                }
 
-            // Mostriamo il messaggio all'utente
-            if (typeof showMessage === "function") {
-                showMessage('info', 'Premi di nuovo indietro per uscire dall\'app');
+                // Se non ripreme entro 2 secondi (2000 ms), resettiamo il flag
+                // e ripristiniamo lo stato fittizio nella cronologia
+                timerUscita = setTimeout(function() {
+                    primoTastoIndietroPremuto = false;
+                    history.pushState({ page: 'home' }, "", window.location.href);
+                }, 2000);
             } else {
-                alert('Premi di nuovo indietro per uscire dall\'app');
+                // Secondo tocco entro 2 secondi: annulliamo il timer ed usciamo
+                clearTimeout(timerUscita);
+                history.back();
             }
-
-            // Se non ripreme entro 2 secondi (2000 ms), resettiamo lo stato
-            timerUscita = setTimeout(function() {
-                primoTastoIndietroPremuto = false;
-            }, 2000);
-        } else {
-            // Se preme di nuovo entro 2 secondi, azzeriamo il timer e lasciamo uscire / tornare indietro
-            clearTimeout(timerUscita);
-            history.back();
-        }
-    });
-})();   
+        });
+    })();
 </script>    
 </body>
 </html>
