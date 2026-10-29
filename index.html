@@ -1692,11 +1692,15 @@ function copiaRigaPreventivo(id) {
             try {
                 const res = await fetch('/api/chiamate');
                 const dati = await res.json();
-                chiamateGlobali = dati; 
-                const badgeMenu = document.getElementById('badgeMenuChiamate');
-                if (badgeMenu) {
+                if (Array.isArray(dati)) {
+                    chiamateGlobali = dati; // Aggiorna la variabile globale
                     const attive = chiamateGlobali.filter(c => c.stato !== 'Completata').length;
-                    badgeMenu.innerText = attive > 0 ? `(${attive})` : '';
+                    
+                    // Aggiorna il numerino nel menu a tendina
+                    const badgeMenu = document.getElementById('badgeMenuChiamate');
+                    if (badgeMenu) {
+                        badgeMenu.innerText = attive > 0 ? `(${attive})` : '';
+                    }
                 }
             } catch (e) {
                 console.error("Errore caricamento badge chiamate iniziale:", e);
