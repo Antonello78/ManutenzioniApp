@@ -571,14 +571,29 @@
         }
 
         function showMessage(type, message) {
-            document.getElementById('errorMsg').classList.add('hidden');
-            document.getElementById('successMsg').classList.add('hidden');
-            const msgElement = document.getElementById(type === 'error' ? 'errorMsg' : 'successMsg');
-            if (msgElement) {
-                msgElement.textContent = message;
-                msgElement.classList.remove('hidden');
-                setTimeout(() => msgElement.classList.add('hidden'), 5000); 
-            }
+            // Rimuove eventuali notifiche precedenti per evitare sovrapposizioni
+            const vecchiaNotifica = document.getElementById('toastStatoNotifica');
+            if (vecchiaNotifica) vecchiaNotifica.remove();
+
+            // Crea il div della finestrella Toast fluttuante in alto
+            const toast = document.createElement('div');
+            toast.id = 'toastStatoNotifica';
+            
+            // Impostiamo i colori in base al tipo (success o error/info)
+            const isError = type === 'error';
+            const bgColor = isError ? 'bg-red-600' : 'bg-green-600';
+            
+            toast.className = `fixed top-6 left-1/2 transform -translate-x-1/2 z-[100] ${bgColor} text-white text-xs sm:text-sm font-bold px-4 py-3 rounded-xl shadow-2xl transition-all duration-300 flex items-center gap-2`;
+            toast.innerHTML = `<span>${isError ? '⚠️' : '✅'}</span> <span>${message}</span>`;
+
+            // Aggiunge la notifica alla pagina
+            document.body.appendChild(toast);
+
+            // Dopo 3 secondi la fa sparire gradualmente e la rimuove
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         function generateId() { return Date.now().toString(); }
