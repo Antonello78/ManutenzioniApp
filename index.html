@@ -1394,9 +1394,9 @@ function copiaRigaPreventivo(id) {
                                 </div>
                             </div>
 
-                            <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
-                                <input type="checkbox" ${st.saldoOk ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'saldoOk', this.checked)" class="h-3.5 w-3.5 text-blue-600 rounded">
-                                <span class="text-[11px] ${st.saldoOk ? 'font-bold text-green-700' : ''}">SALDO OK</span>
+                            <label class="flex items-center space-x-1 cursor-pointer font-medium p-1 rounded border transition-colors ${st.saldoOk ? 'bg-green-100 border-green-400 text-green-800' : 'bg-red-100 border-red-400 text-red-800'}">
+                                <input type="checkbox" ${st.saldoOk ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'saldoOk', this.checked); renderArchivio();" class="h-3.5 w-3.5 text-blue-600 rounded">
+                                <span class="text-[11px] font-bold">SALDO OK</span>
                             </label>
                         </div>
                     </div>`;
