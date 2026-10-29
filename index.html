@@ -2066,6 +2066,8 @@ async function inviaReport() {
             const elData = document.getElementById('dataStampa');
             if (elData) elData.textContent = dataOggi;
 
+            aggiornaBadgeChiamateIniziale();
+
             if (typeof caricaDatiServer === 'function') {
                 caricaDatiServer().finally(() => {
                     if (typeof initializeInputs === 'function') initializeInputs();
