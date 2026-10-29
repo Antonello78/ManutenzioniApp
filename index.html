@@ -1698,10 +1698,14 @@ function copiaRigaPreventivo(id) {
                     });
                 }
 
-                // 3. FILTRO PER PRIORITÀ / URGENZA
+                // 3. FILTRO PER PRIORITÀ O STATO "IN LAVORAZIONE"
                 const filtroPriorita = document.getElementById('filtroPrioritaChiamate') ? document.getElementById('filtroPrioritaChiamate').value : 'TUTTE';
                 if (filtroPriorita !== 'TUTTE') {
-                    chiamate = chiamate.filter(c => c.priorita === filtroPriorita);
+                    if (filtroPriorita === 'In Lavorazione') {
+                        chiamate = chiamate.filter(c => c.stato === 'In Lavorazione');
+                    } else {
+                        chiamate = chiamate.filter(c => c.priorita === filtroPriorita);
+                    }
                 }
 
                 // 📊 CONTA ESATTAMENTE TUTTE LE CHIAMATE ATTIVE (NON COMPLETATE) IN GLOBALE
@@ -2286,6 +2290,7 @@ async function inviaReport() {
                         <option value="Alta">🔴 Alta</option>
                         <option value="Media">🟡 Media</option>
                         <option value="Bassa">🟢 Bassa</option>
+                        <option value="In Lavorazione">🟠 In Lavorazione</option>
                     </select>
                 </div>
                 <div class="flex justify-between items-center text-[11px] font-bold text-gray-600 uppercase">
