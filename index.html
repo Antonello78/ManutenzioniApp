@@ -1686,26 +1686,7 @@ function copiaRigaPreventivo(id) {
                     } else {
                         return c.stato !== 'Completata';
                     }
-                });
-
-        async function aggiornaBadgeChiamateIniziale() {
-            try {
-                const res = await fetch('/api/chiamate');
-                const dati = await res.json();
-                if (Array.isArray(dati)) {
-                    chiamateGlobali = dati; // Aggiorna la variabile globale
-                    const attive = chiamateGlobali.filter(c => c.stato !== 'Completata').length;
-                    
-                    // Aggiorna il numerino nel menu a tendina
-                    const badgeMenu = document.getElementById('badgeMenuChiamate');
-                    if (badgeMenu) {
-                        badgeMenu.innerText = attive > 0 ? `(${attive})` : '';
-                    }
-                }
-            } catch (e) {
-                console.error("Errore caricamento badge chiamate iniziale:", e);
-            }
-        }      
+                });     
 
                 // 2. FILTRO DI RICERCA TESTUALE
                 const testoRicerca = document.getElementById('cercaRegistroChiamate') ? document.getElementById('cercaRegistroChiamate').value.toLowerCase() : '';
@@ -2062,6 +2043,23 @@ async function inviaReport() {
             } catch (error) {
                 console.error("Errore:", error);
                 alert("Errore di connessione al server.");
+            }
+        }
+
+        async function aggiornaBadgeChiamateIniziale() {
+            try {
+                const res = await fetch('/api/chiamate');
+                const dati = await res.json();
+                if (Array.isArray(dati)) {
+                    chiamateGlobali = dati; 
+                    const attive = chiamateGlobali.filter(c => c.stato !== 'Completata').length;
+                    const badgeMenu = document.getElementById('badgeMenuChiamate');
+                    if (badgeMenu) {
+                        badgeMenu.innerText = attive > 0 ? `(${attive})` : '';
+                    }
+                }
+            } catch (e) {
+                console.error("Errore caricamento badge chiamate iniziale:", e);
             }
         }
 
