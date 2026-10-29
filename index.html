@@ -1353,7 +1353,7 @@ function copiaRigaPreventivo(id) {
                         </div>
 
                         <!-- RIGA STATO AMMINISTRATIVO -->
-                        <div class="border-t border-gray-100 pt-2 mt-1 grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs bg-gray-50 p-2 rounded-lg">
+                        <div class="border-t border-gray-100 pt-2 mt-1 grid grid-cols-2 sm:grid-cols-5 gap-2 items-start text-xs bg-gray-50 p-2 rounded-lg">
                             <label class="flex items-center space-x-1 cursor-pointer font-medium text-gray-700">
                                 <input type="checkbox" ${st.scan ? 'checked' : ''} onchange="aggiornaStatoAmministrativo('${i.id}', 'scan', this.checked)" class="h-3.5 w-3.5 text-blue-600 rounded">
                                 <span class="text-[11px] ${st.scan ? 'font-bold text-green-700' : ''}">Scan.</span>
