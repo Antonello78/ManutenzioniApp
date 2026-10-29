@@ -1688,6 +1688,21 @@ function copiaRigaPreventivo(id) {
                     }
                 });
 
+        async function aggiornaBadgeChiamateIniziale() {
+            try {
+                const res = await fetch('/api/chiamate');
+                const dati = await res.json();
+                chiamateGlobali = dati; 
+                const badgeMenu = document.getElementById('badgeMenuChiamate');
+                if (badgeMenu) {
+                    const attive = chiamateGlobali.filter(c => c.stato !== 'Completata').length;
+                    badgeMenu.innerText = attive > 0 ? `(${attive})` : '';
+                }
+            } catch (e) {
+                console.error("Errore caricamento badge chiamate iniziale:", e);
+            }
+        }      
+
                 // 2. FILTRO DI RICERCA TESTUALE
                 const testoRicerca = document.getElementById('cercaRegistroChiamate') ? document.getElementById('cercaRegistroChiamate').value.toLowerCase() : '';
                 if (testoRicerca) {
