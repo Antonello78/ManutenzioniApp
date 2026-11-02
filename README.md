@@ -1,38 +1,50 @@
-# 🏗️ Gestione Manodopera Scuole - v1.3.0
+# 🏗️ Gestione Manodopera Scuole - v1.6.0
 
 **Proprietà:** Ditta D'Angelo Antonello  
 **Release:** 2026  
-**Tecnologia:** Cloud-Sync (Database su Server) / HTML5 / Tailwind CSS
+**Tecnologia:** Cloud-Sync (Database su Vercel KV) / HTML5 / Tailwind CSS
 
 ---
 
 ## 📝 Descrizione
-Questa applicazione è uno strumento professionale per la gestione dei preventivi e dei rapporti di manutenzione presso le scuole statali. Grazie alla sincronizzazione cloud, i dati sono salvati su un **server centralizzato**, permettendo la consultazione e la modifica degli interventi da qualsiasi dispositivo (PC, smartphone o tablet) in tempo reale.
-## 🚀 Novità Versione 1.3.0
-### Aggiunto
-- **Campo Descrizione Lavori**: Nuova sezione nel modulo per specificare i dettagli dell'intervento.
-- **Report di Stampa**: La descrizione viene ora inclusa automaticamente nel PDF finale per la scuola.
-- **Live Preview**: Il testo della descrizione appare nel riepilogo mentre si scrive.
-
-### Corretto
-- **Layout Archivio**: Risolto il problema che causava la visualizzazione a tutto schermo su PC.
-- **Bug Fix**: Sistemata la chiusura dei contenitori (DIV) nel codice HTML.
-## 🚀 Novità Versione 1.2.0
-* **Protezione Sola Lettura**: Caricando un intervento dall'archivio, i campi vengono bloccati automaticamente per prevenire modifiche accidentali.
-* **Tasto Modifica (Arancione)**: Permette di sbloccare i dati esistenti per aggiornamenti rapidi.
-* **Tasto Nuovo (Azzurro)**: Resetta l'interfaccia e interroga il server per assegnare il nuovo numero progressivo.
-* **Header & Footer**: Sincronizzazione dei titoli e delle versioni per una coerenza ditta/app.
-
-## 🛠️ Funzionalità Cloud
-1.  **Sincronizzazione Multi-Dispositivo**: I dati inseriti in cantiere sono immediatamente disponibili in ufficio.
-2.  **Archivio Storico**: Tutti gli interventi sono salvati in sicurezza sul database remoto.
-3.  **Calcolo Dinamico**: Gestione automatica di diritti di uscita, tariffe orarie e maggiorazioni urgenza.
-4.  **Reporting**: Sistema integrato per l'invio rapido dei rapporti ai referenti scolastici via email.
-
-## 📖 Guida Rapida
-* **Per consultare**: Seleziona un lavoro dall'archivio. L'app entra in modalità "Sola Lettura" (campi protetti).
-* **Per modificare**: Clicca su "Modifica". I campi diventano editabili e il tasto diventa verde ("Salva").
-* **Per un nuovo lavoro**: Clicca su "Nuovo". Il sistema pulisce i campi e prepara la nuova numerazione ufficiale.
+Questa applicazione è uno strumento professionale per la gestione dei preventivi, dei rapporti di manutenzione e della contabilità di cantiere presso le scuole statali. Grazie alla sincronizzazione cloud, i dati sono salvati su un **server centralizzato**, permettendo la consultazione e la modifica degli interventi in tempo reale da qualsiasi dispositivo (PC, smartphone o tablet).
 
 ---
-*Ditta D'Angelo Antonello — v1.2.0 (Release 2026)*
+
+## 🚀 Funzionalità Principali
+
+### 1. Calcolo Manodopera & Interventi
+* **Calcolo Automatico:** Gestione dinamica dei costi di uscita (con prima ora inclusa), tariffe orarie e maggiorazioni per urgenze o lavoro fuori orario[cite: 2].
+* **Gestione Prosieguo:** Opzione per interventi continuativi o dei giorni successivi con azzeramento del diritto di chiamata[cite: 2].
+* **Anteprima e Stampa Report:** Generazione di un riepilogo pulito ed essenziale pronto per la stampa o l'esportazione in PDF[cite: 2].
+* **Invio Email Rapido:** Trasmissione automatica del rapporto dettagliato ai referenti scolastici (DSGA)[cite: 2, 15].
+
+### 2. Archivio & Controllo Amministrativo
+* **Stato Amministrativo Avanzato:** Tracciamento rapido per ogni intervento di:
+  * Scansione PDF caricata su Google Drive (`Scan.`)[cite: 2]
+  * Email di riscontro inviata (`Mail`)[cite: 2]
+  * Preventivo emesso con numero e data (`Prev.`)[cite: 2]
+  * Fattura emessa con numero e data (`Fatt.`)[cite: 2]
+  * **Saldo OK:** Controllo definitivo dell'avvenuto pagamento[cite: 2].
+* **Blocco di Sicurezza:** Una volta spuntato il "SALDO OK", i campi amministrativi associati (`Prev.` e `Fatt.`) vengono bloccati automaticamente per prevenire modifiche accidentali.
+* **Filtri e Ricerca:** Ricerca testuale fluida e filtri per tipologia (Urgenze, Prosieguo), mesi, anni e stato amministrativo[cite: 2].
+* **Esportazione Dati:** Funzione di export dell'archivio in formato Excel (CSV)[cite: 2].
+
+### 3. Listino Prezzi & Materiali
+* **Gestione Materiali:** Catalogo interno dei ricambi con calcolo automatico del prezzo di vendita basato su percentuali di ricarico personalizzabili[cite: 2].
+* **Selezione Rapida:** Inserimento diretto dei materiali dal listino all'interno del modulo d'intervento[cite: 2].
+
+### 4. Registro Chiamate & Utilità
+* **Chiamate in Attesa:** Gestione delle segnalazioni urgenti dalle scuole con assegnazione di priorità[cite: 2].
+* **Lista della Spesa:** Riepilogo aggregato dei materiali da acquistare per i vari cantieri[cite: 2].
+* **Integrazione Google Calendar:** Sincronizzazione rapida degli appuntamenti di manutenzione[cite: 2].
+
+---
+
+## 📖 Guida Rapida all'Uso
+* **Nuovo Intervento:** Clicca sul tasto azzurro **"Nuovo"** per pulire i campi e assegnare automaticamente il progressivo ufficiale dell'anno[cite: 2].
+* **Consultazione:** Seleziona un lavoro dall'archivio; i campi si apriranno in modalità protetta (sola lettura) per evitare modifiche involontarie[cite: 2].
+* **Modifica:** Clicca sul tasto arancione **"Modifica"** per sbloccare i dati di un intervento esistente e aggiornarli[cite: 2].
+
+---
+*Ditta D'Angelo Antonello — v1.6.0 (Release 2026)*
