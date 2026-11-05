@@ -1226,20 +1226,20 @@ function copiaRigaPreventivo(id) {
     
     if (i.flagProsieguo) {
         // Testo specifico per il Prosieguo / Giorni Successivi
-        testoHtml = `<b>- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
+        testoHtml = `<b>- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato) - Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `<b>- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi, Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
                     `Quantità: <b>${oreDaPagare} ore</b> x ${i.tariffaOraria}\n\n` +
                     materialiHtml +
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     } else if (i.flagUrgenza) {
-        testoHtml = `<b>- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
+        testoHtml = `<b>- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera. Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
                     `<b>- Manodopera aggiuntiva (Tariffa Urgenza) - ${minutiDaPagare} min oltre la 1ª ora per intervento di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
                     `Quantità ore oltre la prima: <b>${oreDaPagare} ore</b> x ${i.tariffaOraria}\n\n` +
                     materialiHtml +
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     } else {
-        testoHtml = `<b>- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Intervento n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
+        testoHtml = `<b>- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera) - Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}.</b>\n\n` +
                     `Importo diritto di chiamata: <b>€ ${i.costoUscita}</b>\n\n` +
                     `<b>- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) per lavori di manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.).</b>\n\n` +
                     `Quantità: <b>${oreDaPagare} ore</b> x ${i.tariffaOraria}\n\n` +
