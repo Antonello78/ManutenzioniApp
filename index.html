@@ -2408,13 +2408,11 @@ async function inviaReport() {
             const importoRicambiFormattato = parseFloat(i.costoMateriali || 0).toFixed(2).replace('.', ',');
             const materialiTesto = i.materialiUtilizzati || 'Nessuno';
 
-            // 1. TESTI PULITI DA COPIARE NEGLI APPUNTI (senza importi/quantità di controllo)
             let copia1 = "";
             let copia2 = "";
             let copia3 = "";
             let copia4 = "";
 
-            // 2. TESTI VISUALIZZATI A SCHERMO NELLA MODALE (con tutti i dettagli e gli importi)
             let visual1 = "";
             let visual2 = "";
             let visual3 = "";
@@ -2423,7 +2421,7 @@ async function inviaReport() {
             if (i.flagProsieguo) {
                 copia1 = `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.`;
                 copia2 = `- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato)`;
-                copia3 = `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore`;
+                copia3 = `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi) - Fascia oraria ${i.oraInizio}-${i.oraFine} - n. ${i.numOperai} operatore`;
                 copia4 = `- Ricambi utilizzati per l'intervento:\n${materialiTesto}`;
 
                 visual1 = copia1;
@@ -2433,7 +2431,7 @@ async function inviaReport() {
             } else if (i.flagUrgenza) {
                 copia1 = `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di manutenzione indifferibile.`;
                 copia2 = `- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera`;
-                copia3 = `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore`;
+                copia3 = `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine} - n. ${i.numOperai} operatore`;
                 copia4 = `- Ricambi utilizzati per l'intervento:\n${materialiTesto}`;
 
                 visual1 = copia1;
@@ -2443,7 +2441,7 @@ async function inviaReport() {
             } else {
                 copia1 = `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.`;
                 copia2 = `- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera)`;
-                copia3 = `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore`;
+                copia3 = `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine} - n. ${i.numOperai} operatore`;
                 copia4 = `- Ricambi utilizzati per l'intervento:\n${materialiTesto}`;
 
                 visual1 = copia1;
