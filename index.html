@@ -1222,11 +1222,11 @@ function copiaRigaPreventivo(id) {
     
     if (i.flagProsieguo) {
         testoHtml = `<b>Riga 1</b>\n` +
-                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}\n\n` +
+                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.\n\n` +
                     `<b>Riga 2</b>\n` +
                     `- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato)\n\n` +
                     `<b>Riga 3</b>\n` +
-                    `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi, Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n\n` +
+                    `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\n` +
                     `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
                     `<b>Riga 4</b>\n` +
                     `- Ricambi utilizzati per l'intervento:\n` +
@@ -1235,12 +1235,12 @@ function copiaRigaPreventivo(id) {
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     } else if (i.flagUrgenza) {
         testoHtml = `<b>Riga 1</b>\n` +
-                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}\n\n` +
+                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di manutenzione indifferibile.\n\n` +
                     `<b>Riga 2</b>\n` +
                     `- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera\n\n` +
                     `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
                     `<b>Riga 3</b>\n` +
-                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) per lavori di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n\n` +
+                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\n` +
                     `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
                     `<b>Riga 4</b>\n` +
                     `- Ricambi utilizzati per l'intervento:\n` +
@@ -1249,12 +1249,12 @@ function copiaRigaPreventivo(id) {
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     } else {
         testoHtml = `<b>Riga 1</b>\n` +
-                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}\n\n` +
+                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.\n\n` +
                     `<b>Riga 2</b>\n` +
                     `- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera)\n\n` +
                     `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
                     `<b>Riga 3</b>\n` +
-                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) per lavori di piccola manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n\n` +
+                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\n` +
                     `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
                     `<b>Riga 4</b>\n` +
                     `- Ricambi utilizzati per l'intervento:\n` +
