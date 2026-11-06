@@ -2406,7 +2406,7 @@ async function inviaReport() {
             const oreDaPagare = (minutiDaPagare / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             const importoRicambiFormattato = parseFloat(i.costoMateriali || 0).toFixed(2).replace('.', ',');
-            const materialiTesto = i.materialiUtilizzati || 'Minuteria di consumo';
+            const materialiTesto = i.materialiUtilizzati || 'Materiali di consumo e minuteria';
 
             let copia1 = "";
             let copia2 = "";
