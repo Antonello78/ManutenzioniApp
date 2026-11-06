@@ -2459,7 +2459,7 @@ async function inviaReport() {
                                 📋 Copia Riga 1
                             </button>
                         </div>
-                        <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${visual1}</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${copia1}</div>
                     </div>
 
                     <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -2469,7 +2469,8 @@ async function inviaReport() {
                                 📋 Copia Riga 2
                             </button>
                         </div>
-                        <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${visual2}</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${copia2}</div>
+                        ${i.costoUscita ? `<div class="text-xs text-gray-800 font-bold mt-2">Importo diritto di chiamata: € ${i.costoUscita}</div>` : ''}
                     </div>
 
                     <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -2479,7 +2480,8 @@ async function inviaReport() {
                                 📋 Copia Riga 3
                             </button>
                         </div>
-                        <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${visual3}</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${copia3}</div>
+                        <div class="text-xs text-gray-800 font-bold mt-2">Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}</div>
                     </div>
 
                     <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -2489,7 +2491,8 @@ async function inviaReport() {
                                 📋 Copia Riga 4
                             </button>
                         </div>
-                        <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${visual4}</div>
+                        <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${copia4}</div>
+                        <div class="text-xs text-gray-800 font-bold mt-2 whitespace-pre-wrap">Importo ricambi: € ${importoRicambiFormattato}<br>Importo totale intervento: € ${i.totaleManodopera}</div>
                     </div>
                 </div>
             `;
