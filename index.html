@@ -1218,52 +1218,74 @@ function copiaRigaPreventivo(id) {
     const importoRicambiFormattato = parseFloat(i.costoMateriali || 0).toFixed(2).replace('.', ',');
     const materialiTesto = i.materialiUtilizzati || 'Nessuno';
 
-    let testoHtml = "";
-    
+    let riga1 = "";
+    let riga2 = "";
+    let riga3 = "";
+    let riga4 = "";
+
     if (i.flagProsieguo) {
-        testoHtml = `<b>Riga 1</b>\n` +
-                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.\n\n` +
-                    `<b>Riga 2</b>\n` +
-                    `- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato)\n\n` +
-                    `<b>Riga 3</b>\n` +
-                    `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\n` +
-                    `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
-                    `<b>Riga 4</b>\n` +
-                    `- Ricambi utilizzati per l'intervento:\n` +
-                    `${materialiTesto}\n\n` +
-                    `Importo ricambi: € ${importoRicambiFormattato}\n\n` +
-                    `Importo totale intervento: € ${i.totaleManodopera}`;
+        riga1 = `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.`;
+        riga2 = `- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato)`;
+        riga3 = `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\nQuantità: ${oreDaPagare} ore x ${i.tariffaOraria}`;
+        riga4 = `- Ricambi utilizzati per l'intervento:\n${materialiTesto}\n\nImporto ricambi: € ${importoRicambiFormattato}\n\nImporto totale intervento: € ${i.totaleManodopera}`;
     } else if (i.flagUrgenza) {
-        testoHtml = `<b>Riga 1</b>\n` +
-                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di manutenzione indifferibile.\n\n` +
-                    `<b>Riga 2</b>\n` +
-                    `- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera\n\n` +
-                    `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
-                    `<b>Riga 3</b>\n` +
-                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\n` +
-                    `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
-                    `<b>Riga 4</b>\n` +
-                    `- Ricambi utilizzati per l'intervento:\n` +
-                    `${materialiTesto}\n\n` +
-                    `Importo ricambi: € ${importoRicambiFormattato}\n\n` +
-                    `Importo totale intervento: € ${i.totaleManodopera}`;
+        riga1 = `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di manutenzione indifferibile.`;
+        riga2 = `- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera\n\nImporto diritto di chiamata: € ${i.costoUscita}`;
+        riga3 = `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\nQuantità: ${oreDaPagare} ore x ${i.tariffaOraria}`;
+        riga4 = `- Ricambi utilizzati per l'intervento:\n${materialiTesto}\n\nImporto ricambi: € ${importoRicambiFormattato}\n\nImporto totale intervento: € ${i.totaleManodopera}`;
     } else {
-        testoHtml = `<b>Riga 1</b>\n` +
-                    `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.\n\n` +
-                    `<b>Riga 2</b>\n` +
-                    `- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera)\n\n` +
-                    `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
-                    `<b>Riga 3</b>\n` +
-                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\n` +
-                    `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
-                    `<b>Riga 4</b>\n` +
-                    `- Ricambi utilizzati per l'intervento:\n` +
-                    `${materialiTesto}\n\n` +
-                    `Importo ricambi: € ${importoRicambiFormattato}\n\n` +
-                    `Importo totale intervento: € ${i.totaleManodopera}`;
+        riga1 = `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.`;
+        riga2 = `- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera)\n\nImporto diritto di chiamata: € ${i.costoUscita}`;
+        riga3 = `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) - Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} operatore\n\nQuantità: ${oreDaPagare} ore x ${i.tariffaOraria}`;
+        riga4 = `- Ricambi utilizzati per l'intervento:\n${materialiTesto}\n\nImporto ricambi: € ${importoRicambiFormattato}\n\nImporto totale intervento: € ${i.totaleManodopera}`;
     }
+
+    // Costruzione dell'HTML con i singoli pulsanti di copia per Libero SiFattura
+    const modalHtml = `
+        <div class="space-y-4">
+            <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-gray-800 text-xs uppercase">Riga 1 — Rif. Intervento</span>
+                    <button onclick="copiaTestoSingolo(\`${riga1.replace(/`/g, '\\`')}\`, 'Riga 1')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-3 rounded shadow transition">
+                        📋 Copia Riga 1
+                    </button>
+                </div>
+                <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${riga1}</div>
+            </div>
+
+            <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-gray-800 text-xs uppercase">Riga 2 — Diritto di Chiamata</span>
+                    <button onclick="copiaTestoSingolo(\`${riga2.replace(/`/g, '\\`')}\`, 'Riga 2')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-3 rounded shadow transition">
+                        📋 Copia Riga 2
+                    </button>
+                </div>
+                <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${riga2}</div>
+            </div>
+
+            <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-gray-800 text-xs uppercase">Riga 3 — Manodopera Aggiuntiva</span>
+                    <button onclick="copiaTestoSingolo(\`${riga3.replace(/`/g, '\\`')}\`, 'Riga 3')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-3 rounded shadow transition">
+                        📋 Copia Riga 3
+                    </button>
+                </div>
+                <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${riga3}</div>
+            </div>
+
+            <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-bold text-gray-800 text-xs uppercase">Riga 4 — Ricambi e Totale</span>
+                    <button onclick="copiaTestoSingolo(\`${riga4.replace(/`/g, '\\`')}\`, 'Riga 4')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-3 rounded shadow transition">
+                        📋 Copia Riga 4
+                    </button>
+                </div>
+                <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${riga4}</div>
+            </div>
+        </div>
+    `;
     
-    document.getElementById('testoPreventivoModal').innerHTML = testoHtml;
+    document.getElementById('testoPreventivoModal').innerHTML = modalHtml;
     document.body.style.overflow = 'hidden';
     document.getElementById('modalPreventivo').classList.remove('hidden');
 }
