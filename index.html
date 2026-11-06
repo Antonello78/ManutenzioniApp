@@ -2486,13 +2486,18 @@ async function inviaReport() {
 
                     <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
                         <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-gray-800 text-xs uppercase">Riga 4 — Ricambi e Totale</span>
+                            <span class="font-bold text-gray-800 text-xs uppercase">Riga 4 — Ricambi e Materiali</span>
                             <button onclick="copiaTestoSingolo(\`${copia4.replace(/`/g, '\\`')}\`, 'Riga 4')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-3 rounded shadow transition h-9 shrink-0 flex items-center justify-center">
                                 📋 Copia Riga 4
                             </button>
                         </div>
                         <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${copia4}</div>
-                        <div class="text-xs text-gray-800 font-bold mt-2 whitespace-pre-wrap">Importo ricambi: € ${importoRicambiFormattato}<br>Importo totale intervento: € ${i.totaleManodopera}</div>
+                        <div class="text-xs text-gray-800 font-bold mt-2">Importo ricambi: € ${importoRicambiFormattato}</div>
+                    </div>
+
+                    <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-center">
+                        <span class="text-xs text-blue-900 font-bold uppercase block mb-1">Totale Generale Intervento</span>
+                        <span class="text-base text-blue-700 font-extrabold">€ ${i.totaleManodopera}</span>
                     </div>
                 </div>
             `;
