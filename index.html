@@ -1221,49 +1221,49 @@ function copiaRigaPreventivo(id) {
     let testoHtml = "";
     
     if (i.flagProsieguo) {
-        testoHtml = `Riga 1\n` +
+        testoHtml = `<b>Riga 1</b>\n` +
                     `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}\n\n` +
-                    `Riga 2\n` +
+                    `<b>Riga 2</b>\n` +
                     `- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato)\n\n` +
-                    `Riga 3\n` +
-                    `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi, Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n` +
+                    `<b>Riga 3</b>\n` +
+                    `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi, Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n\n` +
                     `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
-                    `Riga 4\n` +
+                    `<b>Riga 4</b>\n` +
                     `- Ricambi utilizzati per l'intervento:\n` +
                     `${materialiTesto}\n\n` +
                     `Importo ricambi: € ${importoRicambiFormattato}\n\n` +
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     } else if (i.flagUrgenza) {
-        testoHtml = `Riga 1\n` +
+        testoHtml = `<b>Riga 1</b>\n` +
                     `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}\n\n` +
-                    `Riga 2\n` +
-                    `- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera\n` +
+                    `<b>Riga 2</b>\n` +
+                    `- Diritto di chiamata e uscita (URGENZA) - Inclusa 1ª ora di manodopera\n\n` +
                     `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
-                    `Riga 3\n` +
-                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) per lavori di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n` +
+                    `<b>Riga 3</b>\n` +
+                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) per lavori di manutenzione indifferibile (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n\n` +
                     `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
-                    `Riga 4\n` +
+                    `<b>Riga 4</b>\n` +
                     `- Ricambi utilizzati per l'intervento:\n` +
                     `${materialiTesto}\n\n` +
                     `Importo ricambi: € ${importoRicambiFormattato}\n\n` +
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     } else {
-        testoHtml = `Riga 1\n` +
+        testoHtml = `<b>Riga 1</b>\n` +
                     `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}\n\n` +
-                    `Riga 2\n` +
-                    `- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera)\n` +
+                    `<b>Riga 2</b>\n` +
+                    `- Diritto di chiamata e uscita (inclusa 1ª ora di manodopera)\n\n` +
                     `Importo diritto di chiamata: € ${i.costoUscita}\n\n` +
-                    `Riga 3\n` +
-                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) per lavori di piccola manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n` +
+                    `<b>Riga 3</b>\n` +
+                    `- Manodopera aggiuntiva (${minutiDaPagare} min oltre la 1ª ora) per lavori di piccola manutenzione generale (Fascia oraria ${i.oraInizio}-${i.oraFine}, n. ${i.numOperai} op.)\n\n` +
                     `Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}\n\n` +
-                    `Riga 4\n` +
+                    `<b>Riga 4</b>\n` +
                     `- Ricambi utilizzati per l'intervento:\n` +
                     `${materialiTesto}\n\n` +
                     `Importo ricambi: € ${importoRicambiFormattato}\n\n` +
                     `Importo totale intervento: € ${i.totaleManodopera}`;
     }
     
-    document.getElementById('testoPreventivoModal').innerText = testoHtml;
+    document.getElementById('testoPreventivoModal').innerHTML = testoHtml;
     document.body.style.overflow = 'hidden';
     document.getElementById('modalPreventivo').classList.remove('hidden');
 }
