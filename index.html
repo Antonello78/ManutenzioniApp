@@ -879,6 +879,14 @@ async function salvaIntervento() {
     let interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
     const existingIndex = interventi.findIndex(i => i.nIntervento === nInterventoCompleto);
     
+    // RECUPERO EVENTUALE STATO AMMINISTRATIVO PRECEDENTE (PER NON PERDERLO DURANTE IL SALVATAGGIO)
+    const statoAmministrativoPrecedente = (existingIndex > -1 && interventi[existingIndex].statoAmministrativo) 
+        ? interventi[existingIndex].statoAmministrativo 
+        : {
+            scan: false, mail: false, prev: false, numPrev: '', dataPrev: '',
+            fatt: false, numFatt: '', dataFatt: '', saldoOk: false
+        };
+
     // CREAZIONE OGGETTO CON TUTTI I DATI
     const interventoObj = {
         id: (existingIndex > -1) ? interventi[existingIndex].id : generateId(),
@@ -900,7 +908,10 @@ async function salvaIntervento() {
         flagUrgenza: document.getElementById('flagUrgenza').checked,
         flagProsieguo: document.getElementById('flagProsieguo') ? document.getElementById('flagProsieguo').checked : false,
         tariffaOraria: document.getElementById('tariffaOraria').textContent,
-        totaleManodopera: document.getElementById('totaleManodopera').textContent
+        totaleManodopera: document.getElementById('totaleManodopera').textContent,
+
+        // MANTENIMENTO STATO AMMINISTRATIVO
+        statoAmministrativo: statoAmministrativoPrecedente
     };
 
     try {
