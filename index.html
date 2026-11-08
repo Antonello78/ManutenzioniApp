@@ -2694,69 +2694,90 @@ async function inviaReport() {
             <button onclick="toggleModalListino()" class="text-2xl font-bold">&times;</button>
         </div>
 
-        <div class="p-4 bg-gray-50 border-b space-y-3">
-            <input type="hidden" id="matId">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <input type="text" id="matNome" placeholder="NOME MATERIALE / CODICE" class="p-2 border rounded text-sm uppercase">
-                <select id="matCategoria" class="p-2 border rounded text-sm">
-                    <option value="Generale">Categoria: Generale</option>
-                    <option value="Elettrico">Elettrico</option>
-                    <option value="Serrature/Ferramenta">Serrature / Ferramenta</option>
-                    <option value="Idraulica">Idraulica</option>
-                    <option value="Falegnameria">Falegnameria</option>
-                    <option value="Tapparelle/Avvolgibili">Tapparelle / Avvolgibili</option>
-                    <option value="Edilizia">Edilizia</option>
-                </select>
-            </div>
-            <input type="text" id="matFornitore" placeholder="FORNITORE / NOTE (Es. Sacchi, Urmet, Riferimento ordine)" class="w-full p-2 border rounded text-sm uppercase mt-1">
+        <!-- Corpo Principale con tendina in alto e ricerca subito pronta -->
+        <div class="p-4 flex-1 overflow-y-auto space-y-4">
             
-            <div class="grid grid-cols-3 gap-2">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Costo Acquisto (€)</label>
-                    <input type="number" id="matPrezzoAcquisto" step="0.01" min="0" oninput="calcolaPrezzoVenditaDaRicarico()" placeholder="0.00" class="w-full p-2 border rounded text-sm font-semibold">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase">Ricarico (%)</label>
-                    <input type="number" id="matPercentualeRicarico" step="1" value="30" oninput="calcolaPrezzoVenditaDaRicarico()" placeholder="30" class="w-full p-2 border rounded text-sm font-semibold">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-emerald-700 uppercase">Prezzo Vendita (€)</label>
-                    <input type="number" id="matPrezzoVendita" step="0.01" min="0" oninput="calcolaRicaricoDaPrezzoVendita()" placeholder="0.00" class="w-full p-2 border border-emerald-500 rounded text-sm font-extrabold text-emerald-800 bg-emerald-50">
-                </div>
-            </div>
-
-            <div class="flex gap-2">
-                <button id="btnSalvaMateriale" onclick="salvaMaterialeListino()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded font-bold uppercase text-xs shadow">
-                    💾 Salva in Listino
+            <!-- SEZIONE GESTIONE / INSERIMENTO ARTICOLO A SCOMPARSA (TENDINA) -->
+            <div class="bg-gray-50 border border-gray-200 rounded-xl p-3">
+                <button onclick="document.getElementById('pannelloGestioneMateriale').classList.toggle('hidden')" class="w-full flex justify-between items-center text-xs font-bold text-gray-700 uppercase focus:outline-none">
+                    <span>⚙️ Gestisci / Inserisci Nuovo Articolo</span>
+                    <span class="text-gray-400 text-sm">▼</span>
                 </button>
-                <button id="btnResetMateriale" onclick="resetFormMateriale()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-3 py-2 rounded font-bold uppercase text-xs">
-                    Reset
-                </button>
-            </div>
-        </div>
+                
+                <div id="pannelloGestioneMateriale" class="hidden mt-3 space-y-3 pt-3 border-t border-gray-200">
+                    <input type="hidden" id="matId">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input type="text" id="matNome" placeholder="NOME MATERIALE / CODICE" class="p-2 border rounded text-sm uppercase bg-white">
+                        <select id="matCategoria" class="p-2 border rounded text-sm bg-white">
+                            <option value="Generale">Categoria: Generale</option>
+                            <option value="Elettrico">Elettrico</option>
+                            <option value="Serrature/Ferramenta">Serrature / Ferramenta</option>
+                            <option value="Idraulica">Idraulica</option>
+                            <option value="Falegnameria">Falegnameria</option>
+                            <option value="Tapparelle/Avvolgibili">Tapparelle / Avvolgibili</option>
+                            <option value="Edilizia">Edilizia</option>
+                        </select>
+                    </div>
+                    <input type="text" id="matFornitore" placeholder="FORNITORE / NOTE (Es. Sacchi, Urmet, Riferimento ordine)" class="w-full p-2 border rounded text-sm uppercase mt-1 bg-white">
+                    
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Costo Acquisto (€)</label>
+                            <input type="number" id="matPrezzoAcquisto" step="0.01" min="0" oninput="calcolaPrezzoVenditaDaRicarico()" placeholder="0.00" class="w-full p-2 border rounded text-sm font-semibold bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-500 uppercase">Ricarico (%)</label>
+                            <input type="number" id="matPercentualeRicarico" step="1" value="30" oninput="calcolaPrezzoVenditaDaRicarico()" placeholder="30" class="w-full p-2 border rounded text-sm font-semibold bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-emerald-700 uppercase">Prezzo Vendita (€)</label>
+                            <input type="number" id="matPrezzoVendita" step="0.01" min="0" oninput="calcolaRicaricoDaPrezzoVendita()" placeholder="0.00" class="w-full p-2 border border-emerald-500 rounded text-sm font-extrabold text-emerald-800 bg-emerald-50">
+                        </div>
+                    </div>
 
-        <div class="sticky top-0 bg-white z-25 py-3 px-4 border-b border-gray-100 flex flex-col sm:flex-row gap-2">
-            <input type="text" id="cercaMaterialeListino" onkeyup="renderListinoMateriali()" placeholder="Cerca materiale..." class="flex-1 p-2 border rounded text-sm">
-            <select id="filtroCategoriaListino" onchange="renderListinoMateriali()" class="p-2 border rounded text-xs font-bold text-gray-700">
-                <option value="">Seleziona categoria...</option>
-                <option value="TUTTE">Tutte le categorie</option>
-                <option value="Generale">Generale</option>
-                <option value="Elettrico">Elettrico</option>
-                <option value="Serrature/Ferramenta">Serrature / Ferramenta</option>
-                <option value="Idraulica">Idraulica</option>
-                <option value="Falegnameria">Falegnameria</option>
-                <option value="Tapparelle/Avvolgibili">Tapparelle / Avvolgibili</option>
-                <option value="Edilizia">Edilizia</option>
-            </select>
-        </div>
-        <div class="flex items-center gap-2 px-4 py-2 bg-gray-50 border-b">
-            <input type="checkbox" id="chkIncludiPrezzoTesto" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-            <label for="chkIncludiPrezzoTesto" class="text-xs text-gray-700 font-medium cursor-pointer">Includi prezzo tra parentesi nella descrizione</label>
-        </div>
-
-            <div id="listaMaterialiContainer" class="max-h-[60vh] overflow-y-auto space-y-2 px-1">
-                <p class="text-xs text-gray-400 italic text-center py-4">Caricamento listino...</p>
+                    <div class="flex gap-2">
+                        <button id="btnSalvaMateriale" onclick="salvaMaterialeListino()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded font-bold uppercase text-xs shadow">
+                            💾 Salva in Listino
+                        </button>
+                        <button id="btnResetMateriale" onclick="resetFormMateriale()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-3 py-2 rounded font-bold uppercase text-xs">
+                            Reset
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            <hr class="border-gray-200 my-2">
+
+            <!-- RICERCA E FILTRI SUBITO PRONTI IN PRIMO PIANO -->
+            <div class="space-y-2">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="cercaMaterialeListino" onkeyup="renderListinoMateriali()" placeholder="Cerca materiale..." class="flex-1 p-2 border rounded text-sm bg-white">
+                    <select id="filtroCategoriaListino" onchange="renderListinoMateriali()" class="p-2 border rounded text-xs font-bold text-gray-700 bg-white">
+                        <option value="">Seleziona categoria...</option>
+                        <option value="TUTTE">Tutte le categorie</option>
+                        <option value="Generale">Generale</option>
+                        <option value="Elettrico">Elettrico</option>
+                        <option value="Serrature/Ferramenta">Serrature / Ferramenta</option>
+                        <option value="Idraulica">Idraulica</option>
+                        <option value="Falegnameria">Falegnameria</option>
+                        <option value="Tapparelle/Avvolgibili">Tapparelle / Avvolgibili</option>
+                        <option value="Edilizia">Edilizia</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-2 py-1">
+                    <input type="checkbox" id="chkIncludiPrezzoTesto" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
+                    <label for="chkIncludiPrezzoTesto" class="text-xs text-gray-700 font-medium cursor-pointer">Includi prezzo tra parentesi nella descrizione</label>
+                </div>
+            </div>
+
+            <!-- LISTA RISULTATI -->
+            <div>
+                <h3 class="text-xs font-bold text-emerald-800 uppercase mb-2">Articoli in Listino</h3>
+                <div id="listaMaterialiContainer" class="space-y-2">
+                    <p class="text-xs text-gray-400 italic text-center py-4">Caricamento listino...</p>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -2765,41 +2786,39 @@ async function inviaReport() {
     let listinoMaterialiGlobali = [];
 
     function toggleModalListino() {
-    const modal = document.getElementById('modalListino');
-    if (modal) {
-        modal.classList.toggle('hidden');
-        
-        if (!modal.classList.contains('hidden')) {
-            // Blocca lo scroll del body
-            document.body.style.overflow = 'hidden';
+        const modal = document.getElementById('modalListino');
+        if (modal) {
+            modal.classList.toggle('hidden');
             
-            // 1. AZZERIAMO SUBITO I FILTRI
-            if (document.getElementById('cercaMaterialeListino')) {
-                document.getElementById('cercaMaterialeListino').value = '';
-            }
-            if (document.getElementById('filtroCategoriaListino')) {
-                document.getElementById('filtroCategoriaListino').value = '';
-            }
+            if (!modal.classList.contains('hidden')) {
+                document.body.style.overflow = 'hidden';
+                
+                // 1. AZZERIAMO SUBITO I FILTRI
+                if (document.getElementById('cercaMaterialeListino')) {
+                    document.getElementById('cercaMaterialeListino').value = '';
+                }
+                if (document.getElementById('filtroCategoriaListino')) {
+                    document.getElementById('filtroCategoriaListino').value = '';
+                }
 
-            // 2. SVUOTIAMO SUBITO IL CONTENITORE DELLA LISTA
-            const container = document.getElementById('listaMaterialiContainer');
-            if (container) {
-                container.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-6">Inizia a digitare nel campo di ricerca o seleziona una categoria per visualizzare i materiali.</p>';
-            }
+                // 2. SVUOTIAMO SUBITO IL CONTENITORE DELLA LISTA
+                const container = document.getElementById('listaMaterialiContainer');
+                if (container) {
+                    container.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-6">Inizia a digitare nel campo di ricerca o seleziona una categoria per visualizzare i materiali.</p>';
+                }
 
-            // Ferma la propagazione della rotella del mouse fuori dal modale
-            modal.onwheel = function(e) {
-                e.stopPropagation();
-            };
-            
-            // 3. SCARICHIAMO I DATI AGGIORNATI DAL SERVER IN BACKGROUND
-            caricaListinoMateriali();
-        } else {
-            document.body.style.overflow = '';
-            modal.onwheel = null;
+                modal.onwheel = function(e) {
+                    e.stopPropagation();
+                };
+                
+                caricaListinoMateriali();
+            } else {
+                document.body.style.overflow = '';
+                modal.onwheel = null;
+            }
         }
     }
-}
+
     function calcolaPrezzoVenditaDaRicarico() {
         const costoAcquisto = parseFloat(document.getElementById('matPrezzoAcquisto').value) || 0;
         const percentuale = parseFloat(document.getElementById('matPercentualeRicarico').value) || 0;
@@ -2838,67 +2857,65 @@ async function inviaReport() {
     }
 
     function renderListinoMateriali() {
-    const container = document.getElementById('listaMaterialiContainer');
-    const ricerca = document.getElementById('cercaMaterialeListino').value.toLowerCase();
-    const catFiltro = document.getElementById('filtroCategoriaListino').value;
+        const container = document.getElementById('listaMaterialiContainer');
+        const ricerca = document.getElementById('cercaMaterialeListino').value.toLowerCase();
+        const catFiltro = document.getElementById('filtroCategoriaListino').value;
 
-    // Mostra il messaggio iniziale solo se non c'è ricerca E la categoria non è stata selezionata
-    if (ricerca === '' && catFiltro === '') {
-        container.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-6">Inizia a digitare nel campo di ricerca o seleziona una categoria per visualizzare i materiali.</p>';
-        return;
-    }
+        if (ricerca === '' && catFiltro === '') {
+            container.innerHTML = '<p class="text-xs text-gray-400 italic text-center py-6">Inizia a digitare nel campo di ricerca o seleziona una categoria per visualizzare i materiali.</p>';
+            return;
+        }
 
-    let filtrati = listinoMaterialiGlobali.filter(m => {
-        const matchRicerca = (m.nome && m.nome.toLowerCase().includes(ricerca)) ||  
-                             (m.categoria && m.categoria.toLowerCase().includes(ricerca)) ||
-                             (m.fornitore && m.fornitore.toLowerCase().includes(ricerca));
-                             
-        // Se la categoria è 'TUTTE' mostra tutto, altrimenti filtra per la categoria esatta
-        const matchCat = catFiltro === '' || catFiltro === 'TUTTE' || m.categoria === catFiltro;
-        return matchRicerca && matchCat;
-    });
+        let filtrati = listinoMaterialiGlobali.filter(m => {
+            const matchRicerca = (m.nome && m.nome.toLowerCase().includes(ricerca)) ||  
+                                 (m.categoria && m.categoria.toLowerCase().includes(ricerca)) ||
+                                 (m.fornitore && m.fornitore.toLowerCase().includes(ricerca));
+                                 
+            const matchCat = catFiltro === '' || catFiltro === 'TUTTE' || m.categoria === catFiltro;
+            return matchRicerca && matchCat;
+        });
 
-    if (filtrati.length === 0) {
-        container.innerHTML = '<p class="text-xs text-gray-500 italic text-center py-4">Nessun materiale trovato per la ricerca effettuata.</p>';
-        return;
-    }
+        if (filtrati.length === 0) {
+            container.innerHTML = '<p class="text-xs text-gray-500 italic text-center py-4">Nessun materiale trovato per la ricerca effettuata.</p>';
+            return;
+        }
 
-    container.innerHTML = `<div class="space-y-2 px-1">` + filtrati.map(m => {
-        const costoAcq = parseFloat(m.prezzoAcquisto || 0).toFixed(2).replace('.', ',');
-        const prezzoVen = parseFloat(m.prezzoVendita || 0).toFixed(2).replace('.', ',');
-        const ricarico = m.percentualeRicarico || 0;
-        const infoFornitore = m.fornitore ? ` | Fornitore: <span class="font-bold text-gray-700">${m.fornitore}</span>` : '';
+        container.innerHTML = filtrati.map(m => {
+            const costoAcq = parseFloat(m.prezzoAcquisto || 0).toFixed(2).replace('.', ',');
+            const prezzoVen = parseFloat(m.prezzoVendita || 0).toFixed(2).replace('.', ',');
+            const ricarico = m.percentualeRicarico || 0;
+            const infoFornitore = m.fornitore ? ` | Fornitore: <span class="font-bold text-gray-700">${m.fornitore}</span>` : '';
 
-        return `
-            <div class="p-3 border rounded-xl bg-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <span class="font-extrabold text-gray-800 text-sm uppercase">${m.nome}</span>
-                        <span class="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold uppercase">${m.categoria || 'Generale'}</span>
+            return `
+                <div class="p-3 border rounded-xl bg-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-gray-800 text-sm uppercase">${m.nome}</span>
+                            <span class="text-[9px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-bold uppercase">${m.categoria || 'Generale'}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">
+                            Acquisto: <span class="font-bold">€ ${costoAcq}</span> | Ricarico: <span class="font-bold text-amber-600">+${ricarico}%</span>${infoFornitore}
+                        </div>
                     </div>
-                    <div class="text-xs text-gray-500 mt-1">
-                        Acquisto: <span class="font-bold">€ ${costoAcq}</span> | Ricarico: <span class="font-bold text-amber-600">+${ricarico}%</span>${infoFornitore}
+
+                    <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0">
+                        <div class="text-right">
+                            <span class="block text-[9px] font-bold text-emerald-700 uppercase">Vendita</span>
+                            <span class="text-base font-black text-emerald-700">€ ${prezzoVen}</span>
+                        </div>
+
+                        <div class="flex items-center gap-1">
+                            <button onclick="selezionaMaterialePerScheda('${m.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase px-2 py-1.5 rounded shadow" title="Aggiungi all'intervento">
+                                + Inserisci
+                            </button>
+                            <button onclick="modificaMateriale('${m.id}')" class="bg-amber-100 text-amber-700 p-1.5 rounded" title="Modifica">✏️</button>
+                            <button onclick="eliminaMaterialeListino('${m.id}')" class="bg-red-100 text-red-600 p-1.5 rounded" title="Elimina">🗑️</button>
+                        </div>
                     </div>
                 </div>
-
-                <div class="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0">
-                    <div class="text-right">
-                        <span class="block text-[9px] font-bold text-emerald-700 uppercase">Vendita</span>
-                        <span class="text-base font-black text-emerald-700">€ ${prezzoVen}</span>
-                    </div>
-
-                    <div class="flex items-center gap-1">
-                        <button onclick="selezionaMaterialePerScheda('${m.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase px-2 py-1.5 rounded shadow" title="Aggiungi all'intervento">
-                            + Inserisci
-                        </button>
-                        <button onclick="modificaMateriale('${m.id}')" class="bg-amber-100 text-amber-700 p-1.5 rounded" title="Modifica">✏️</button>
-                        <button onclick="eliminaMaterialeListino('${m.id}')" class="bg-red-100 text-red-600 p-1.5 rounded" title="Elimina">🗑️</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
+            `;
+        }).join('');
+    }
 
     async function salvaMaterialeListino() {
         const id = document.getElementById('matId').value;
@@ -2926,15 +2943,21 @@ async function inviaReport() {
             if (res.ok) {
                 resetFormMateriale();
                 caricaListinoMateriali();
+                // Chiude automaticamente il pannello a tendina dopo il salvataggio
+                document.getElementById('pannelloGestioneMateriale').classList.add('hidden');
             }
         } catch (err) {
             console.error("Errore salvataggio materiale:", err);
         }
     }
+
     function modificaMateriale(id) {
         const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
         if (!mat) return;
     
+        // Apre automaticamente il pannello a tendina per mostrare i campi di modifica
+        document.getElementById('pannelloGestioneMateriale').classList.remove('hidden');
+
         document.getElementById('matId').value = mat.id;
         document.getElementById('matNome').value = mat.nome;
         document.getElementById('matCategoria').value = mat.categoria || 'Generale';
@@ -2943,6 +2966,9 @@ async function inviaReport() {
         document.getElementById('matPercentualeRicarico').value = mat.percentualeRicarico || '30';
         document.getElementById('matPrezzoVendita').value = mat.prezzoVendita || '';
         document.getElementById('btnSalvaMateriale').innerText = '✏️ Aggiorna Articolo';
+        
+        // Torna in cima alla modale per vedere il form
+        document.getElementById('modalListino').querySelector('.overflow-y-auto').scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     async function eliminaMaterialeListino(id) {
@@ -2956,40 +2982,37 @@ async function inviaReport() {
     }
 
     function selezionaMaterialePerScheda(id) {
-    const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
-    if (!mat) return;
+        const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
+        if (!mat) return;
 
-    const qtaStr = prompt(`Quanti pezzi/metri di "${mat.nome}" desideri aggiungere?`, "1");
-    if (!qtaStr) return;
-    const qta = parseFloat(qtaStr) || 1;
+        const qtaStr = prompt(`Quanti pezzi/metri di "${mat.nome}" desideri aggiungere?`, "1");
+        if (!qtaStr) return;
+        const qta = parseFloat(qtaStr) || 1;
 
-    const campoTestoMat = document.getElementById('materialiUtilizzati');
-    const campoCostoMat = document.getElementById('costoMateriali');
+        const campoTestoMat = document.getElementById('materialiUtilizzati');
+        const campoCostoMat = document.getElementById('costoMateriali');
 
-    const prezzoTotaleArticolo = (parseFloat(mat.prezzoVendita) || 0) * qta;
+        const prezzoTotaleArticolo = (parseFloat(mat.prezzoVendita) || 0) * qta;
+        const includiPrezzo = document.getElementById('chkIncludiPrezzoTesto') ? document.getElementById('chkIncludiPrezzoTesto').checked : false;
 
-    // Controlliamo se la spunta è attiva
-    const includiPrezzo = document.getElementById('chkIncludiPrezzoTesto') ? document.getElementById('chkIncludiPrezzoTesto').checked : false;
+        let rigaTesto = `${qta}x ${mat.nome}`;
+        if (includiPrezzo) {
+            rigaTesto += ` (€ ${prezzoTotaleArticolo.toFixed(2).replace('.', ',')})`;
+        }
 
-    // Prepariamo la riga di testo in base alla spunta
-    let rigaTesto = `${qta}x ${mat.nome}`;
-    if (includiPrezzo) {
-        rigaTesto += ` (€ ${prezzoTotaleArticolo.toFixed(2).replace('.', ',')})`;
+        if (campoTestoMat.value.trim() === '') {
+            campoTestoMat.value = rigaTesto;
+        } else {
+            campoTestoMat.value += ` - ${rigaTesto}`;
+        }
+
+        const costoAttuale = parseFloat(campoCostoMat.value) || 0;
+        campoCostoMat.value = (costoAttuale + prezzoTotaleArticolo).toFixed(2);
+
+        calcolaManodopera();
+        toggleModalListino();
+        showMessage('success', `Aggiunto: ${rigaTesto}`);
     }
-
-    if (campoTestoMat.value.trim() === '') {
-        campoTestoMat.value = rigaTesto;
-    } else {
-        campoTestoMat.value += ` - ${rigaTesto}`;
-    }
-
-    const costoAttuale = parseFloat(campoCostoMat.value) || 0;
-    campoCostoMat.value = (costoAttuale + prezzoTotaleArticolo).toFixed(2);
-
-    calcolaManodopera();
-    toggleModalListino();
-    showMessage('success', `Aggiunto: ${rigaTesto}`);
-}
 </script>
 
 <script>
