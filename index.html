@@ -644,6 +644,22 @@
     const flagProsieguo = document.getElementById('flagProsieguo');
     if (flagProsieguo) flagProsieguo.disabled = lock;        
 }
+
+// --- FUNZIONE DI SUPPORTO PER LO SVUOTAMENTO MATERIALI ---
+        function validaSvuotamentoMateriali() {
+            const campoTestoMat = document.getElementById('materialiUtilizzati');
+            const campoCostoMat = document.getElementById('costoMateriali');
+            
+            // Se l'utente cancella tutto il testo dei materiali, azzera automaticamente anche il costo in euro
+            if (campoTestoMat && campoCostoMat && campoTestoMat.value.trim() === '') {
+                campoCostoMat.value = '0';
+            }
+            
+            // Ricalcola i totali in tempo reale
+            if (typeof calcolaManodopera === 'function') {
+                calcolaManodopera();
+            }
+        }
         
 function calcolaManodopera() {
     // 1. Recupero Input
