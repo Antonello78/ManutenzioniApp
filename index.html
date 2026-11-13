@@ -2885,11 +2885,18 @@ async function inviaReport() {
 
         let filtrati = listinoMaterialiGlobali.filter(m => {
             const matchRicerca = (m.nome && m.nome.toLowerCase().includes(ricerca)) ||  
-                                 (m.categoria && m.categoria.toLowerCase().includes(ricerca)) ||
-                                 (m.fornitore && m.fornitore.toLowerCase().includes(ricerca));
-                                 
+                               (m.categoria && m.categoria.toLowerCase().includes(ricerca)) ||
+                               (m.fornitore && m.fornitore.toLowerCase().includes(ricerca));
+                               
             const matchCat = catFiltro === '' || catFiltro === 'TUTTE' || m.categoria === catFiltro;
             return matchRicerca && matchCat;
+        });
+
+        // Ordinamento alfabetico dei materiali filtrati dalla A alla Z
+        filtrati.sort((a, b) => {
+            const nomeA = (a.nome || '').toUpperCase();
+            const nomeB = (b.nome || '').toUpperCase();
+            return nomeA.localeCompare(nomeB);
         });
 
         if (filtrati.length === 0) {
