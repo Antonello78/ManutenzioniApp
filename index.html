@@ -3019,13 +3019,24 @@ async function inviaReport() {
         }
     }
 
+    // --- NUOVA FUNZIONE PER GESTIRE I PULSANTI - E + ---
+    function cambiaQtaListino(id, delta) {
+        const input = document.getElementById(`qta_mat_${id}`);
+        if (input) {
+            let val = parseFloat(input.value) || 1;
+            val += delta;
+            if (val < 1) val = 1;
+            input.value = val;
+        }
+    }
+
+    // --- NUOVA FUNZIONE DI INSERIMENTO DIRETTO SENZA PROMPT ---
     function selezionaMaterialePerScheda(id) {
         const mat = listinoMaterialiGlobali.find(m => String(m.id) === String(id));
         if (!mat) return;
 
-        const qtaStr = prompt(`Quanti pezzi/metri di "${mat.nome}" desideri aggiungere?`, "1");
-        if (!qtaStr) return;
-        const qta = parseFloat(qtaStr) || 1;
+        const inputQta = document.getElementById(`qta_mat_${id}`);
+        const qta = inputQta ? (parseFloat(inputQta.value) || 1) : 1;
 
         const campoTestoMat = document.getElementById('materialiUtilizzati');
         const campoCostoMat = document.getElementById('costoMateriali');
