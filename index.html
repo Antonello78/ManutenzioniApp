@@ -2621,6 +2621,14 @@ async function inviaReport() {
                 container.innerHTML = '<p class="italic text-xs text-gray-400">Nessuna scuola inserita.</p>';
                 return;
             }
+
+            // Ordinamento alfabetico delle scuole dalla A alla Z
+            scuole.sort((a, b) => {
+                const nomeA = (a.nome || '').toUpperCase();
+                const nomeB = (b.nome || '').toUpperCase();
+                return nomeA.localeCompare(nomeB);
+            });
+
             container.innerHTML = scuole.map(s => `
                 <div class="flex justify-between items-center bg-gray-100 p-2 rounded">
                     <div class="truncate mr-2">
