@@ -2936,19 +2936,25 @@ async function inviaReport() {
                             <span class="text-base font-black text-emerald-700">€ ${prezzoVen}</span>
                         </div>
 
-                        <div class="flex items-center gap-1">
-                            <button onclick="selezionaMaterialePerScheda('${m.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase px-2 py-1.5 rounded shadow" title="Aggiungi all'intervento">
+                        <div class="flex items-center gap-1.5">
+                            <!-- Selettore Quantità con pulsanti - e + -->
+                            <div class="flex items-center bg-gray-50 border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+                                <button type="button" onclick="cambiaQtaListino('${m.id}', -1)" class="w-7 h-7 bg-white hover:bg-gray-100 text-gray-700 font-extrabold text-xs flex items-center justify-center border-r border-gray-300 transition">−</button>
+                                <input type="number" id="qta_mat_${m.id}" value="1" min="1" step="any" class="w-10 text-center text-xs font-bold bg-transparent border-none focus:outline-none text-gray-800">
+                                <button type="button" onclick="cambiaQtaListino('${m.id}', 1)" class="w-7 h-7 bg-white hover:bg-gray-100 text-gray-700 font-extrabold text-xs flex items-center justify-center border-l border-gray-300 transition">+</button>
+                            </div>
+
+                            <button onclick="selezionaMaterialePerScheda('${m.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold uppercase px-2.5 py-2 rounded-lg shadow transition" title="Aggiungi all'intervento">
                                 + Inserisci
                             </button>
-                            <button onclick="modificaMateriale('${m.id}')" class="bg-amber-100 text-amber-700 p-1.5 rounded" title="Modifica">✏️</button>
-                            <button onclick="eliminaMaterialeListino('${m.id}')" class="bg-red-100 text-red-600 p-1.5 rounded" title="Elimina">🗑️</button>
+                            <button onclick="modificaMateriale('${m.id}')" class="bg-amber-100 hover:bg-amber-200 text-amber-700 p-2 rounded-lg transition" title="Modifica">✏️</button>
+                            <button onclick="eliminaMaterialeListino('${m.id}')" class="bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded-lg transition" title="Elimina">🗑️</button>
                         </div>
                     </div>
                 </div>
             `;
         }).join('');
     }
-
     async function salvaMaterialeListino() {
         const id = document.getElementById('matId').value;
         const nome = document.getElementById('matNome').value.trim();
