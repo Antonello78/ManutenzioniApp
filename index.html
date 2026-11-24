@@ -1887,6 +1887,7 @@ function caricaIntervento(id) {
             "Operai",
             "Urgenza",
             "Prosieguo",
+            "Contratto",
             "Totale (€)"
         ];
 
@@ -1911,6 +1912,7 @@ function caricaIntervento(id) {
                 pulisciTesto(i.numOperai),
                 pulisciTesto(i.flagUrgenza ? "SI" : "NO"),
                 pulisciTesto(i.flagProsieguo ? "SI" : "NO"),
+                pulisciTesto(i.flagContratto ? "SI" : "NO"),
                 pulisciTesto(i.totaleManodopera ? i.totaleManodopera.replace(' €', '') : "0,00")
             ];
             righeCSV.push(riga.join(";"));
@@ -1927,7 +1929,6 @@ function caricaIntervento(id) {
         link.click();
         document.body.removeChild(link);
     }
-
     function cambiaAnno(anno) {
         annoSelezionato = anno;
         renderArchivio();
