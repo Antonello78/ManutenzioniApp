@@ -1192,6 +1192,7 @@ function nuovoIntervento() {
     document.getElementById('numOperai').value = '1';
     document.getElementById('flagUrgenza').checked = false;
     if (document.getElementById('flagProsieguo')) document.getElementById('flagProsieguo').checked = false;
+    if (document.getElementById('flagContratto')) document.getElementById('flagContratto').checked = false;
 
     // Reset tariffe predefinite
     if (document.getElementById('inputCostoUscita')) document.getElementById('inputCostoUscita').value = 75;
@@ -1263,9 +1264,9 @@ async function salvaIntervento() {
         tariffaBase: document.getElementById('inputTariffaBase').value,
         flagUrgenza: document.getElementById('flagUrgenza').checked,
         flagProsieguo: document.getElementById('flagProsieguo') ? document.getElementById('flagProsieguo').checked : false,
+        flagContratto: document.getElementById('flagContratto') ? document.getElementById('flagContratto').checked : false,
         tariffaOraria: document.getElementById('tariffaOraria').textContent,
         totaleManodopera: document.getElementById('totaleManodopera').textContent,
-
         // MANTENIMENTO STATO AMMINISTRATIVO
         statoAmministrativo: statoAmministrativoPrecedente
     };
