@@ -976,6 +976,7 @@ function nuovoIntervento() {
     
     // Reset dei campi descrittivi
     document.getElementById('nomeScuola').value = '';
+    if (typeof nascondiSuggerimentiScuola === 'function') nascondiSuggerimentiScuola();
     document.getElementById('plessoEdificio').value = '';
     
     // CORRETTO: Svuota e sblocca Descrizione
@@ -1760,6 +1761,7 @@ function caricaIntervento(id) {
         }
 
         function toggleArchivio() {
+            if (typeof nascondiSuggerimentiScuola === 'function') nascondiSuggerimentiScuola();
             const archivio = document.getElementById('archivioInterventi');
             const inputSection = document.getElementById('input-section');
             const btn = document.getElementById('btnToggleArchivio');
