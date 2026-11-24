@@ -383,6 +383,7 @@
                     <option value="TUTTI">Tutte le tipologie</option>
                     <option value="URGENTE">Solo Urgenze</option>
                     <option value="PROSIEVO">Solo Prosieguo</option>
+                    <option value="CONTRATTO">Solo Contratto</option>
                 </select>
                 <select id="filtroMeseArchivio" onchange="renderArchivio()" class="px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-xs font-semibold text-gray-700 bg-white">
                     <option value="TUTTI">Tutti i mesi</option>
@@ -1606,6 +1607,7 @@ function caricaIntervento(id) {
                 let matchTipo = true;
                 if (filtroTipo === 'URGENTE') matchTipo = !!i.flagUrgenza;
                 if (filtroTipo === 'PROSIEVO') matchTipo = !!i.flagProsieguo;
+                if (filtroTipo === 'CONTRATTO') matchTipo = !!i.flagContratto;
 
                 // --- CONTROLLO FILTRO MESE ---
                 let matchMese = true;
@@ -1639,6 +1641,7 @@ function caricaIntervento(id) {
             listaDiv.innerHTML = ''; 
             interventiDaMostrare.forEach(i => {
                 const badgeUrgenza = i.flagUrgenza ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase bg-red-100 text-red-700 border border-red-200 rounded">Urgente</span>` : '';
+                const badgeContratto = i.flagContratto ? `<span class="ml-2 px-2 py-0.5 text-[10px] font-bold uppercase bg-emerald-100 text-emerald-700 border border-emerald-200 rounded">Contratto</span>` : '';
                 
                 // Ore extra
                 const oraInizioMin = parseTime(i.oraInizio);
@@ -1664,7 +1667,7 @@ function caricaIntervento(id) {
                             <div class="flex-1 min-w-[200px]">
                                 <div class="flex items-center">
                                     <span class="font-bold text-blue-700 text-lg"># ${i.nIntervento}</span>
-                                    ${badgeUrgenza}
+                                    ${badgeUrgenza}${badgeContratto}
                                 </div>
                                 <div class="text-sm font-semibold text-gray-800">${i.nomeScuola || 'N/A'}</div>
                                 <div class="text-xs text-gray-500">${i.plessoEdificio || ''} — ${formatDate(i.dataIntervento)}</div>
