@@ -269,6 +269,13 @@
                 </label>
             </div>
 
+            <div class="flex items-center pt-2 mt-2">
+                <input id="flagContratto" type="checkbox" onchange="calcolaManodopera()" class="h-5 w-5 text-emerald-600 border-gray-300 rounded">
+                <label for="flagContratto" class="ml-3 block text-base font-medium text-emerald-700">
+                    Intervento su contratto (Quota mensile)
+                </label>
+            </div>
+
             <div class="mt-8 pt-6 border-t border-gray-200">
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4 no-print">Dettaglio Calcolo e Totale</h2>
                                             
@@ -968,7 +975,9 @@
     const flagUrgenza = document.getElementById('flagUrgenza');
     if (flagUrgenza) flagUrgenza.disabled = lock;
     const flagProsieguo = document.getElementById('flagProsieguo');
-    if (flagProsieguo) flagProsieguo.disabled = lock;        
+    if (flagProsieguo) flagProsieguo.disabled = lock;
+    const flagContratto = document.getElementById('flagContratto');
+    if (flagContratto) flagContratto.disabled = lock;        
 }
 
 // --- FUNZIONE DI SUPPORTO PER LO SVUOTAMENTO MATERIALI ---
@@ -996,15 +1005,16 @@ function calcolaManodopera() {
     const tariffaBaseInput = parseFloat(document.getElementById('inputTariffaBase').value) || 38;
     const flagUrgenza = document.getElementById('flagUrgenza').checked;
     const flagProsieguo = document.getElementById('flagProsieguo') ? document.getElementById('flagProsieguo').checked : false;
+    const flagContratto = document.getElementById('flagContratto') ? document.getElementById('flagContratto').checked : false;
     const nIntervento = document.getElementById('nIntervento').value; 
     const dataIntervento = document.getElementById('dataIntervento').value;
     const nomeScuola = document.getElementById('nomeScuola').value;
     const plessoEdificio = document.getElementById('plessoEdificio').value;
 
-    // 2. Logica Costo Uscita (Automatismo Urgenza e Prosieguo)
-    if (flagProsieguo) {
+    // 2. Logica Costo Uscita (Automatismo Contratto, Urgenza e Prosieguo)
+    if (flagContratto || flagProsieguo) {
         campoCostoUscita.value = "0";
-        campoCostoUscita.disabled = true; // disabilita il campo uscita per evitare errori
+        campoCostoUscita.disabled = true;
     } else {
         campoCostoUscita.disabled = false;
         if (flagUrgenza && campoCostoUscita.value == "75") {
@@ -1409,6 +1419,7 @@ async function aggiornaStatoAmministrativo(id, campo, valore) {
                 'numOperai', 
                 'flagUrgenza',
                 'flagProsieguo',
+                'flagContratto',
                 'inputCostoUscita',
                 'inputTariffaBase'
             ];
