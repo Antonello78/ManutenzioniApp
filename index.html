@@ -185,12 +185,15 @@
                 </div>
             </div>
 
-            <div class="mt-4">
+            <div class="mt-4 relative">
                 <label for="nomeScuola" class="block text-sm font-medium text-gray-600">Nome Scuola</label>
-                <input type="text" id="nomeScuola" 
-                       oninput="this.value = this.value.toUpperCase(); calcolaManodopera()" 
+                <input type="text" id="nomeScuola" autocomplete="off"
+                       oninput="this.value = this.value.toUpperCase(); calcolaManodopera(); aggiornaSuggerimentiScuola(this.value)"
+                       onfocus="aggiornaSuggerimentiScuola(this.value)"
+                       onkeydown="gestisciTastiSuggerimentiScuola(event)"
                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg uppercase" 
                        placeholder="ISTITUTO COMPRENSIVO G. PASCOLI">
+                <div id="suggerimentiScuola" class="hidden absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto z-30"></div>
             </div>
 
             <div class="mt-4">
