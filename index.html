@@ -470,7 +470,7 @@
                     if (Array.isArray(dati)) {
                         chiamateGlobali = dati;
                         const inputScuola = document.getElementById('nomeScuola');
-                        if (inputScuola && !inputScuola.readOnly && !inputScuola.disabled && inputScuola.value.trim().length >= 2) {
+                        if (inputScuola && !inputScuola.readOnly && !inputScuola.disabled && inputScuola.value.trim().length >= 3) {
                             aggiornaSuggerimentiScuola(inputScuola.value);
                         }
                         const inputPlesso = document.getElementById('plessoEdificio');
