@@ -450,6 +450,171 @@
                 renderArchivio();
             }, 200);
         }
+        // --- SUGGERIMENTO AUTOMATICO NOME SCUOLA (ARCHIVIO + REGISTRO CHIAMATE) ---
+        let indiceSuggerimentoScuola = -1;
+        let chiamateGiaCaricatePerSuggerimenti = false;
+
+        async function assicuraChiamatePerSuggerimenti() {
+            if (Array.isArray(chiamateGlobali) && chiamateGlobali.length > 0) {
+                return;
+            }
+            if (chiamateGiaCaricatePerSuggerimenti) return;
+            chiamateGiaCaricatePerSuggerimenti = true;
+            try {
+                const res = await fetch('/api/chiamate');
+                if (res.ok) {
+                    const dati = await res.json();
+                    if (Array.isArray(dati)) {
+                        chiamateGlobali = dati;
+                        const inputScuola = document.getElementById('nomeScuola');
+                        if (inputScuola && !inputScuola.readOnly && !inputScuola.disabled && inputScuola.value.trim().length >= 2) {
+                            aggiornaSuggerimentiScuola(inputScuola.value);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Errore recupero chiamate per suggerimenti scuola:', e);
+            }
+        }
+
+        function ottieniElencoScuoleUniche() {
+            const setScuole = new Set();
+
+            // 1. Scuole dall'archivio interventi salvati
+            try {
+                const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                if (Array.isArray(interventi)) {
+                    interventi.forEach(item => {
+                        if (item && item.nomeScuola) {
+                            const pulito = String(item.nomeScuola).trim().toUpperCase();
+                            if (pulito) setScuole.add(pulito);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Errore lettura scuole da archivio:', e);
+            }
+
+            // 2. Scuole dal registro chiamate
+            if (Array.isArray(chiamateGlobali)) {
+                chiamateGlobali.forEach(ch => {
+                    if (ch && ch.scuola) {
+                        const pulito = String(ch.scuola).trim().toUpperCase();
+                        if (pulito) setScuole.add(pulito);
+                    }
+                });
+            }
+
+            return Array.from(setScuole).sort((a, b) => a.localeCompare(b, 'it'));
+        }
+
+        function nascondiSuggerimentiScuola() {
+            const box = document.getElementById('suggerimentiScuola');
+            if (box) {
+                box.classList.add('hidden');
+                box.innerHTML = '';
+            }
+            indiceSuggerimentoScuola = -1;
+        }
+
+        function selezionaSuggerimentoScuola(nomeScuola) {
+            const input = document.getElementById('nomeScuola');
+            if (!input) return;
+            input.value = nomeScuola.toUpperCase();
+            nascondiSuggerimentiScuola();
+            calcolaManodopera();
+            if (typeof controllaPdfSuDrive === 'function') {
+                controllaPdfSuDrive();
+            }
+            input.focus();
+        }
+
+        function aggiornaSuggerimentiScuola(valore) {
+            const input = document.getElementById('nomeScuola');
+            const box = document.getElementById('suggerimentiScuola');
+            if (!input || !box) return;
+
+            if (input.readOnly || input.disabled) {
+                nascondiSuggerimentiScuola();
+                return;
+            }
+
+            const query = (valore || '').trim().toUpperCase();
+            if (query.length < 2) {
+                nascondiSuggerimentiScuola();
+                return;
+            }
+
+            assicuraChiamatePerSuggerimenti();
+
+            const tutteLeScuole = ottieniElencoScuoleUniche();
+            const corrispondenze = tutteLeScuole
+                .filter(nome => nome.includes(query))
+                .slice(0, 8);
+
+            if (corrispondenze.length === 0) {
+                nascondiSuggerimentiScuola();
+                return;
+            }
+
+            indiceSuggerimentoScuola = -1;
+            box.innerHTML = corrispondenze.map((scuola, idx) => {
+                const scuolaEscapata = scuola.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                return `
+                    <button type="button"
+                            data-idx="${idx}"
+                            onmousedown="event.preventDefault(); selezionaSuggerimentoScuola('${scuolaEscapata}')"
+                            class="w-full text-left px-4 py-2.5 text-sm font-semibold text-gray-800 hover:bg-blue-50 hover:text-blue-800 border-b border-gray-100 last:border-b-0 transition cursor-pointer">
+                        ${scuola}
+                    </button>
+                `;
+            }).join('');
+
+            box.classList.remove('hidden');
+        }
+
+        function gestisciTastiSuggerimentiScuola(event) {
+            const box = document.getElementById('suggerimentiScuola');
+            if (!box || box.classList.contains('hidden')) return;
+
+            const opzioni = box.querySelectorAll('button[data-idx]');
+            if (!opzioni.length) return;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                indiceSuggerimentoScuola = (indiceSuggerimentoScuola + 1) % opzioni.length;
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                indiceSuggerimentoScuola = (indiceSuggerimentoScuola - 1 + opzioni.length) % opzioni.length;
+            } else if (event.key === 'Enter' && indiceSuggerimentoScuola >= 0) {
+                event.preventDefault();
+                opzioni[indiceSuggerimentoScuola].dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+                return;
+            } else if (event.key === 'Escape') {
+                nascondiSuggerimentiScuola();
+                return;
+            } else {
+                return;
+            }
+
+            opzioni.forEach((btn, idx) => {
+                if (idx === indiceSuggerimentoScuola) {
+                    btn.classList.add('bg-blue-50', 'text-blue-800');
+                } else {
+                    btn.classList.remove('bg-blue-50', 'text-blue-800');
+                }
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            const input = document.getElementById('nomeScuola');
+            const box = document.getElementById('suggerimentiScuola');
+            if (box && !box.classList.contains('hidden')) {
+                if (e.target !== input && !box.contains(e.target)) {
+                    nascondiSuggerimentiScuola();
+                }
+            }
+        });
         // --- FUNZIONI GESTIONE MENU TRE PUNTINI (OVERFLOW MENU) ---
         function toggleMenuOverflow(event) {
             if (event) event.stopPropagation();
