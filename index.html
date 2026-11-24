@@ -2780,7 +2780,7 @@ async function inviaReport() {
             const oraFineMin = parseTime(i.oraFine);
             const minutiLavoratiEffettivi = (oraFineMin - oraInizioMin) * i.numOperai;
             const minutiFatturabili = Math.ceil(minutiLavoratiEffettivi / 15) * 15;
-            const minutiDaPagare = i.flagProsieguo ? minutiFatturabili : Math.max(0, minutiFatturabili - 60);
+            const minutiDaPagare = i.flagContratto ? 0 : (i.flagProsieguo ? minutiFatturabili : Math.max(0, minutiFatturabili - 60));
             const oreDaPagare = (minutiDaPagare / 60).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
             const importoRicambiFormattato = parseFloat(i.costoMateriali || 0).toFixed(2).replace('.', ',');
@@ -2796,7 +2796,17 @@ async function inviaReport() {
             let visual3 = "";
             let visual4 = "";
 
-            if (i.flagProsieguo) {
+            if (i.flagContratto) {
+                copia1 = `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.`;
+                copia2 = `- Intervento rientrante nel contratto di manutenzione a canone mensile (Diritto di chiamata non applicato)`;
+                copia3 = `- Manodopera inclusa nel contratto di manutenzione a canone mensile (${minutiFatturabili} min complessivi) - Fascia oraria ${i.oraInizio}-${i.oraFine} - n. ${i.numOperai} operatore`;
+                copia4 = `- Ricambi utilizzati per l'intervento:\n${materialiTesto}`;
+
+                visual1 = copia1;
+                visual2 = copia2;
+                visual3 = copia3;
+                visual4 = copia4 + `\n\nImporto ricambi: € ${importoRicambiFormattato}\n\nImporto totale intervento: € ${i.totaleManodopera}`;
+            } else if (i.flagProsieguo) {
                 copia1 = `- Rif. Rapporto Tecnico n. ${i.nIntervento} del ${dataFormattata} presso ${scuolaPlesso}, per lavori di piccola manutenzione generale.`;
                 copia2 = `- Prosieguo lavori / Giorno successivo (Diritto di chiamata non applicato)`;
                 copia3 = `- Manodopera specializzata per completamento lavori (${minutiFatturabili} min complessivi) - Fascia oraria ${i.oraInizio}-${i.oraFine} - n. ${i.numOperai} operatore`;
@@ -2828,6 +2838,14 @@ async function inviaReport() {
                 visual4 = copia4 + `\n\nImporto ricambi: € ${importoRicambiFormattato}\n\nImporto totale intervento: € ${i.totaleManodopera}`;
             }
 
+            const riga2ExtraHtml = i.flagContratto
+                ? `<div class="text-xs text-emerald-700 font-bold mt-2">Incluso nel contratto a canone mensile (0,00 €)</div>`
+                : (i.costoUscita ? `<div class="text-xs text-gray-800 font-bold mt-2">Importo diritto di chiamata: € ${i.costoUscita}</div>` : '');
+
+            const riga3ExtraHtml = i.flagContratto
+                ? `<div class="text-xs text-emerald-700 font-bold mt-2">Manodopera inclusa nel canone mensile (0,00 €)</div>`
+                : `<div class="text-xs text-gray-800 font-bold mt-2">Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}</div>`;
+
             const modalHtml = `
                 <div class="space-y-4">
                     <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -2848,7 +2866,7 @@ async function inviaReport() {
                             </button>
                         </div>
                         <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${copia2}</div>
-                        ${i.costoUscita ? `<div class="text-xs text-gray-800 font-bold mt-2">Importo diritto di chiamata: € ${i.costoUscita}</div>` : ''}
+                        ${riga2ExtraHtml}
                     </div>
 
                     <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -2859,7 +2877,7 @@ async function inviaReport() {
                             </button>
                         </div>
                         <div class="text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border border-gray-100">${copia3}</div>
-                        <div class="text-xs text-gray-800 font-bold mt-2">Quantità: ${oreDaPagare} ore x ${i.tariffaOraria}</div>
+                        ${riga3ExtraHtml}
                     </div>
 
                     <div class="p-3 bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -2884,7 +2902,6 @@ async function inviaReport() {
             document.body.style.overflow = 'hidden';
             document.getElementById('modalPreventivo').classList.remove('hidden');
         }
-
         // Qui sotto rimangono memorizzate ed intatte le tue funzioni originali del file.
     </script>
 
