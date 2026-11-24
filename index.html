@@ -1063,10 +1063,11 @@ function calcolaManodopera() {
 
     // Se è un prosieguo, si paga la manodopera dal 1° minuto (tutti i minuti fatturabili)
     // Se è un intervento standard (1° giorno), si calcolano solo i minuti oltre i 60.
-    const minutiManodoperaDaPagare = flagProsieguo ? minutiFatturabili : Math.max(0, minutiFatturabili - 60);
+    const minutiManodoperaDaPagare = flagContratto
+        ? 0
+        : (flagProsieguo ? minutiFatturabili : Math.max(0, minutiFatturabili - 60));
     const oreAggiuntiveDecimali = minutiManodoperaDaPagare / 60;
-    const costoManodoperaAggiuntiva = oreAggiuntiveDecimali * tariffaOraria;
-
+    const costoManodoperaAggiuntiva = flagContratto ? 0 : (oreAggiuntiveDecimali * tariffaOraria);
     // 6. Logica Materiali (€)
     const costoMaterialiElement = document.getElementById('costoMateriali');
     const costoMateriali = costoMaterialiElement ? (parseFloat(costoMaterialiElement.value) || 0) : 0;
