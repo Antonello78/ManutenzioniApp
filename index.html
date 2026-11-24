@@ -1085,7 +1085,7 @@ function calcolaManodopera() {
     // 9. Aggiornamento Interfaccia (Dettaglio Calcolo)
     const updateText = (id, text) => { if(document.getElementById(id)) document.getElementById(id).textContent = text; };
 
-    updateText('tariffaOraria', tariffaOraria.toFixed(2).replace('.', ',') + ' €/ora');
+    updateText('tariffaOraria', flagContratto ? '0,00 €/ora (Contratto)' : (tariffaOraria.toFixed(2).replace('.', ',') + ' €/ora'));
     updateText('minutiEffettivi', `${durataMinutiEffettiva} min x ${numOperai} op = ${minutiManodoperaEffettivi} min/uomo`);
     updateText('minutiFatturabili', `${minutiFatturabili} min ${testoOreDettaglio}`);
     updateText('oreOltre60', oreAggiuntiveDecimali.toFixed(2).replace('.', ','));
