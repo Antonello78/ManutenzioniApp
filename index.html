@@ -1133,6 +1133,7 @@ function nuovoIntervento() {
     document.getElementById('nomeScuola').value = '';
     if (typeof nascondiSuggerimentiScuola === 'function') nascondiSuggerimentiScuola();
     document.getElementById('plessoEdificio').value = '';
+    if (typeof nascondiSuggerimentiPlesso === 'function') nascondiSuggerimentiPlesso();
     
     // CORRETTO: Svuota e sblocca Descrizione
     const desc = document.getElementById('descrizioneLavori');
@@ -1917,6 +1918,7 @@ function caricaIntervento(id) {
 
         function toggleArchivio() {
             if (typeof nascondiSuggerimentiScuola === 'function') nascondiSuggerimentiScuola();
+            if (typeof nascondiSuggerimentiPlesso === 'function') nascondiSuggerimentiPlesso();
             const archivio = document.getElementById('archivioInterventi');
             const inputSection = document.getElementById('input-section');
             const btn = document.getElementById('btnToggleArchivio');
