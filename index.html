@@ -622,6 +622,154 @@
                 }
             }
         });
+        // --- SUGGERIMENTO AUTOMATICO PLESSO / EDIFICIO (OPZIONE A) ---
+        let indiceSuggerimentoPlesso = -1;
+
+        function ottieniElencoPlessiUnici(scuolaSelezionata) {
+            const setPlessi = new Set();
+            const scuolaFiltro = (scuolaSelezionata || '').trim().toUpperCase();
+
+            // 1. Plessi dall'archivio interventi salvati
+            try {
+                const interventi = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+                if (Array.isArray(interventi)) {
+                    interventi.forEach(item => {
+                        if (item && item.plessoEdificio) {
+                            const plessoPulito = String(item.plessoEdificio).trim().toUpperCase();
+                            const scuolaItem = String(item.nomeScuola || '').trim().toUpperCase();
+                            if (!plessoPulito) return;
+                            if (!scuolaFiltro || scuolaItem === scuolaFiltro) {
+                                setPlessi.add(plessoPulito);
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Errore lettura plessi da archivio:', e);
+            }
+
+            // 2. Plessi dal registro chiamate
+            if (Array.isArray(chiamateGlobali)) {
+                chiamateGlobali.forEach(ch => {
+                    if (ch && ch.plesso) {
+                        const plessoPulito = String(ch.plesso).trim().toUpperCase();
+                        const scuolaCh = String(ch.scuola || '').trim().toUpperCase();
+                        if (!plessoPulito) return;
+                        if (!scuolaFiltro || scuolaCh === scuolaFiltro) {
+                            setPlessi.add(plessoPulito);
+                        }
+                    }
+                });
+            }
+
+            return Array.from(setPlessi).sort((a, b) => a.localeCompare(b, 'it'));
+        }
+
+        function nascondiSuggerimentiPlesso() {
+            const box = document.getElementById('suggerimentiPlesso');
+            if (box) {
+                box.classList.add('hidden');
+                box.innerHTML = '';
+            }
+            indiceSuggerimentoPlesso = -1;
+        }
+
+        function selezionaSuggerimentoPlesso(nomePlesso) {
+            const input = document.getElementById('plessoEdificio');
+            if (!input) return;
+            input.value = nomePlesso.toUpperCase();
+            nascondiSuggerimentiPlesso();
+            calcolaManodopera();
+            input.focus();
+        }
+
+        function aggiornaSuggerimentiPlesso(valore) {
+            const input = document.getElementById('plessoEdificio');
+            const box = document.getElementById('suggerimentiPlesso');
+            if (!input || !box) return;
+
+            if (input.readOnly || input.disabled) {
+                nascondiSuggerimentiPlesso();
+                return;
+            }
+
+            const query = (valore || '').trim().toUpperCase();
+            if (query.length < 2) {
+                nascondiSuggerimentiPlesso();
+                return;
+            }
+
+            assicuraChiamatePerSuggerimenti();
+
+            const scuolaCorrente = document.getElementById('nomeScuola') ? document.getElementById('nomeScuola').value : '';
+            const tuttiIPlessi = ottieniElencoPlessiUnici(scuolaCorrente);
+            const corrispondenze = tuttiIPlessi
+                .filter(nome => nome.includes(query))
+                .slice(0, 8);
+
+            if (corrispondenze.length === 0) {
+                nascondiSuggerimentiPlesso();
+                return;
+            }
+
+            indiceSuggerimentoPlesso = -1;
+            box.innerHTML = corrispondenze.map((plesso, idx) => {
+                const plessoEscapato = plesso.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+                return `
+                    <button type="button"
+                            data-idx="${idx}"
+                            onmousedown="event.preventDefault(); selezionaSuggerimentoPlesso('${plessoEscapato}')"
+                            class="w-full text-left px-4 py-2.5 text-sm font-semibold text-gray-800 hover:bg-blue-50 hover:text-blue-800 border-b border-gray-100 last:border-b-0 transition cursor-pointer">
+                        ${plesso}
+                    </button>
+                `;
+            }).join('');
+
+            box.classList.remove('hidden');
+        }
+
+        function gestisciTastiSuggerimentiPlesso(event) {
+            const box = document.getElementById('suggerimentiPlesso');
+            if (!box || box.classList.contains('hidden')) return;
+
+            const opzioni = box.querySelectorAll('button[data-idx]');
+            if (!opzioni.length) return;
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                indiceSuggerimentoPlesso = (indiceSuggerimentoPlesso + 1) % opzioni.length;
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                indiceSuggerimentoPlesso = (indiceSuggerimentoPlesso - 1 + opzioni.length) % opzioni.length;
+            } else if (event.key === 'Enter' && indiceSuggerimentoPlesso >= 0) {
+                event.preventDefault();
+                opzioni[indiceSuggerimentoPlesso].dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
+                return;
+            } else if (event.key === 'Escape') {
+                nascondiSuggerimentiPlesso();
+                return;
+            } else {
+                return;
+            }
+
+            opzioni.forEach((btn, idx) => {
+                if (idx === indiceSuggerimentoPlesso) {
+                    btn.classList.add('bg-blue-50', 'text-blue-800');
+                } else {
+                    btn.classList.remove('bg-blue-50', 'text-blue-800');
+                }
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            const input = document.getElementById('plessoEdificio');
+            const box = document.getElementById('suggerimentiPlesso');
+            if (box && !box.classList.contains('hidden')) {
+                if (e.target !== input && !box.contains(e.target)) {
+                    nascondiSuggerimentiPlesso();
+                }
+            }
+        });
         // --- FUNZIONI GESTIONE MENU TRE PUNTINI (OVERFLOW MENU) ---
         function toggleMenuOverflow(event) {
             if (event) event.stopPropagation();
