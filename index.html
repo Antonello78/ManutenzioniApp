@@ -1475,6 +1475,9 @@ function caricaIntervento(id) {
         document.getElementById('flagUrgenza').checked = !!intervento.flagUrgenza;
         if (document.getElementById('flagProsieguo')) {
             document.getElementById('flagProsieguo').checked = !!intervento.flagProsieguo;
+         if (document.getElementById('flagContratto')) {
+             document.getElementById('flagContratto').checked = !!intervento.flagContratto;
+         }   
         }
         
         // --- MODIFICA AGGIORNAMENTO: BLOCCO E GESTIONE PULSANTE ---
