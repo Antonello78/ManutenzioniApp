@@ -196,12 +196,15 @@
                 <div id="suggerimentiScuola" class="hidden absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto z-30"></div>
             </div>
 
-            <div class="mt-4">
+            <div class="mt-4 relative">
                 <label for="plessoEdificio" class="block text-sm font-medium text-gray-600">Plesso / Edificio</label>
-                <input type="text" id="plessoEdificio" 
-                       oninput="this.value = this.value.toUpperCase(); calcolaManodopera()" 
+                <input type="text" id="plessoEdificio" autocomplete="off"
+                       oninput="this.value = this.value.toUpperCase(); calcolaManodopera(); aggiornaSuggerimentiPlesso(this.value)"
+                       onfocus="aggiornaSuggerimentiPlesso(this.value)"
+                       onkeydown="gestisciTastiSuggerimentiPlesso(event)"
                        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 text-lg uppercase" 
                        placeholder="ES. SEDE CENTRALE">
+                <div id="suggerimentiPlesso" class="hidden absolute left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto z-30"></div>
             </div>
 
             <div class="mt-4">
@@ -470,10 +473,14 @@
                         if (inputScuola && !inputScuola.readOnly && !inputScuola.disabled && inputScuola.value.trim().length >= 2) {
                             aggiornaSuggerimentiScuola(inputScuola.value);
                         }
+                        const inputPlesso = document.getElementById('plessoEdificio');
+                        if (inputPlesso && !inputPlesso.readOnly && !inputPlesso.disabled && inputPlesso.value.trim().length >= 2) {
+                            aggiornaSuggerimentiPlesso(inputPlesso.value);
+                        }
                     }
                 }
             } catch (e) {
-                console.error('Errore recupero chiamate per suggerimenti scuola:', e);
+                console.error('Errore recupero chiamate per suggerimenti:', e);
             }
         }
 
