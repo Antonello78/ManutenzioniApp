@@ -693,19 +693,22 @@
                 return;
             }
 
+            const scuolaCorrente = document.getElementById('nomeScuola') ? document.getElementById('nomeScuola').value.trim() : '';
             const query = (valore || '').trim().toUpperCase();
-            if (query.length < 2) {
+
+            // Se non c'è una scuola inserita, aspetta almeno 2 lettere; se la scuola c'è, mostra subito i suoi plessi
+            if (!scuolaCorrente && query.length < 2) {
                 nascondiSuggerimentiPlesso();
                 return;
             }
 
             assicuraChiamatePerSuggerimenti();
 
-            const scuolaCorrente = document.getElementById('nomeScuola') ? document.getElementById('nomeScuola').value : '';
             const tuttiIPlessi = ottieniElencoPlessiUnici(scuolaCorrente);
-            const corrispondenze = tuttiIPlessi
-                .filter(nome => nome.includes(query))
-                .slice(0, 8);
+            const corrispondenze = (query
+                ? tuttiIPlessi.filter(nome => nome.includes(query))
+                : tuttiIPlessi
+            ).slice(0, 10);
 
             if (corrispondenze.length === 0) {
                 nascondiSuggerimentiPlesso();
